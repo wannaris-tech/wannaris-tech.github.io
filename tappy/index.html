@@ -1,0 +1,1361 @@
+<script>if(!(localStorage.getItem("celikplay_games")||"").includes("tappy")){window.location.href="/";}</script>
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kedai Roti Tappy - Matematik Kanak-Kanak</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fredoka & Bubblegum Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Fredoka', sans-serif;
+      touch-action: manipulation;
+      background: linear-gradient(135deg, #fffbeb 0%, #ffedd5 50%, #fef3c7 100%);
+      min-height: 100vh;
+    }
+    .font-playful {
+      font-family: 'Bubblegum Sans', cursive;
+    }
+    
+    /* 3D Claymorphism Styles */
+    .clay-card {
+      background: #ffffff;
+      border-radius: 32px;
+      box-shadow: 14px 14px 30px rgba(217, 119, 6, 0.12), 
+                  -14px -14px 30px rgba(255, 255, 255, 0.9),
+                  inset 4px 4px 8px rgba(255, 255, 255, 0.9),
+                  inset -4px -4px 8px rgba(217, 119, 6, 0.08);
+      border: 3px solid rgba(254, 215, 170, 0.6);
+    }
+    
+    .clay-banner {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      border-radius: 32px;
+      box-shadow: 10px 10px 25px rgba(234, 88, 12, 0.25), 
+                  -10px -10px 25px rgba(255, 255, 255, 0.8),
+                  inset 3px 3px 6px rgba(255, 255, 255, 0.4),
+                  inset -3px -3px 6px rgba(154, 52, 18, 0.3);
+      border: 3px solid rgba(255, 237, 213, 0.4);
+    }
+
+    .clay-button {
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 0 rgba(180, 83, 9, 0.4), 0 12px 20px rgba(0,0,0,0.1);
+      border-radius: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+    .clay-button:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 rgba(180, 83, 9, 0.4), 0 4px 8px rgba(0,0,0,0.05);
+    }
+
+    .clay-circle {
+      background: #fffbeb;
+      box-shadow: inset 5px 5px 10px rgba(217, 119, 6, 0.15),
+                  inset -5px -5px 10px rgba(255, 255, 255, 0.9),
+                  8px 8px 16px rgba(0,0,0,0.06);
+      border: 3px solid #fde68a;
+    }
+
+    .clay-input {
+      background: #fffdf9;
+      box-shadow: inset 3px 3px 6px rgba(217, 119, 6, 0.1),
+                  inset -3px -3px 6px rgba(255, 255, 255, 0.9);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(2deg); }
+    }
+    .animate-float {
+      animation: float 3.5s ease-in-out infinite;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop {
+      animation: pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-bread {
+      animation: bounce-slow 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between selection:bg-amber-200">
+
+  <!-- START SCREEN VIEW WITH LOGO & COPYRIGHT -->
+  <div id="startScreenView" class="fixed inset-0 bg-gradient-to-br from-amber-400 via-orange-400 to-amber-600 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="clay-card bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 animate-pop text-center my-auto">
+      <!-- Official CelikPlay Logo Image with 3D Embossed Frame -->
+      <div class="flex justify-center">
+        <div class="clay-circle p-2 rounded-full inline-block shadow-lg">
+          <img src="CP1.jpg" alt="CelikPlay Logo" class="w-36 h-36 sm:w-44 sm:h-44 object-cover rounded-full shadow-inner border-4 border-amber-300" onerror="this.src='https://placehold.co/180x180/FFD100/007ACC?text=CelikPlay'">
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <h1 class="text-3xl sm:text-4xl font-playful font-bold text-amber-600 tracking-wide drop-shadow-sm">Kedai Roti Tappy</h1>
+        <p class="font-playful text-lg sm:text-xl text-slate-600 font-bold">Permainan Matematik Ceria & Menyeronokkan</p>
+      </div>
+
+      <!-- Start Game Button with 3D Puffy Effect -->
+      <button onclick="enterGameApp()" class="clay-button w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-playful font-bold text-2xl py-4 rounded-2xl tracking-wide flex items-center justify-center gap-2">
+        <span>🚀</span> Mula Bermain Sekarang
+      </button>
+
+      <!-- Licensing & Copyright Terms on Start Screen -->
+      <div class="bg-amber-50/90 p-4 rounded-2xl border-2 border-amber-200 text-[11px] sm:text-xs text-slate-600 space-y-1.5 leading-relaxed text-center shadow-inner">
+        <p class="font-bold text-amber-800">© 2026 CelikPlay. Hak Cipta Terpelihara.</p>
+        <p class="font-semibold text-slate-700">Dikendalikan oleh Nurwan Trading.</p>
+        <p class="text-slate-500 italic">Untuk kegunaan keluarga pembeli sahaja. Dilarang menyalin, mengedar, berkongsi pautan akses atau menjual semula permainan ini tanpa kebenaran.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header (Shown only on Main Menu) -->
+  <header id="mainHeader" class="bg-amber-500 text-white shadow-lg sticky top-0 z-20 border-b-4 border-amber-600">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- Dynamic Title with Animated Bread Graphic -->
+      <div class="flex items-center space-x-2">
+        <span class="text-3xl drop-shadow-md inline-block animate-bread">🍞</span>
+        <h1 id="appHeaderTitle" class="text-xl sm:text-2xl font-playful tracking-wide font-bold drop-shadow-sm">Kedai Roti Tappy</h1>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- BGM Toggle Button -->
+        <button id="bgmToggleBtn" onclick="toggleBGM()" class="clay-button bg-amber-600 hover:bg-amber-700 text-white p-2.5 rounded-full text-lg flex items-center justify-center shadow-md" title="Muzik Latar Belakang">
+          🎵
+        </button>
+
+        <!-- Player Profile Summary Button with Edit Pen Icon -->
+        <button id="profileBtn" onclick="openProfileModal()" class="clay-button flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-full transition shadow-md" title="Sunting Profil">
+          <span id="navAvatar" class="text-xl">👨‍🍳</span>
+          <span id="navName" class="font-bold text-sm sm:text-base max-w-[90px] truncate">Tappy</span>
+          <span class="text-xs bg-amber-700/80 p-1 rounded-full flex items-center justify-center shadow-inner">✏️</span>
+          <span id="navStars" class="bg-amber-900/50 text-amber-100 text-xs px-2.5 py-1 rounded-full font-extrabold flex items-center gap-1 shadow-inner">
+            ⭐ <span id="starCountNav">0</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl mx-auto w-full p-4 flex-grow flex flex-col justify-center my-auto">
+
+    <!-- MAIN MENU VIEW -->
+    <div id="mainMenuView" class="space-y-6 animate-pop">
+      <!-- Main Banner Card with 3D Clay Gradient -->
+      <div class="clay-banner p-6 text-white shadow-xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between">
+        <!-- Floating Animated Chef Graphic in 3D Circle -->
+        <div class="clay-circle text-6xl sm:text-7xl mb-4 sm:mb-0 animate-float p-5 rounded-full flex items-center justify-center">
+          👨‍🍳✨
+        </div>
+        
+        <div class="text-center sm:text-left z-10 sm:ml-6 flex-1">
+          <h2 class="text-2xl sm:text-4xl font-playful font-bold mb-2 drop-shadow-md">Selamat Datang ke <span id="welcomeShopName">Kedai Roti Tappy</span>!</h2>
+          
+          <p class="font-playful text-lg sm:text-xl text-yellow-100 font-bold tracking-wide drop-shadow-md my-2 bg-amber-700/30 p-3 rounded-2xl border border-yellow-200/30 text-center sm:text-left shadow-inner">
+            ✨ Mari bantu kira pastri lazat sambil mengumpul bintang pencapaian! 🌟
+          </p>
+          
+          <!-- Decorative Expanded Pastry Bar -->
+          <div class="flex justify-center sm:justify-start gap-2 text-2xl mt-3 bg-white/20 p-2.5 rounded-2xl w-fit flex-wrap shadow-inner">
+            <span>🥐</span><span>🍩</span><span>🧁</span><span>🥖</span><span>🍪</span><span>🍰</span><span>🥧</span><span>🧇</span><span>🥞</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level Buttons Grid (Each level now opens operation choice modal) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Tahap Awal -->
+        <button onclick="openEarlyLevelModal()" class="clay-card hover:bg-amber-50/80 p-5 rounded-3xl transition text-left flex items-center justify-between group border-2 border-amber-300">
+          <div>
+            <div class="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">Prasekolah (5 Tahun)</div>
+            <div class="text-xl font-bold text-amber-900 group-hover:text-amber-700">Tahap Awal – Kenali Nombor</div>
+            <div class="text-xs text-slate-500 mt-1 font-medium">Kenal angka & kira pastri (1-10)</div>
+          </div>
+          <span class="clay-circle text-3xl p-3 rounded-2xl group-hover:scale-110 transition shadow-sm">🧸</span>
+        </button>
+
+        <!-- Level 1 -->
+        <button onclick="openOperationModal(1)" class="clay-card hover:bg-amber-50/80 p-5 rounded-3xl transition text-left flex items-center justify-between group">
+          <div>
+            <div class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Tahap 1</div>
+            <div id="lvl1Title" class="text-xl font-bold text-slate-800 group-hover:text-amber-700">Asas Mudah (Sehingga 10)</div>
+            <div class="text-xs text-slate-500 mt-1 font-medium">Sesuai untuk permulaan</div>
+          </div>
+          <span class="clay-circle text-3xl p-3 rounded-2xl group-hover:scale-110 transition shadow-sm">🧁</span>
+        </button>
+
+        <!-- Level 2 (Bijak) -->
+        <button onclick="openOperationModal(2)" class="clay-card hover:bg-amber-50/80 p-5 rounded-3xl transition text-left flex items-center justify-between group">
+          <div>
+            <div class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Tahap 2</div>
+            <div id="lvl2Title" class="text-xl font-bold text-slate-800 group-hover:text-amber-700">Bijak (Sehingga 20)</div>
+            <div class="text-xs text-slate-500 mt-1 font-medium">Latihan nombor harian</div>
+          </div>
+          <span class="clay-circle text-3xl p-3 rounded-2xl group-hover:scale-110 transition shadow-sm">🍩</span>
+        </button>
+
+        <!-- Level 3 -->
+        <button onclick="openOperationModal(3)" class="clay-card hover:bg-amber-50/80 p-5 rounded-3xl transition text-left flex items-center justify-between group">
+          <div>
+            <div class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Tahap 3</div>
+            <div id="lvl3Title" class="text-xl font-bold text-amber-800 group-hover:text-amber-700">Cabar Diri (Sehingga 30)</div>
+            <div class="text-xs text-slate-500 mt-1 font-medium">Mengira kuantiti lebih besar</div>
+          </div>
+          <span class="clay-circle text-3xl p-3 rounded-2xl group-hover:scale-110 transition shadow-sm">🥐</span>
+        </button>
+
+        <!-- Level 4 (Juara - Centered for visual stability) -->
+        <div class="sm:col-span-2 flex justify-center">
+          <button onclick="openOperationModal(4)" class="clay-card hover:bg-amber-50/80 p-5 rounded-3xl transition text-left flex items-center justify-between group w-full max-w-xl">
+            <div>
+              <div class="text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">Tahap 4</div>
+              <div id="lvl4Title" class="text-xl font-bold text-amber-900 group-hover:text-amber-700">Juara (Sehingga 50)</div>
+              <div class="text-xs text-slate-500 mt-1 font-medium">Cabaran tahap tinggi</div>
+            </div>
+            <span class="clay-circle text-3xl p-3 rounded-2xl group-hover:scale-110 transition shadow-sm">🏆</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tahap 5: Masteri Sifu (Sehingga 100) Premium Card Centered at Bottom -->
+      <div class="pt-1 flex justify-center">
+        <button onclick="openOperationModal(5)" class="clay-card hover:bg-amber-100/90 p-5 sm:p-6 rounded-3xl transition text-left flex items-center justify-between group bg-gradient-to-r from-amber-200 via-yellow-100 to-orange-200 border-3 border-amber-400 shadow-xl relative overflow-hidden w-full max-w-xl mx-auto">
+          <div class="absolute -right-6 -bottom-6 text-7xl opacity-20 pointer-events-none">👑</div>
+          <div>
+            <div class="text-xs font-extrabold text-amber-800 uppercase tracking-wider mb-1 flex items-center gap-1"><span>✨</span> Tahap 5 • Premium</div>
+            <div class="text-xl sm:text-2xl font-black text-amber-950 group-hover:text-amber-800">Masteri Sifu (Sehingga 100)</div>
+            <div class="text-xs sm:text-sm text-slate-700 mt-1 font-semibold">Cabaran maksimum kira dan kuasai nombor</div>
+          </div>
+          <span class="clay-circle text-3xl sm:text-4xl p-3.5 rounded-2xl group-hover:scale-110 transition shadow-md bg-amber-100 border-2 border-amber-400">👑</span>
+        </button>
+      </div>
+
+      <!-- Action Buttons Row (Badges & Parents Report) -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <button onclick="openBadgesModal()" class="clay-button flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 p-4 rounded-2xl font-bold transition flex items-center justify-center gap-2 shadow-md">
+          <span>🎖️</span> Lencana Saya
+        </button>
+        <button onclick="openParentsModal()" class="clay-button flex-1 bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-2xl font-bold transition flex items-center justify-center gap-2 shadow-md">
+          <span>📊</span> Laporan Ibu Bapa
+        </button>
+      </div>
+
+      <!-- Main Menu Footer with Official Logo & Copyright -->
+      <div class="clay-card py-4 px-6 text-center mt-6 bg-white/90">
+        <div class="max-w-4xl mx-auto flex flex-col items-center justify-center gap-2">
+          <div class="flex items-center justify-center gap-3">
+            <div class="clay-circle p-1.5 rounded-full inline-block shadow-md">
+              <img src="CP1.jpg" alt="CelikPlay Logo" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-inner border-2 border-amber-300" onerror="this.src='https://placehold.co/80x80/FFD100/007ACC?text=CP'">
+            </div>
+            <span class="text-xs sm:text-sm font-bold text-slate-600 tracking-wide">Game Pendidikan CelikPlay Studio</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium">© 2026 CelikPlay. Hak Cipta Terpelihara. Dikendalikan oleh Nurwan Trading.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME SCREEN VIEW (No Header, No Logo/Copyright for Focus) -->
+    <div id="gameScreenView" class="hidden space-y-6 animate-pop">
+      <!-- Game Navigation Bar with BGM Audio Toggle -->
+      <div class="clay-card flex items-center justify-between p-3.5 rounded-2xl bg-white">
+        <div class="flex items-center gap-2">
+          <button onclick="goToMainMenu()" class="clay-button bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl text-sm transition flex items-center gap-1.5 shadow-sm">
+            <span>🏠</span> Menu
+          </button>
+          <button id="gameBgmToggleBtn" onclick="toggleBGM()" class="clay-button bg-amber-600 hover:bg-amber-700 text-white p-2.5 rounded-xl text-base flex items-center justify-center shadow-sm" title="Muzik Latar Belakang">
+            🎵
+          </button>
+        </div>
+
+        <div class="text-center">
+          <span id="gameLevelBadge" class="bg-amber-100 text-amber-800 text-xs font-extrabold px-3.5 py-1.5 rounded-full uppercase tracking-wider border border-amber-300 shadow-inner">Tahap 1</span>
+        </div>
+
+        <div id="gameScoreDisplay" class="clay-button bg-amber-500 text-white font-extrabold px-4 py-1.5 rounded-xl text-sm shadow-md flex items-center gap-1.5">
+          ⭐ 0
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-amber-200/80 h-3.5 rounded-full overflow-hidden p-0.5 shadow-inner">
+        <div id="progressBar" class="bg-gradient-to-r from-amber-500 to-orange-500 h-full rounded-full transition-all duration-300 w-0 shadow-sm"></div>
+      </div>
+
+      <!-- Question Box -->
+      <div class="clay-card rounded-3xl p-6 text-center space-y-5 relative">
+        <div class="flex items-center justify-between text-xs sm:text-sm text-slate-500 font-semibold px-2">
+          <span id="questionProgressText">Soalan 1 / 10</span>
+          <button onclick="speakQuestionText()" class="clay-button bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1 font-bold text-xs shadow-sm">
+            🔊 Sebut Soalan
+          </button>
+        </div>
+
+        <!-- Question Prompt Text -->
+        <h3 id="questionPrompt" class="text-lg sm:text-2xl font-bold text-slate-800 drop-shadow-sm">Berapakah jumlah pastri?</h3>
+
+        <!-- Visual Items Container -->
+        <div id="pastryVisualContainer" class="clay-circle p-4 rounded-2xl min-h-[120px] flex items-center justify-center gap-4 flex-wrap shadow-inner">
+          <!-- Dynamic Pastry Icons injected here -->
+        </div>
+
+        <!-- Math Equation Display -->
+        <div id="equationDisplay" class="text-3xl sm:text-5xl font-playful font-extrabold text-amber-900 tracking-wider drop-shadow-md">
+          2 + 3 = ?
+        </div>
+      </div>
+
+      <!-- Answer Options Grid -->
+      <div id="answersGrid" class="grid grid-cols-2 gap-3 sm:gap-4">
+        <!-- Answer Buttons injected dynamically -->
+      </div>
+
+      <!-- Feedback Area -->
+      <div id="feedbackArea" class="hidden">
+        <!-- Will be dynamically populated for Correct or Incorrect -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: EARLY LEVEL TIER SELECTION -->
+  <div id="earlyLevelModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-pop border-2 border-amber-300">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">🧸 Tahap Awal – Kenali Nombor</h3>
+        <button onclick="closeEarlyLevelModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-600 font-medium">Pilih peringkat kesukaran untuk aktiviti prasekolah pengenalan nombor:</p>
+      <div class="space-y-3">
+        <button onclick="startEarlyLevel(1)" class="clay-button w-full bg-amber-500 hover:bg-amber-600 text-white font-bold p-4 rounded-2xl flex items-center justify-between shadow-md">
+          <span>Peringkat 1: Nombor 1 hingga 5</span>
+          <span class="text-2xl">⭐</span>
+        </button>
+        <button onclick="startEarlyLevel(2)" class="clay-button w-full bg-orange-500 hover:bg-orange-600 text-white font-bold p-4 rounded-2xl flex items-center justify-between shadow-md">
+          <span>Peringkat 2: Nombor 1 hingga 10</span>
+          <span class="text-2xl">🌟</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: OPERATION SELECTION (TAMBAH / TOLAK) FOR LEVELS -->
+  <div id="operationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-pop border-2 border-amber-300 text-center">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="operationModalTitle" class="text-xl font-bold text-slate-800 flex items-center gap-2">Pilih Mod Operasi</h3>
+        <button onclick="closeOperationModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-600 font-medium">Sila pilih jenis pengiraan matematik untuk tahap ini:</p>
+      <div class="grid grid-cols-2 gap-4 pt-2">
+        <button onclick="confirmOperationSelection('tambah')" class="clay-button bg-amber-500 hover:bg-amber-600 text-white font-bold p-5 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-md text-lg">
+          <span class="text-3xl">➕</span> Tambah
+        </button>
+        <button onclick="confirmOperationSelection('tolak')" class="clay-button bg-orange-500 hover:bg-orange-600 text-white font-bold p-5 rounded-2xl flex flex-col items-center justify-center gap-2 shadow-md text-lg">
+          <span class="text-3xl">➖</span> Tolak
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 1: PROFILE SELECTION MODAL -->
+  <div id="profileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-pop border-2 border-amber-300">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">👤 Sunting Profil Pemain</h3>
+        <button onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      </div>
+
+      <!-- Player Name Input -->
+      <div>
+        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Nama Pemain</label>
+        <input type="text" id="playerNameInput" maxlength="15" placeholder="Nama..." class="clay-input w-full border-2 border-amber-300 focus:border-amber-500 rounded-xl px-4 py-3 font-bold text-slate-800 outline-none transition">
+      </div>
+
+      <!-- Unified Character Avatar Grid -->
+      <div>
+        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Pilih Watak & Chef</label>
+        <div class="grid grid-cols-3 gap-3">
+          <button onclick="selectAvatar('👨‍🍳')" class="clay-button avatar-option p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 hover:border-amber-400 text-3xl transition flex items-center justify-center shadow-sm" data-avatar="👨‍🍳">👨‍🍳</button>
+          <button onclick="selectAvatar('👦')" class="clay-button avatar-option p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 hover:border-amber-400 text-3xl transition flex items-center justify-center shadow-sm" data-avatar="👦">👦</button>
+          <button onclick="selectAvatar('👧')" class="clay-button avatar-option p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 hover:border-amber-400 text-3xl transition flex items-center justify-center shadow-sm" data-avatar="👧">👧</button>
+          <button onclick="selectAvatar('👦🏻')" class="clay-button avatar-option p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 hover:border-amber-400 text-3xl transition flex items-center justify-center shadow-sm" data-avatar="👦🏻">👦🏻</button>
+          <button onclick="selectAvatar('👧🏻')" class="clay-button avatar-option p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 hover:border-amber-400 text-3xl transition flex items-center justify-center shadow-sm" data-avatar="👧🏻">👧🏻</button>
+          <button onclick="selectAvatar('🧒')" class="clay-button avatar-option p-3 rounded-2xl bg-amber-50 border-2 border-amber-200 hover:border-amber-400 text-3xl transition flex items-center justify-center shadow-sm" data-avatar="🧒">🧒</button>
+        </div>
+      </div>
+
+      <button onclick="saveProfile()" class="clay-button w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl shadow-md transition">
+        Simpan Profil
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: BADGES MODAL -->
+  <div id="badgesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-pop border-2 border-amber-300">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">🎖️ Lencana Pencapaian</h3>
+        <button onclick="closeBadgesModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      </div>
+
+      <div id="badgesList" class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+        <!-- Badges dynamically injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: PARENTS DASHBOARD MODAL -->
+  <div id="parentsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-pop border-2 border-slate-700 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+        <div>
+          <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">📊 Laporan Ibu Bapa & Pendidik</h3>
+          <p class="text-xs text-slate-500">Statistik kemajuan pembelajaran matematik</p>
+        </div>
+        <button onclick="closeParentsModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      </div>
+
+      <!-- Overall Performance Summary -->
+      <div class="grid grid-cols-3 gap-3 clay-circle p-4 rounded-2xl text-center">
+        <div>
+          <div class="text-xs text-slate-500 font-semibold">Jumlah Soalan</div>
+          <div id="parentTotalQuestions" class="text-xl font-black text-slate-800">0</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500 font-semibold">Jawapan Betul</div>
+          <div id="parentTotalCorrect" class="text-xl font-black text-emerald-600">0</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500 font-semibold">Ketepatan</div>
+          <div id="parentAccuracy" class="text-xl font-black text-amber-600">0%</div>
+        </div>
+      </div>
+
+      <!-- Level Breakdown Table -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Prestasi Mengikut Tahap</h4>
+        <div id="parentsLevelBreakdown" class="space-y-2">
+          <!-- Breakdown injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Reset Data Action -->
+      <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
+        <button onclick="showResetConfirmation()" class="clay-button bg-rose-100 hover:bg-rose-200 text-rose-800 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-rose-300 flex items-center gap-1 shadow-sm">
+          🗑️ Reset Semula Data
+        </button>
+        <button onclick="closeParentsModal()" class="clay-button bg-slate-800 hover:bg-slate-900 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-sm">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PARENT VERIFICATION GATE -->
+  <div id="parentVerifyModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-pop border-2 border-slate-700 text-center">
+      <div class="text-3xl">🔒</div>
+      <h3 class="text-lg font-bold text-slate-800">Pengesahan Ibu Bapa</h3>
+      <p class="text-xs text-slate-600">Sila selesaikan soalan ini untuk membuka laporan:</p>
+      <div id="parentVerifyEquation" class="text-2xl font-bold text-slate-800 my-2">3 + 4 = ?</div>
+      <input type="number" id="parentVerifyInput" placeholder="Jawapan..." class="clay-input w-full border-2 border-slate-300 focus:border-slate-600 rounded-xl px-4 py-2.5 font-bold text-center text-xl outline-none transition">
+      <div class="flex gap-3 pt-2">
+        <button onclick="closeParentVerifyModal()" class="clay-button flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+          Batal
+        </button>
+        <button onclick="verifyParentAnswer()" class="clay-button flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
+          Sahkan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRMATION MODAL FOR RESET DATA -->
+  <div id="resetConfirmModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 animate-pop border-2 border-rose-300 text-center">
+      <div class="text-4xl">⚠️</div>
+      <h3 class="text-lg font-bold text-slate-800">Sahkan Reset Data?</h3>
+      <p class="text-xs text-slate-600">Tindakan ini akan mengosongkan semua statistik jawapan serta mengurangkan **jumlah bintang** terkumpul ke 0.</p>
+      <div class="flex gap-3 pt-2">
+        <button onclick="cancelReset()" class="clay-button flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition shadow-sm">
+          Batal
+        </button>
+        <button onclick="executeFullReset()" class="clay-button flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
+          Ya, Reset Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* GAME CONFIGURATION & STATE */
+    let currentOperation = 'tambah'; // 'tambah', 'tolak', or 'kenali'
+    let currentLevel = 1;
+    let selectedLevelForOp = 1;
+    let earlyTier = 1; // 1 (1-5) or 2 (1-10) for Tahap Awal
+    let currentEarlyActivityType = 1; // 1: Kenali, 2: Cari, 3: Padankan, 4: Teka
+    let questionNumber = 0;
+    const MAX_QUESTIONS = 10;
+    let currentScore = 0;
+    let currentAnswer = 0;
+    let isAnswered = false;
+    let recentQuestionsHistory = [];
+    let speechTimeoutId = null;
+
+    const PASTRY_ICONS = ['🥐', '🍩', '🧁', '🥖', '🍪', '🍰', '🥧', '🧇', '🥞'];
+
+    let userProfile = {
+      name: 'Nama...',
+      avatar: '👨‍🍳',
+      stars: 0,
+      cumulativeStars: 0, // Used for exponential badge unlocking
+      stats: {
+        totalQuestions: 0,
+        totalCorrect: 0,
+        byLevel: {
+          'kenali_1': { attempted: 0, correct: 0 },
+          'kenali_2': { attempted: 0, correct: 0 },
+          'tambah_1': { attempted: 0, correct: 0 },
+          'tambah_2': { attempted: 0, correct: 0 },
+          'tambah_3': { attempted: 0, correct: 0 },
+          'tambah_4': { attempted: 0, correct: 0 },
+          'tambah_5': { attempted: 0, correct: 0 },
+          'tolak_1': { attempted: 0, correct: 0 },
+          'tolak_2': { attempted: 0, correct: 0 },
+          'tolak_3': { attempted: 0, correct: 0 },
+          'tolak_4': { attempted: 0, correct: 0 },
+          'tolak_5': { attempted: 0, correct: 0 }
+        }
+      }
+    };
+
+    const LEVEL_CONFIG = {
+      1: { min: 1, max: 10, label: "Tahap 1: Asas Mudah (Sehingga 10)" },
+      2: { min: 1, max: 20, label: "Tahap 2: Bijak (Sehingga 20)" },
+      3: { min: 1, max: 30, label: "Tahap 3: Cabar Diri (Sehingga 30)" },
+      4: { min: 1, max: 50, label: "Tahap 4: Juara (Sehingga 50)" },
+      5: { min: 1, max: 100, label: "Tahap 5: Masteri Sifu (Sehingga 100)" }
+    };
+
+    /* BGM AUDIO SYNTHESIZER */
+    let audioCtx = null;
+    let bgmInterval = null;
+    let isBgmPlaying = false;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleBGM() {
+      initAudioContext();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const btns = [document.getElementById('bgmToggleBtn'), document.getElementById('gameBgmToggleBtn')];
+      if (isBgmPlaying) {
+        stopBGM();
+        btns.forEach(btn => {
+          if (btn) {
+            btn.innerHTML = '🔇';
+            btn.classList.replace('bg-amber-600', 'bg-slate-500');
+          }
+        });
+      } else {
+        startBGM();
+        btns.forEach(btn => {
+          if (btn) {
+            btn.innerHTML = '🎵';
+            btn.classList.replace('bg-slate-500', 'bg-amber-600');
+          }
+        });
+      }
+    }
+
+    function startBGM() {
+      if (isBgmPlaying) return;
+      isBgmPlaying = true;
+      
+      const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
+      let index = 0;
+
+      bgmInterval = setInterval(() => {
+        if (!isBgmPlaying || !audioCtx) return;
+        try {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(notes[index % notes.length], audioCtx.currentTime);
+          
+          gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+          
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+          
+          index++;
+        } catch(e){}
+      }, 400);
+    }
+
+    function stopBGM() {
+      isBgmPlaying = false;
+      if (bgmInterval) {
+        clearInterval(bgmInterval);
+        bgmInterval = null;
+      }
+    }
+
+    /* MALAY NUMBER TO WORDS HELPER FOR CORRECT PRONUNCIATION */
+    function numberToMalayWords(num) {
+      if (num === 0) return 'kosong';
+      const units = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'lapan', 'sembilan'];
+      if (num < 10) return units[num];
+      if (num === 10) return 'sepuluh';
+      if (num === 11) return 'sebelas';
+      if (num < 20) return units[num % 10] + ' belas';
+      if (num < 100) {
+        let ten = Math.floor(num / 10);
+        let unit = num % 10;
+        if (unit === 0) {
+          return units[ten] + ' puluh';
+        } else {
+          return units[ten] + ' puluh ' + units[unit];
+        }
+      }
+      return num.toString();
+    }
+
+    /* AUDIO / SPEECH SYNTHESIS HELPER */
+    function stopSpeech() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      if (speechTimeoutId) {
+        clearTimeout(speechTimeoutId);
+        speechTimeoutId = null;
+      }
+    }
+
+    function speak(text, pitchVal = 1.1) {
+      if ('speechSynthesis' in window) {
+        stopSpeech();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        const voices = window.speechSynthesis.getVoices();
+        const msVoice = voices.find(v => v.lang.startsWith('ms') || v.lang.startsWith('id'));
+        
+        if (msVoice) {
+          utterance.voice = msVoice;
+          utterance.lang = msVoice.lang;
+        } else {
+          utterance.lang = 'ms-MY';
+        }
+        
+        utterance.rate = 0.8;
+        utterance.pitch = pitchVal;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    window.onload = function() {
+      loadProfileData();
+      updateProfileUI();
+    };
+
+    function enterGameApp() {
+      initAudioContext();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      startBGM();
+      document.getElementById('startScreenView').classList.add('hidden');
+    }
+
+    function openOperationModal(level) {
+      selectedLevelForOp = level;
+      const titleMap = {
+        1: "Tahap 1: Asas Mudah",
+        2: "Tahap 2: Bijak",
+        3: "Tahap 3: Cabar Diri",
+        4: "Tahap 4: Juara",
+        5: "Tahap 5: Masteri Sifu"
+      };
+      document.getElementById('operationModalTitle').textContent = `Pilih Operasi • ${titleMap[level] || 'Tahap ' + level}`;
+      document.getElementById('operationModal').classList.remove('hidden');
+    }
+
+    function closeOperationModal() {
+      document.getElementById('operationModal').classList.add('hidden');
+    }
+
+    function confirmOperationSelection(op) {
+      closeOperationModal();
+      currentOperation = op;
+      startGame(selectedLevelForOp);
+    }
+
+    function loadProfileData() {
+      const saved = localStorage.getItem('kedai_roti_tappy_user');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          userProfile = { ...userProfile, ...parsed };
+          if (typeof userProfile.cumulativeStars === 'undefined') {
+            userProfile.cumulativeStars = userProfile.stars || 0;
+          }
+          if (!userProfile.stats.byLevel['kenali_1']) {
+            userProfile.stats.byLevel['kenali_1'] = { attempted: 0, correct: 0 };
+            userProfile.stats.byLevel['kenali_2'] = { attempted: 0, correct: 0 };
+          }
+        } catch(e) {
+          console.error("Failed to load user profile", e);
+        }
+      }
+    }
+
+    function saveProfileData() {
+      localStorage.setItem('kedai_roti_tappy_user', JSON.stringify(userProfile));
+      updateProfileUI();
+    }
+
+    function updateProfileUI() {
+      const name = userProfile.name || 'Nama...';
+      document.getElementById('navName').textContent = name;
+      document.getElementById('navAvatar').textContent = userProfile.avatar || '👨‍🍳';
+      document.getElementById('starCountNav').textContent = userProfile.stars || 0;
+      
+      document.getElementById('appHeaderTitle').textContent = `Kedai Roti Tappy`;
+      document.getElementById('welcomeShopName').textContent = `Kedai Roti Tappy`;
+    }
+
+    function openProfileModal() {
+      document.getElementById('playerNameInput').value = userProfile.name === 'Nama...' ? '' : userProfile.name;
+      highlightSelectedAvatar(userProfile.avatar);
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    let tempSelectedAvatar = userProfile.avatar;
+
+    function selectAvatar(avatar) {
+      tempSelectedAvatar = avatar;
+      highlightSelectedAvatar(avatar);
+    }
+
+    function highlightSelectedAvatar(avatar) {
+      document.querySelectorAll('.avatar-option').forEach(btn => {
+        if (btn.dataset.avatar === avatar) {
+          btn.classList.add('border-amber-500', 'bg-amber-100', 'scale-105', 'shadow-md');
+        } else {
+          btn.classList.remove('border-amber-500', 'bg-amber-100', 'scale-105', 'shadow-md');
+        }
+      });
+    }
+
+    function saveProfile() {
+      const newName = document.getElementById('playerNameInput').value.trim();
+      userProfile.name = newName ? newName : 'Nama...';
+      userProfile.avatar = tempSelectedAvatar;
+      saveProfileData();
+      closeProfileModal();
+    }
+
+    function openEarlyLevelModal() {
+      document.getElementById('earlyLevelModal').classList.remove('hidden');
+    }
+
+    function closeEarlyLevelModal() {
+      document.getElementById('earlyLevelModal').classList.add('hidden');
+    }
+
+    function startEarlyLevel(tier) {
+      closeEarlyLevelModal();
+      initAudioContext();
+      currentOperation = 'kenali';
+      earlyTier = tier;
+      questionNumber = 0;
+      currentScore = 0;
+      recentQuestionsHistory = [];
+
+      document.getElementById('mainHeader').classList.add('hidden');
+      document.getElementById('mainMenuView').classList.add('hidden');
+      document.getElementById('gameScreenView').classList.remove('hidden');
+
+      const maxNum = (tier === 1) ? 5 : 10;
+      document.getElementById('gameLevelBadge').textContent = `Tahap Awal (1 - ${maxNum})`;
+      document.getElementById('gameScoreDisplay').innerHTML = `⭐ ${currentScore}`;
+
+      generateNextQuestion();
+    }
+
+    function startGame(level) {
+      initAudioContext();
+      currentLevel = level;
+      questionNumber = 0;
+      currentScore = 0;
+      recentQuestionsHistory = [];
+
+      document.getElementById('mainHeader').classList.add('hidden');
+      document.getElementById('mainMenuView').classList.add('hidden');
+      document.getElementById('gameScreenView').classList.remove('hidden');
+
+      const opSymbol = currentOperation === 'tambah' ? 'Tambah' : 'Tolak';
+      document.getElementById('gameLevelBadge').textContent = `${opSymbol} - Tahap ${level}`;
+      document.getElementById('gameScoreDisplay').innerHTML = `⭐ ${currentScore}`;
+
+      generateNextQuestion();
+    }
+
+    function goToMainMenu() {
+      stopSpeech();
+      document.getElementById('mainHeader').classList.remove('hidden');
+      document.getElementById('gameScreenView').classList.add('hidden');
+      document.getElementById('mainMenuView').classList.remove('hidden');
+      updateProfileUI();
+    }
+
+    function generateNextQuestion() {
+      stopSpeech();
+      isAnswered = false;
+      questionNumber++;
+
+      if (questionNumber > MAX_QUESTIONS) {
+        finishGameSession();
+        return;
+      }
+
+      document.getElementById('questionProgressText').textContent = `Soalan ${questionNumber} / ${MAX_QUESTIONS}`;
+      document.getElementById('progressBar').style.width = `${(questionNumber / MAX_QUESTIONS) * 100}%`;
+      
+      const feedbackArea = document.getElementById('feedbackArea');
+      feedbackArea.classList.add('hidden');
+      feedbackArea.innerHTML = '';
+
+      if (currentOperation === 'kenali') {
+        const maxNum = (earlyTier === 1) ? 5 : 10;
+        const minNum = 1;
+        
+        currentEarlyActivityType = Math.floor(Math.random() * 4) + 1;
+        let targetNum = Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+        currentAnswer = targetNum;
+
+        if (currentEarlyActivityType === 1) {
+          document.getElementById('questionPrompt').textContent = "Ini nombor berapa?";
+          document.getElementById('equationDisplay').innerHTML = `<span class="text-6xl sm:text-7xl text-amber-800 font-extrabold px-6 py-2 bg-amber-50 rounded-3xl border-4 border-amber-300 shadow-inner">${targetNum}</span>`;
+          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-lg font-bold text-amber-700">Kenali angka di atas! 🥐</div>`;
+        } else if (currentEarlyActivityType === 2) {
+          document.getElementById('questionPrompt').textContent = `Cari nombor ${targetNum} !`;
+          document.getElementById('equationDisplay').innerHTML = `<span class="text-3xl text-slate-700 font-bold">Cari angka yang tepat</span>`;
+          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-4xl">🔍✨</div>`;
+        } else if (currentEarlyActivityType === 3) {
+          document.getElementById('questionPrompt').textContent = "Berapakah bilangan pastri ini?";
+          document.getElementById('equationDisplay').innerHTML = `<span class="text-xl font-bold text-amber-800">Kira dan padankan angka</span>`;
+          
+          const container = document.getElementById('pastryVisualContainer');
+          container.innerHTML = '';
+          const pastryIcon = PASTRY_ICONS[(questionNumber) % PASTRY_ICONS.length];
+          const group = document.createElement('div');
+          group.className = "flex gap-2 flex-wrap justify-center bg-white p-3 rounded-2xl border-2 border-amber-200 text-3xl sm:text-4xl shadow-sm";
+          for (let i = 0; i < targetNum; i++) {
+            group.innerHTML += `<span>${pastryIcon}</span>`;
+          }
+          container.appendChild(group);
+        } else {
+          document.getElementById('questionPrompt').textContent = "Apakah nombor ini?";
+          document.getElementById('equationDisplay').innerHTML = `<span class="text-6xl sm:text-7xl text-orange-700 font-extrabold px-6 py-2 bg-amber-50 rounded-3xl border-4 border-amber-300 shadow-inner">${targetNum}</span>`;
+          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-lg font-bold text-amber-700">Pilih simbol nombor yang tepat! 🧁</div>`;
+        }
+
+        renderAnswerOptionsForKenali(targetNum, maxNum);
+
+        speechTimeoutId = setTimeout(() => {
+          if (!isAnswered) speakEarlyQuestion(currentEarlyActivityType, targetNum);
+        }, 350);
+      } else {
+        // Standard Math operations (Levels 1-5 with exact sum limits)
+        let num1, num2, key;
+        let attempts = 0;
+
+        do {
+          attempts++;
+          if (currentOperation === 'tambah') {
+            if (currentLevel === 1) {
+              currentAnswer = Math.floor(Math.random() * 9) + 2; // sum up to 10
+              num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
+              num2 = currentAnswer - num1;
+            } else if (currentLevel === 2) {
+              currentAnswer = Math.floor(Math.random() * 15) + 5; // sum up to 20
+              num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
+              num2 = currentAnswer - num1;
+            } else if (currentLevel === 3) {
+              currentAnswer = Math.floor(Math.random() * 20) + 10; // sum up to 30
+              num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
+              num2 = currentAnswer - num1;
+            } else if (currentLevel === 4) {
+              currentAnswer = Math.floor(Math.random() * 25) + 25; // sum up to 50
+              num1 = Math.floor(Math.random() * (currentAnswer - 5)) + 5;
+              num2 = currentAnswer - num1;
+            } else {
+              currentAnswer = Math.floor(Math.random() * 50) + 50; // sum up to 100
+              num1 = Math.floor(Math.random() * (currentAnswer - 10)) + 10;
+              num2 = currentAnswer - num1;
+            }
+            key = `${num1}+${num2}`;
+          } else {
+            // Tolak
+            if (currentLevel === 1) {
+              num1 = Math.floor(Math.random() * 9) + 2; // max 10
+              num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+            } else if (currentLevel === 2) {
+              num1 = Math.floor(Math.random() * 18) + 2; // max 20
+              num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+            } else if (currentLevel === 3) {
+              num1 = Math.floor(Math.random() * 27) + 3; // max 30
+              num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+            } else if (currentLevel === 4) {
+              num1 = Math.floor(Math.random() * 40) + 10; // max 50
+              num2 = Math.floor(Math.random() * (num1 - 5)) + 1;
+            } else {
+              num1 = Math.floor(Math.random() * 60) + 40; // max 100
+              num2 = Math.floor(Math.random() * (num1 - 10)) + 10;
+            }
+            currentAnswer = num1 - num2;
+            key = `${num1}-${num2}`;
+          }
+        } while (recentQuestionsHistory.includes(key) && attempts < 25);
+
+        recentQuestionsHistory.push(key);
+        if (recentQuestionsHistory.length > 5) recentQuestionsHistory.shift();
+
+        const promptText = currentOperation === 'tambah'
+          ? "Berapakah jumlah pastri?"
+          : "Berapakah baki pastri?";
+        document.getElementById('questionPrompt').textContent = promptText;
+
+        const container = document.getElementById('pastryVisualContainer');
+        container.innerHTML = '';
+        const pastryIcon = PASTRY_ICONS[(questionNumber + currentLevel) % PASTRY_ICONS.length];
+
+        if (currentOperation === 'tambah') {
+          const group1 = document.createElement('div');
+          group1.className = "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm";
+          for (let i = 0; i < num1; i++) group1.innerHTML += `<span>${pastryIcon}</span>`;
+
+          const plusSign = document.createElement('div');
+          plusSign.className = "text-2xl font-bold text-amber-600";
+          plusSign.innerHTML = "+";
+
+          const group2 = document.createElement('div');
+          group2.className = "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm";
+          for (let i = 0; i < num2; i++) group2.innerHTML += `<span>${pastryIcon}</span>`;
+
+          container.appendChild(group1);
+          container.appendChild(plusSign);
+          container.appendChild(group2);
+
+          document.getElementById('equationDisplay').innerHTML = `${num1} + ${num2} = ?`;
+        } else {
+          const group1 = document.createElement('div');
+          group1.className = "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm relative";
+          for (let i = 0; i < num1; i++) {
+            const isTakenAway = i >= currentAnswer;
+            const styleStr = isTakenAway ? 'opacity: 0.3; filter: grayscale(100%); text-decoration: line-through;' : '';
+            group1.innerHTML += `<span style="${styleStr}">${pastryIcon}</span>`;
+          }
+          container.appendChild(group1);
+
+          document.getElementById('equationDisplay').innerHTML = `${num1} - ${num2} = ?`;
+        }
+
+        renderAnswerOptions(currentAnswer);
+
+        speechTimeoutId = setTimeout(() => {
+          if (!isAnswered) speakCurrentQuestion(num1, num2);
+        }, 350);
+      }
+    }
+
+    function speakCurrentQuestion(n1, n2) {
+      if (currentOperation === 'tambah') {
+        speak(`Berapakah jumlah ${numberToMalayWords(n1)} ditambah ${numberToMalayWords(n2)}?`);
+      } else {
+        speak(`Berapakah baki pastri apabila ${numberToMalayWords(n1)} ditolak ${numberToMalayWords(n2)}?`);
+      }
+    }
+
+    function speakEarlyQuestion(type, target) {
+      if (type === 1 || type === 4) {
+        speak(`Ini nombor berapa? ${numberToMalayWords(target)}.`);
+      } else if (type === 2) {
+        speak(`Cari nombor ${numberToMalayWords(target)}!`);
+      } else {
+        speak(`Berapakah bilangan pastri ini?`);
+      }
+    }
+
+    function speakQuestionText() {
+      if (currentOperation === 'kenali') {
+        speakEarlyQuestion(currentEarlyActivityType, currentAnswer);
+      } else {
+        // Parse equation
+        const eqText = document.getElementById('equationDisplay').textContent;
+        speak(eqText.replace('?', 'berapa'));
+      }
+    }
+
+    function renderAnswerOptions(correctVal) {
+      const grid = document.getElementById('answersGrid');
+      grid.innerHTML = '';
+
+      let options = [correctVal];
+      while (options.length < 4) {
+        let offset = Math.floor(Math.random() * 5) - 2;
+        let fake = correctVal + offset;
+        if (fake >= 0 && !options.includes(fake)) {
+          options.push(fake);
+        }
+      }
+      options.sort(() => Math.random() - 0.5);
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "clay-button bg-white hover:bg-amber-50 text-amber-900 font-playful font-extrabold text-3xl sm:text-4xl py-6 rounded-3xl transition border-2 border-amber-200 shadow-md flex items-center justify-center";
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(opt, correctVal, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function renderAnswerOptionsForKenali(correctVal, maxLimit) {
+      const grid = document.getElementById('answersGrid');
+      grid.innerHTML = '';
+
+      let options = [correctVal];
+      while (options.length < 4) {
+        let fake = Math.floor(Math.random() * maxLimit) + 1;
+        if (!options.includes(fake)) {
+          options.push(fake);
+        }
+      }
+      options.sort(() => Math.random() - 0.5);
+
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "clay-button bg-white hover:bg-amber-50 text-amber-900 font-playful font-extrabold text-3xl sm:text-4xl py-6 rounded-3xl transition border-2 border-amber-200 shadow-md flex items-center justify-center";
+        btn.textContent = opt;
+        btn.onclick = () => checkAnswer(opt, correctVal, btn);
+        grid.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct, btnElement) {
+      if (isAnswered) return;
+      isAnswered = true;
+      stopSpeech();
+
+      const feedbackArea = document.getElementById('feedbackArea');
+      feedbackArea.classList.remove('hidden');
+
+      // Update statistics
+      userProfile.stats.totalQuestions++;
+      if (currentOperation === 'kenali') {
+        const key = `kenali_${earlyTier}`;
+        if (!userProfile.stats.byLevel[key]) userProfile.stats.byLevel[key] = { attempted: 0, correct: 0 };
+        userProfile.stats.byLevel[key].attempted++;
+      } else {
+        const key = `${currentOperation}_${currentLevel}`;
+        if (!userProfile.stats.byLevel[key]) userProfile.stats.byLevel[key] = { attempted: 0, correct: 0 };
+        userProfile.stats.byLevel[key].attempted++;
+      }
+
+      if (selected === correct) {
+        currentScore++;
+        userProfile.stars++;
+        userProfile.cumulativeStars++;
+
+        userProfile.stats.totalCorrect++;
+        if (currentOperation === 'kenali') {
+          userProfile.stats.byLevel[`kenali_${earlyTier}`].correct++;
+        } else {
+          userProfile.stats.byLevel[`${currentOperation}_${currentLevel}`].correct++;
+        }
+        saveProfileData();
+
+        document.getElementById('gameScoreDisplay').innerHTML = `⭐ ${currentScore}`;
+
+        btnElement.classList.remove('bg-white', 'hover:bg-amber-50');
+        btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+
+        // Auto advance on correct answer without Seterusnya button
+        feedbackArea.innerHTML = `
+          <div class="clay-card bg-emerald-50 border-2 border-emerald-300 p-4 rounded-3xl text-center space-y-2 animate-pop shadow-lg">
+            <div class="text-2xl font-bold text-emerald-700">✨ Bagus ! 🎉</div>
+            <p class="text-xs text-slate-600 font-medium">Tahniah! Jawapan kamu betul dan tepat.</p>
+          </div>
+        `;
+        speak("Bagus!");
+        
+        // Auto proceed after brief pause
+        setTimeout(() => {
+          if (!document.getElementById('gameScreenView').classList.contains('hidden')) {
+            generateNextQuestion();
+          }
+        }, 1200);
+      } else {
+        btnElement.classList.remove('bg-white', 'hover:bg-amber-50');
+        btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+
+        // Incorrect answer with Larger Seterusnya button placed beside text
+        feedbackArea.innerHTML = `
+          <div class="clay-card bg-rose-50 border-2 border-rose-300 p-4 rounded-3xl text-center space-y-3 animate-pop shadow-lg">
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div class="text-lg font-bold text-rose-700">sila kira semula ya ! 💡</div>
+              <button onclick="generateNextQuestion()" class="clay-button bg-amber-600 hover:bg-amber-700 text-white font-extrabold px-6 py-3 rounded-2xl text-sm sm:text-base transition shadow-md flex items-center gap-2">
+                <span>Seterusnya</span> <span class="text-lg">➔</span>
+              </button>
+            </div>
+            <p class="text-xs text-slate-600 font-medium text-center">Jangan putus asa, cuba semak semula jawapan kamu.</p>
+          </div>
+        `;
+        speak("sila kira semula ya!");
+      }
+    }
+
+    function finishGameSession() {
+      const feedbackArea = document.getElementById('feedbackArea');
+      feedbackArea.classList.remove('hidden');
+
+      const isLowScore = currentScore < 5;
+      let endMessage = "";
+      if (isLowScore) {
+        endMessage = `Cuba lagi ${userProfile.name} !`;
+        speak(`Cuba lagi ${userProfile.name}`);
+      } else {
+        endMessage = `Tahniah ${userProfile.name} ! Cemerlang!`;
+        speak(`Tahniah ${userProfile.name}, kamu mendapat ${numberToMalayWords(currentScore)} bintang!`);
+      }
+
+      document.getElementById('questionPrompt').textContent = "Sesi Latihan Selesai! 🎉";
+      document.getElementById('equationDisplay').innerHTML = `⭐ Skor: ${currentScore} / ${MAX_QUESTIONS}`;
+      document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-3xl sm:text-4xl font-playful font-bold text-amber-700">${endMessage}</div>`;
+      
+      // Results screen with Menu Utama button only (no Seterusnya)
+      document.getElementById('answersGrid').innerHTML = `
+        <button onclick="goToMainMenu()" class="clay-button col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl text-lg shadow-md transition flex items-center justify-center gap-2">
+          <span>🏠</span> Kembali ke Menu Utama
+        </button>
+      `;
+    }
+
+    /* EXPONENTIAL PROGRESSION LOGIC FOR BADGES */
+    function getBadgeStatus(tierIndex, cumulativeStars) {
+      // Exponential tier thresholds: Tier 0: 10, Tier 1: 35, Tier 2: 75, Tier 3: 115, Tier 4: 150
+      const thresholds = [10, 35, 75, 115, 150];
+      const required = thresholds[tierIndex] || 200;
+      const unlocked = cumulativeStars >= required;
+      const progress = Math.min(100, Math.floor((cumulativeStars / required) * 100));
+      return { unlocked, required, progress };
+    }
+
+    function openBadgesModal() {
+      const list = document.getElementById('badgesList');
+      list.innerHTML = '';
+
+      const badgesDef = [
+        { name: "Pembantu Bakeri", icon: "🥐", desc: "Kumpul bintang kumulatif tahap awal" },
+        { name: "Pakar Pastri", icon: "🧁", desc: "Pengumpul bintang mahir kedai roti" },
+        { name: "Chef Cilik", icon: "👨‍🍳", desc: "Juara matematik cemerlang" },
+        { name: "Master Roti", icon: "👑", desc: "Pakar pengiraan tahap tinggi" },
+        { name: "Legenda Tappy", icon: "⭐", desc: "Pemain terulung Kedai Roti Tappy" }
+      ];
+
+      const cumulative = userProfile.cumulativeStars || userProfile.stars || 0;
+
+      badgesDef.forEach((b, idx) => {
+        const status = getBadgeStatus(idx, cumulative);
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-2xl border-2 flex items-center gap-4 ${status.unlocked ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-slate-50 border-slate-200 opacity-75'}`;
+        
+        card.innerHTML = `
+          <div class="text-4xl clay-circle p-3 rounded-2xl">${status.unlocked ? b.icon : '🔒'}</div>
+          <div class="flex-1">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-slate-800 text-sm sm:text-base">${b.name}</h4>
+              <span class="text-xs font-bold px-2.5 py-1 rounded-full ${status.unlocked ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
+                ${status.unlocked ? 'Dibuka! ✨' : `${cumulative} / ${status.required} ⭐`}
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">${b.desc}</p>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden mt-2">
+              <div class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: ${status.progress}%"></div>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      document.getElementById('badgesModal').classList.remove('hidden');
+    }
+
+    function closeBadgesModal() {
+      document.getElementById('badgesModal').classList.add('hidden');
+    }
+
+    let parentVerifyNum1 = 3;
+    let parentVerifyNum2 = 4;
+    let parentVerifyCorrect = 7;
+
+    function openParentsModal() {
+      parentVerifyNum1 = Math.floor(Math.random() * 5) + 2;
+      parentVerifyNum2 = Math.floor(Math.random() * 5) + 1;
+      parentVerifyCorrect = parentVerifyNum1 + parentVerifyNum2;
+      
+      document.getElementById('parentVerifyEquation').textContent = `${parentVerifyNum1} + ${parentVerifyNum2} = ?`;
+      document.getElementById('parentVerifyEquation').className = "text-2xl font-bold text-slate-800 my-2";
+      document.getElementById('parentVerifyInput').value = '';
+      document.getElementById('parentVerifyModal').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('parentVerifyInput').focus();
+      }, 100);
+    }
+
+    function closeParentVerifyModal() {
+      document.getElementById('parentVerifyModal').classList.add('hidden');
+    }
+
+    function verifyParentAnswer() {
+      const val = parseInt(document.getElementById('parentVerifyInput').value);
+      if (val === parentVerifyCorrect) {
+        closeParentVerifyModal();
+        showActualParentsModal();
+      } else {
+        const eqEl = document.getElementById('parentVerifyEquation');
+        eqEl.textContent = `${parentVerifyNum1} + ${parentVerifyNum2} = ? (Salah, Cuba Lagi!)`;
+        eqEl.className = "text-xl font-bold text-rose-600 my-2";
+        document.getElementById('parentVerifyInput').value = '';
+        setTimeout(() => {
+          eqEl.className = "text-2xl font-bold text-slate-800 my-2";
+          eqEl.textContent = `${parentVerifyNum1} + ${parentVerifyNum2} = ?`;
+        }, 1500);
+      }
+    }
+
+    function showActualParentsModal() {
+      const stats = userProfile.stats;
+      document.getElementById('parentTotalQuestions').textContent = stats.totalQuestions;
+      document.getElementById('parentTotalCorrect').textContent = stats.totalCorrect;
+      
+      const accuracy = stats.totalQuestions > 0 ? Math.round((stats.totalCorrect / stats.totalQuestions) * 100) : 0;
+      document.getElementById('parentAccuracy').textContent = `${accuracy}%`;
+
+      const breakdownContainer = document.getElementById('parentsLevelBreakdown');
+      breakdownContainer.innerHTML = '';
+
+      const keys = [
+        { key: 'kenali_1', name: 'Tahap Awal (1-5)' },
+        { key: 'kenali_2', name: 'Tahap Awal (1-10)' },
+        { key: 'tambah_1', name: 'Tambah Tahap 1' },
+        { key: 'tambah_2', name: 'Tambah Tahap 2' },
+        { key: 'tambah_3', name: 'Tambah Tahap 3' },
+        { key: 'tambah_4', name: 'Tambah Tahap 4' },
+        { key: 'tambah_5', name: 'Tambah Tahap 5 (Sifu)' },
+        { key: 'tolak_1', name: 'Tolak Tahap 1' },
+        { key: 'tolak_2', name: 'Tolak Tahap 2' },
+        { key: 'tolak_3', name: 'Tolak Tahap 3' },
+        { key: 'tolak_4', name: 'Tolak Tahap 4' },
+        { key: 'tolak_5', name: 'Tolak Tahap 5 (Sifu)' }
+      ];
+
+      keys.forEach(item => {
+        const data = stats.byLevel[item.key] || { attempted: 0, correct: 0 };
+        const acc = data.attempted > 0 ? Math.round((data.correct / data.attempted) * 100) : 0;
+        
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-xs";
+        row.innerHTML = `
+          <span class="font-bold text-slate-700">${item.name}</span>
+          <span class="text-slate-600">Jawab: <b>${data.correct}/${data.attempted}</b></span>
+          <span class="font-extrabold text-amber-600">${acc}% Tepat</span>
+        `;
+        breakdownContainer.appendChild(row);
+      });
+
+      document.getElementById('parentsModal').classList.remove('hidden');
+    }
+
+    function closeParentsModal() {
+      document.getElementById('parentsModal').classList.add('hidden');
+    }
+
+    function showResetConfirmation() {
+      document.getElementById('resetConfirmModal').classList.remove('hidden');
+    }
+
+    function cancelReset() {
+      document.getElementById('resetConfirmModal').classList.add('hidden');
+    }
+
+    function executeFullReset() {
+      localStorage.removeItem('kedai_roti_tappy_user');
+      userProfile = {
+        name: 'Nama...',
+        avatar: '👨‍🍳',
+        stars: 0,
+        cumulativeStars: 0,
+        stats: {
+          totalQuestions: 0,
+          totalCorrect: 0,
+          byLevel: {
+            'kenali_1': { attempted: 0, correct: 0 },
+            'kenali_2': { attempted: 0, correct: 0 },
+            'tambah_1': { attempted: 0, correct: 0 },
+            'tambah_2': { attempted: 0, correct: 0 },
+            'tambah_3': { attempted: 0, correct: 0 },
+            'tambah_4': { attempted: 0, correct: 0 },
+            'tambah_5': { attempted: 0, correct: 0 },
+            'tolak_1': { attempted: 0, correct: 0 },
+            'tolak_2': { attempted: 0, correct: 0 },
+            'tolak_3': { attempted: 0, correct: 0 },
+            'tolak_4': { attempted: 0, correct: 0 },
+            'tolak_5': { attempted: 0, correct: 0 }
+          }
+        }
+      };
+      saveProfileData();
+      cancelReset();
+      closeParentsModal();
+    }
+  </script>
+</body>
+</html>
