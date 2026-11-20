@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lobi Permainan CelikPlay</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f9ff; margin: 0; padding: 20px; text-align: center; }
+    .grid-game { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; max-width: 600px; margin: 20px auto; }
+    .kad-game { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; transition: 0.2s; }
+    .kad-game.terkunci { opacity: 0.6; background: #e2e8f0; }
+    .btn-main { display: inline-block; margin-top: 12px; padding: 10px 20px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+    .kad-game.terkunci .btn-main { background: #64748b; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+  <div id="skrinKunci" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:9999; display:flex; justify-content:center; align-items:center; padding:20px; box-sizing:border-box;">
+    <div style="background:white; padding:25px; border-radius:15px; max-width:350px; width:100%;">
+      <h2 style="margin-top:0;">🔒 Akses CelikPlay</h2>
+      <p style="font-size:14px; color:#64748b;">Masukkan Kod Akses anda (Maksimum 3 peranti keluarga).</p>
+      <input type="text" id="inputKod" placeholder="Contoh: CP-1234" style="width:100%; padding:12px; margin:10px 0; border:2px solid #cbd5e1; border-radius:8px; font-size:16px; text-align:center; text-transform:uppercase; box-sizing:border-box;">
+      <button id="btnSemak" onclick="semakKod()" style="width:100%; padding:12px; background:#10b981; color:white; border:none; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">Buka Lobi Permainan</button>
+      <p id="mesejRalat" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;"></p>
+    </div>
+  </div>
+
+  <h1>🎮 Lobi Permainan CelikPlay</h1>
+  <p style="color:#475569;">Pilih permainan yang telah diaktifkan untuk anak anda:</p>
+
+  <div class="grid-game">
+    <div class="kad-game terkunci" id="kad-tappy">
+      <div style="font-size:40px;">🍞</div>
+      <h3>Kedai Roti Tappy</h3>
+      <a href="/tappy/" class="btn-main" id="btn-tappy">🔒 Terkunci</a>
+    </div>
+
+    <div class="kad-game terkunci" id="kad-english">
+      <div style="font-size:40px;">🔤</div>
+      <h3>English First Words</h3>
+      <a href="/english/" class="btn-main" id="btn-english">🔒 Terkunci</a>
+    </div>
+
+    <div class="kad-game terkunci" id="kad-pasar">
+      <div style="font-size:40px;">🛒</div>
+      <h3>Pasar Mini Bijak</h3>
+      <a href="/pasar/" class="btn-main" id="btn-pasar">🔒 Terkunci</a>
+    </div>
+
+    <div class="kad-game terkunci" id="kad-angkasa">
+      <div style="font-size:40px;">🚀</div>
+      <h3>Misi Angkasa (Bonus)</h3>
+      <a href="/angkasa/" class="btn-main" id="btn-angkasa">🔒 Terkunci</a>
+    </div>
+  </div>
+
+  <p style="margin-top:30px; font-size:13px; color:#64748b;">
+    Mahu tambah permainan lain? <a href="/sales.html" style="color:#0284c7; font-weight:bold;">Dapatkan di sini</a>
+  </p>
+
+<script>
+  const URL_APPS_SCRIPT = "https://google.com";
+
+  let deviceId = localStorage.getItem("celikplay_device_id");
+  if (!deviceId) {
+    deviceId = "DEV-" + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    localStorage.setItem("celikplay_device_id", deviceId);
+  }
+
+  const simpananGame = localStorage.getItem("celikplay_games");
+  if (simpananGame) {
+    document.getElementById("skrinKunci").style.display = "none";
+    bukaKunciGame(simpananGame);
+  }
+
+  function bukaKunciGame(senaraiString) {
+    const senarai = senaraiString.toLowerCase();
+    const semuaGame = ["tappy", "english", "pasar", "angkasa"];
+
+    semuaGame.forEach(nama => {
+      if (senarai.includes(nama)) {
+        document.getElementById("kad-" + nama).classList.remove("terkunci");
+        document.getElementById("btn-" + nama).innerText = "▶ Mula Bermain";
+      }
+    });
+  }
+
+  function semakKod() {
+    const kod = document.getElementById("inputKod").value;
+    const btn = document.getElementById("btnSemak");
+    const mesej = document.getElementById("mesejRalat");
+
+    if (!kod) {
+      mesej.innerText = "Sila masukkan kod akses.";
+      mesej.style.display = "block";
+      return;
+    }
+
+    btn.innerText = "Menyemak...";
+    btn.disabled = true;
+    mesej.style.display = "none";
+
+    fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      body: JSON.stringify({ tindakan: "semak_kod", kod: kod, deviceId: deviceId })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === "berjaya") {
+        localStorage.setItem("celikplay_games", data.games);
+        document.getElementById("skrinKunci").style.display = "none";
+        bukaKunciGame(data.games);
+      } else if (data.status === "penuh") {
+        mesej.innerText = "Maaf, kod ini telah mencapai had maksimum 3 peranti.";
+        mesej.style.display = "block";
+      } else {
+        mesej.innerText = "Kod akses tidak sah. Sila semak semula.";
+        mesej.style.display = "block";
+      }
+      btn.innerText = "Buka Lobi Permainan";
+      btn.disabled = false;
+    })
+    .catch(err => {
+      mesej.innerText = "Ralat sambungan. Sila cuba lagi.";
+      mesej.style.display = "block";
+      btn.innerText = "Buka Lobi Permainan";
+      btn.disabled = false;
+    });
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const kodDariLink = urlParams.get('kod');
+
+  if (kodDariLink) {
+    document.getElementById("inputKod").value = kodDariLink;
+    semakKod();
+  }
+</script>
+</body>
+</html>
