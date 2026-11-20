@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<script>if(!(localStorage.getItem("celikplay_games")||"").includes("angkasa")){window.location.href="/";}</script>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Misi Angkasa: Roket Bijak Matematik</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Tone.js for Audio -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000000; /* Latar belakang angkasa lepas gelap */
+            font-family: 'Nunito', sans-serif;
+            touch-action: none; /* Halang skrol pada peranti sentuh */
+        }
+        h1, h2, h3, .font-heading {
+            font-family: 'Fredoka One', cursive;
+        }
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            pointer-events: none; 
+        }
+        .pointer-events-auto {
+            pointer-events: auto;
+        }
+        
+        /* Animasi UI Tersuai */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.4s ease-out forwards;
+        }
+        @keyframes floatMsg {
+            0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -40px) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -60px) scale(0.8); opacity: 0; }
+        }
+        .animate-msg {
+            animation: floatMsg 2s ease-in-out forwards;
+        }
+
+        /* Glassmorphism panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Scrollbar tersembunyi */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="text-white select-none">
+
+    <!-- 3D Game Canvas -->
+    <div id="game-canvas"></div>
+
+    <!-- UI Layer -->
+    <div id="ui-layer" class="flex flex-col justify-between p-4 relative">
+        
+        <!-- MAIN MENU -->
+        <div id="menu-screen" class="absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/60 backdrop-blur-sm z-50">
+            <div class="glass-panel p-6 md:p-8 rounded-3xl max-w-lg w-full mx-4 text-center animate-pop max-h-[95vh] overflow-y-auto custom-scrollbar">
+                
+                <!-- Logo -->
+                <div class="mb-4 flex justify-center">
+                    <a href="https://ibb.co/bgLbKgJt" target="_blank" rel="noopener noreferrer">
+                        <img src="CP1.jpg" alt="CelikPlay Logo" class="w-24 h-24 md:w-32 md:h-32 object-contain rounded-full shadow-[0_0_20px_rgba(255,255,255,0.2)] border-4 border-white/10 hover:scale-105 transition-transform cursor-pointer">
+                    </a>
+                </div>
+                
+                <h1 class="text-3xl md:text-5xl text-yellow-400 font-heading mb-1 drop-shadow-lg leading-tight">Misi Angkasa</h1>
+                <h2 class="text-xl md:text-2xl text-blue-200 font-heading mb-4">Roket Bijak Matematik</h2>
+                
+                <p id="menu-desc" class="text-sm text-gray-300 mb-5 bg-black/40 p-3 rounded-xl">
+                    Selesaikan soalan Matematik dengan menangkap jawapan bintang yang betul!
+                </p>
+
+                <!-- Pilihan Tahap -->
+                <div class="flex flex-col gap-3 mb-5" id="main-levels">
+                    <button onclick="startGame(1)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-heading text-xl shadow-lg transform transition hover:scale-105 border-b-4 border-green-800">
+                        Tahap 1: Angkasawan Roket Muda
+                        <span class="block text-xs font-sans font-normal mt-1 opacity-90 tracking-wide uppercase">Persediaan Prasekolah</span>
+                    </button>
+                    <button onclick="startGame(2)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-heading text-xl shadow-lg transform transition hover:scale-105 border-b-4 border-blue-800">
+                        Tahap 2: Wira Roket Bijak
+                        <span class="block text-xs font-sans font-normal mt-1 opacity-90 tracking-wide uppercase">Prasekolah - Tahun 1</span>
+                    </button>
+                    <button onclick="startGame(3)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white font-heading text-xl shadow-lg transform transition hover:scale-105 border-b-4 border-purple-900">
+                        Tahap 3: Kapten Roket Angkasa
+                        <span class="block text-xs font-sans font-normal mt-1 opacity-90 tracking-wide uppercase">Tahun 1</span>
+                    </button>
+                    <button onclick="showLevel4Menu()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-heading text-xl shadow-lg transform transition hover:scale-105 border-b-4 border-red-900">
+                        Tahap 4: Komander Roket Elit
+                        <span class="block text-xs font-sans font-normal mt-1 opacity-90 tracking-wide uppercase">Tahun 1 - Cabaran Lanjutan</span>
+                    </button>
+                </div>
+
+                <!-- Sub-menu Tahap 4 -->
+                <div class="flex flex-col gap-3 mb-5 hidden" id="level4-missions">
+                    <button onclick="startGame(4, 1)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white font-heading text-lg shadow-lg transform transition hover:scale-105 border-b-4 border-orange-900">
+                        Misi 1: Bintang Bijak
+                    </button>
+                    <button onclick="startGame(4, 2)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white font-heading text-lg shadow-lg transform transition hover:scale-105 border-b-4 border-orange-900">
+                        Misi 2: Cabaran Meteor
+                    </button>
+                    <button onclick="startGame(4, 3)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-700 hover:from-orange-600 hover:to-orange-800 text-white font-heading text-lg shadow-lg transform transition hover:scale-105 border-b-4 border-orange-900">
+                        Misi 3: Rahsia Planet
+                    </button>
+                    <button onclick="startGame(4, 4)" class="w-full py-3 rounded-2xl bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-heading text-lg shadow-lg transform transition hover:scale-105 border-b-4 border-red-900">
+                        Misi 4: Misi Komander
+                    </button>
+                    <button onclick="hideLevel4Menu()" class="w-full py-2 mt-2 rounded-xl bg-gray-600 hover:bg-gray-500 text-white font-heading text-md shadow-lg transform transition hover:scale-105 border-b-4 border-gray-800">
+                        Kembali
+                    </button>
+                </div>
+
+                <!-- Butang Lencana Tambahan -->
+                <button onclick="showBadgesMenu()" id="btn-lencana" class="w-full py-3 mb-5 rounded-2xl bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-white font-heading text-xl shadow-lg transform transition hover:scale-105 border-b-4 border-yellow-800">
+                    Koleksi Lencana 🏆
+                </button>
+
+                <!-- Copyright Text -->
+                <div class="mt-2 pt-4 border-t border-white/20">
+                    <p class="text-[10px] md:text-xs text-gray-400 leading-relaxed font-sans">
+                        Copyright 2026 CelikPlay. Hak Cipta Terpelihara.<br>
+                        Untuk kegunaan keluarga pembeli sahaja. Dilarang mengedar atau menjual semula tanpa kebenaran.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HUD (Heads Up Display) -->
+        <div id="hud-screen" class="hidden absolute inset-0 pointer-events-none flex flex-col justify-between">
+            
+            <!-- Top Bar -->
+            <div class="flex justify-between items-start p-4">
+                <div class="glass-panel px-5 py-2 md:px-6 md:py-3 rounded-full flex items-center gap-3">
+                    <span class="text-xl md:text-2xl">⭐</span>
+                    <span id="score-display" class="font-heading text-xl md:text-2xl text-yellow-300">0/10</span>
+                </div>
+                
+                <div class="flex gap-2 pointer-events-auto">
+                    <button onclick="toggleMusic()" id="music-btn" class="glass-panel w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-lg md:text-xl hover:bg-white/20 transition">
+                        🎵
+                    </button>
+                    <button onclick="pauseGame()" class="glass-panel w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-lg md:text-xl hover:bg-white/20 transition">
+                        ⏸️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question Display -->
+            <div class="absolute top-16 md:top-20 left-1/2 transform -translate-x-1/2 w-full max-w-xl px-4 pointer-events-none">
+                <div class="bg-gradient-to-b from-blue-900/90 to-purple-900/90 border-4 border-blue-400 rounded-3xl p-4 md:p-6 text-center shadow-[0_0_20px_rgba(96,165,250,0.6)]">
+                    <h3 id="question-text" class="text-2xl md:text-5xl font-heading text-white drop-shadow-md whitespace-pre-line leading-snug">
+                        3 + 2 = ?
+                    </h3>
+                </div>
+            </div>
+
+            <!-- Floating Feedback Message -->
+            <div id="feedback-msg" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl font-heading font-bold text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] hidden z-40">
+                Hebat!
+            </div>
+
+            <!-- Mobile Instructions (Visible only on mobile) -->
+            <div class="pointer-events-none absolute bottom-8 w-full flex justify-center md:hidden">
+                <div class="text-xs text-yellow-300 font-bold text-center bg-black/60 px-5 py-2 rounded-full tracking-wide border border-white/20">
+                    👆 Sentuh & tarik skrin untuk gerakkan roket
+                </div>
+            </div>
+            
+            <!-- Desktop Instructions (Hidden on Mobile) -->
+            <div class="hidden md:block pointer-events-none p-6 text-center text-white/60 text-sm absolute bottom-0 w-full bg-gradient-to-t from-black/60 to-transparent">
+                Gunakan <strong>Kekunci Anak Panah</strong>, <strong>WASD</strong>, atau <strong>Klik & Tarik Tetikus</strong> (Mouse Drag) untuk mengawal roket.
+            </div>
+        </div>
+
+        <!-- PAUSE MENU -->
+        <div id="pause-screen" class="hidden absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/70 backdrop-blur-md z-50">
+            <div class="glass-panel p-8 md:p-10 rounded-3xl text-center">
+                <h2 class="text-3xl md:text-4xl font-heading text-white mb-8">Rehat Sebentar!</h2>
+                <div class="flex flex-col gap-4">
+                    <button onclick="resumeGame()" class="px-8 py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white font-heading text-xl shadow-lg border-b-4 border-blue-700">
+                        Sambung Main ▶️
+                    </button>
+                    <button onclick="quitToMenu()" class="px-8 py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-heading text-xl shadow-lg border-b-4 border-red-700">
+                        Berhenti 🛑
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="gameover-screen" class="hidden absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/80 backdrop-blur-md z-50">
+            <div class="glass-panel p-8 md:p-12 rounded-3xl max-w-md w-full mx-4 text-center animate-pop">
+                <h2 class="text-3xl md:text-4xl font-heading text-yellow-400 mb-2">Misi Selesai!</h2>
+                <p id="end-message" class="text-lg md:text-xl text-blue-200 font-heading mb-6">Kerja yang luar biasa!</p>
+                
+                <div class="bg-black/40 rounded-2xl p-6 mb-8 border border-white/10">
+                    <div id="badge-icon" class="text-6xl mb-4">🏆</div>
+                    <div class="text-gray-300 mb-1 text-sm uppercase tracking-wider font-bold">Lencana Anda</div>
+                    <div id="badge-name" class="text-xl md:text-2xl font-heading text-white mb-4">Kapten Angkasa</div>
+                    
+                    <div class="flex justify-center items-center gap-2">
+                        <span class="text-3xl">⭐</span>
+                        <span id="final-score" class="font-heading text-4xl text-yellow-300">10/10</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button onclick="playAgain()" class="w-full py-4 rounded-full bg-green-500 hover:bg-green-600 text-white font-heading text-2xl shadow-lg border-b-4 border-green-700 transform transition hover:scale-105">
+                        Main Lagi
+                    </button>
+                    <button onclick="quitToMenu()" class="w-full py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white font-heading text-xl shadow-lg border-b-4 border-blue-700 hover:scale-105 transition">
+                        Tukar Tahap
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BADGES SCREEN / MENU LENCANA -->
+        <div id="badges-screen" class="hidden absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/80 backdrop-blur-md z-[60]">
+            <div class="glass-panel p-6 md:p-8 rounded-3xl max-w-2xl w-full mx-4 text-center animate-pop max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <h2 class="text-3xl md:text-4xl font-heading text-yellow-400 mb-6 drop-shadow-lg">Koleksi Lencana</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6" id="badges-container">
+                    <!-- Lencana akan dijana oleh JavaScript -->
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                    <button onclick="hideBadgesMenu()" class="px-8 py-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white font-heading text-xl shadow-lg border-b-4 border-blue-700 hover:scale-105 transition">
+                        Kembali
+                    </button>
+                    <button onclick="confirmResetBadges()" class="px-8 py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-heading text-xl shadow-lg border-b-4 border-red-700 hover:scale-105 transition">
+                        Reset Lencana 🗑️
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESET CONFIRMATION SCREEN (PENGESAHAN RESET) -->
+        <div id="reset-confirm-screen" class="hidden absolute inset-0 flex items-center justify-center pointer-events-auto bg-black/90 backdrop-blur-md z-[70]">
+            <div class="glass-panel p-8 md:p-10 rounded-3xl max-w-md w-full mx-4 text-center animate-pop">
+                <h2 class="text-3xl md:text-4xl font-heading text-red-500 mb-4">Padam Semua?</h2>
+                <p class="text-lg md:text-xl text-white font-sans mb-8">Adakah anda pasti mahu memadam semua lencana yang telah dikumpul? Lencana akan hilang sepenuhnya.</p>
+                
+                <div class="flex flex-col gap-4">
+                    <button onclick="executeResetBadges()" class="w-full py-3 rounded-full bg-red-500 hover:bg-red-600 text-white font-heading text-xl shadow-lg border-b-4 border-red-700 hover:scale-105 transition">
+                        Ya, Padam Semua
+                    </button>
+                    <button onclick="cancelResetBadges()" class="w-full py-3 rounded-full bg-gray-500 hover:bg-gray-600 text-white font-heading text-xl shadow-lg border-b-4 border-gray-700 hover:scale-105 transition">
+                        Batal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * CELIKPLAY SPACE MATH GAME
+         * Engine: Three.js for Rendering, Tone.js for Audio.
+         */
+
+        // --- GAME STATE ---
+        const GameState = { MENU: 0, PLAYING: 1, PAUSED: 2, GAMEOVER: 3 };
+
+        let currentState = GameState.MENU;
+        let currentLevel = 1;
+        let currentMission = 0; // Penanda untuk Misi di Tahap 4
+        let score = 0;
+        let questionCount = 0;
+        const MAX_QUESTIONS = 10;
+        let currentAnswer = 0;
+        let isMusicPlaying = true;
+        let isFirstTryCorrect = true; // Penanda jika berjaya jawab pada cubaan pertama
+        let lastQuestionText = ""; // Penanda soalan terakhir untuk elakkan ulangan
+
+        // --- SISTEM LENCANA (BADGES) ---
+        const badgeData = [
+            { id: 't1', name: 'Angkasawan Roket Muda', icon: '👨‍🚀' },
+            { id: 't2', name: 'Wira Roket Bijak', icon: '🛸' },
+            { id: 't3', name: 'Kapten Roket Angkasa', icon: '👑' },
+            { id: 't4_1', name: 'Misi 1: Bintang Bijak', icon: '🌟' },
+            { id: 't4_2', name: 'Misi 2: Cabaran Meteor', icon: '☄️' },
+            { id: 't4_3', name: 'Misi 3: Rahsia Planet', icon: '🪐' },
+            { id: 't4_4', name: 'Misi 4: Komander', icon: '🚀' }
+        ];
+        // Tarik rekod lencana lama jika pemain pernah bermain sebelum ini
+        let userBadges = JSON.parse(localStorage.getItem('MisiAngkasa_Badges')) || [];
+
+        // --- THREE.JS VARIABLES ---
+        let scene, camera, renderer;
+        let rocket, astronaut;
+        let answerStars = [];
+        let meteors = [];
+        let starLayers = [];
+        let backgroundPlanets = [];
+
+        // --- INPUT STATE ---
+        const input = { left: false, right: false, up: false, down: false };
+
+        // --- AUDIO (Tone.js) ---
+        let synth, errorSynth, bgm;
+        let audioInitialized = false;
+        let lastSoundTime = 0; // Throttle bunyi untuk elak crash
+
+        function initAudio() {
+            if (audioInitialized) return;
+            
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 1 }
+            }).toDestination();
+            synth.volume.value = -5;
+
+            errorSynth = new Tone.Synth({
+                oscillator: { type: "sawtooth" },
+                envelope: { attack: 0.05, decay: 0.2, sustain: 0.1, release: 0.5 }
+            }).toDestination();
+            errorSynth.volume.value = -10;
+
+            bgm = new Tone.PolySynth(Tone.FMSynth).toDestination();
+            bgm.volume.value = -20;
+            
+            const notes = ["C4", "E4", "G4", "B4", "C5", "B4", "G4", "E4"];
+            let step = 0;
+            
+            Tone.Transport.scheduleRepeat((time) => {
+                if (currentState === GameState.PLAYING && isMusicPlaying) {
+                    bgm.triggerAttackRelease(notes[step % notes.length], "8n", time);
+                    step++;
+                }
+            }, "4n");
+
+            Tone.start();
+            Tone.Transport.start();
+            audioInitialized = true;
+        }
+
+        function playSound(type) {
+            if (!audioInitialized) return;
+            
+            // Halang bunyi dimainkan serentak dalam masa < 100ms
+            const currentTime = Date.now();
+            if (currentTime - lastSoundTime < 100) return;
+            lastSoundTime = currentTime;
+
+            const time = Tone.now();
+            
+            if (type === 'success') {
+                synth.triggerAttackRelease(["C5", "E5", "G5"], "4n", time);
+            } else if (type === 'error') {
+                errorSynth.triggerAttackRelease("C3", "8n", time);
+            } else if (type === 'pop') {
+                synth.triggerAttackRelease("G4", "16n", time);
+            }
+        }
+
+        function toggleMusic() {
+            isMusicPlaying = !isMusicPlaying;
+            const btn = document.getElementById('music-btn');
+            btn.innerHTML = isMusicPlaying ? '🎵' : '🔇';
+            btn.classList.toggle('opacity-50', !isMusicPlaying);
+        }
+
+        // --- INIT THREE.JS ---
+        function initThree() {
+            if (scene) return; // Elakkan render berganda
+            const container = document.getElementById('game-canvas');
+            
+            scene = new THREE.Scene();
+            
+            const aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 1000);
+            camera.position.z = 15;
+            camera.position.y = 2; 
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+            container.appendChild(renderer.domElement);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 5);
+            scene.add(dirLight);
+
+            createBackgroundParticles();
+            createPlanets();
+            createRocket();
+            createAstronaut();
+
+            window.addEventListener('resize', onWindowResize);
+            window.addEventListener('keydown', onKeyDown);
+            window.addEventListener('keyup', onKeyUp);
+
+            let isDragging = false;
+            let previousPointer = { x: 0, y: 0 };
+            
+            container.addEventListener('pointerdown', (e) => {
+                isDragging = true;
+                previousPointer.x = e.clientX;
+                previousPointer.y = e.clientY;
+            });
+            window.addEventListener('pointerup', () => { isDragging = false; });
+            window.addEventListener('pointercancel', () => { isDragging = false; });
+            
+            container.addEventListener('pointermove', (e) => {
+                if (!isDragging || currentState !== GameState.PLAYING) return;
+                if (e.pointerType === 'touch') e.preventDefault(); 
+                
+                const deltaX = e.clientX - previousPointer.x;
+                const deltaY = e.clientY - previousPointer.y;
+                
+                rocket.position.x += deltaX * 0.025; 
+                rocket.position.y -= deltaY * 0.025; 
+                
+                previousPointer.x = e.clientX;
+                previousPointer.y = e.clientY;
+                clampRocketPosition();
+            }, {passive: false});
+
+            animate();
+        }
+
+        function createBackgroundParticles() {
+            const particleCount = 400;
+            for (let j = 0; j < 3; j++) {
+                const geom = new THREE.BufferGeometry();
+                const pos = new Float32Array(particleCount * 3);
+                for(let i = 0; i < particleCount * 3; i++) pos[i] = (Math.random() - 0.5) * 80;
+                geom.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                
+                const size = j === 0 ? 0.1 : (j === 1 ? 0.2 : 0.05);
+                const mat = new THREE.PointsMaterial({ color: 0xffffff, size: size, transparent: true, opacity: 0.8 });
+                const layer = new THREE.Points(geom, mat);
+                layer.position.z = -15 - (Math.random() * 15);
+                scene.add(layer);
+                starLayers.push(layer);
+            }
+        }
+
+        function createPlanets() {
+            backgroundPlanets = []; 
+            
+            // Gas Biru
+            const p1M = new THREE.MeshStandardMaterial({color: 0x3b82f6, roughness: 0.7});
+            const p1 = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), p1M);
+            p1.position.set(-15, 12, -25);
+            scene.add(p1); backgroundPlanets.push(p1);
+
+            // Bergelang
+            const p2Group = new THREE.Group();
+            const p2 = new THREE.Mesh(new THREE.SphereGeometry(2.5, 32, 32), new THREE.MeshStandardMaterial({color: 0xf59e0b, roughness: 0.6}));
+            p2Group.add(p2);
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(4.0, 0.4, 16, 64), new THREE.MeshStandardMaterial({color: 0xfde68a, roughness: 0.4}));
+            ring.rotation.x = Math.PI / 2.2; p2Group.add(ring);
+            p2Group.position.set(16, 5, -30); p2Group.rotation.z = Math.PI / 8;
+            scene.add(p2Group); backgroundPlanets.push(p2Group);
+
+            // Merah
+            const p3 = new THREE.Mesh(new THREE.SphereGeometry(1.8, 32, 32), new THREE.MeshStandardMaterial({color: 0xef4444, roughness: 0.9}));
+            p3.position.set(-12, -10, -20);
+            scene.add(p3); backgroundPlanets.push(p3);
+
+            // Ungu
+            const p4 = new THREE.Mesh(new THREE.SphereGeometry(2.2, 32, 32), new THREE.MeshStandardMaterial({color: 0x8b5cf6, roughness: 0.5}));
+            p4.position.set(12, -15, -22);
+            scene.add(p4); backgroundPlanets.push(p4);
+            
+            // Bulan kecil
+            const p5 = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), new THREE.MeshStandardMaterial({color: 0x94a3b8, roughness: 1.0}));
+            p5.position.set(0, 18, -25);
+            scene.add(p5); backgroundPlanets.push(p5);
+            
+            const pointLight = new THREE.PointLight(0xffffff, 0.8, 100);
+            pointLight.position.set(5, 10, -10);
+            scene.add(pointLight);
+        }
+
+        function createRocket() {
+            rocket = new THREE.Group();
+            
+            const metalMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.6, roughness: 0.3 });
+            const redMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.5, roughness: 0.3 });
+            const darkMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8, roughness: 0.2 });
+            
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 2.5, 32), metalMat);
+            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.5, 32), redMat); nose.position.y = 2.0;
+
+            const ringG = new THREE.TorusGeometry(0.7, 0.05, 16, 32);
+            const ring1 = new THREE.Mesh(ringG, darkMat); ring1.position.y = 1.0; ring1.rotation.x = Math.PI / 2;
+            const ring2 = new THREE.Mesh(ringG, darkMat); ring2.position.y = -1.0; ring2.rotation.x = Math.PI / 2;
+
+            const frame = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.08, 16, 32), darkMat); frame.position.set(0, 0.5, 0.68);
+            const win = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.1, 32), new THREE.MeshStandardMaterial({ color: 0x3b82f6, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.8 }));
+            win.rotation.x = Math.PI / 2; win.position.set(0, 0.5, 0.65);
+
+            const finG = new THREE.ConeGeometry(0.15, 1.4, 32);
+            const finPositions = [
+                {x: -0.7, y: -0.8, z: 0, rz: Math.PI / 6, rx: 0},
+                {x: 0.7, y: -0.8, z: 0, rz: -Math.PI / 6, rx: 0},
+                {x: 0, y: -0.8, z: -0.7, rz: 0, rx: -Math.PI / 6},
+                {x: 0, y: -0.8, z: 0.7, rz: 0, rx: Math.PI / 6},
+            ];
+            finPositions.forEach(p => {
+                const fin = new THREE.Mesh(finG, redMat);
+                fin.position.set(p.x, p.y, p.z); fin.rotation.z = p.rz; fin.rotation.x = p.rx;
+                rocket.add(fin);
+            });
+
+            const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.6, 0.5, 32), darkMat); nozzle.position.y = -1.5;
+            
+            const flame = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2.0, 16), new THREE.MeshBasicMaterial({color: 0xfbbf24}));
+            flame.position.y = -2.5; flame.rotation.z = Math.PI; flame.name = "flame";
+            
+            const innerFlame = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.2, 16), new THREE.MeshBasicMaterial({color: 0xffffff}));
+            innerFlame.position.y = -2.1; innerFlame.rotation.z = Math.PI; innerFlame.name = "innerFlame";
+
+            rocket.add(body, nose, ring1, ring2, frame, win, nozzle, flame, innerFlame);
+            rocket.scale.set(0.7, 0.7, 0.7); 
+            rocket.position.set(0, -6, 0);
+            scene.add(rocket);
+        }
+
+        function createAstronaut() {
+            astronaut = new THREE.Group();
+            
+            const suitM = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.8, metalness: 0.1});
+            const jointM = new THREE.MeshStandardMaterial({color: 0x64748b, roughness: 0.7});
+            
+            const glass = new THREE.Mesh(new THREE.SphereGeometry(0.65, 32, 32), new THREE.MeshPhysicalMaterial({
+                color: 0x333333, transmission: 0.6, opacity: 1.0, transparent: true, roughness: 0.05, metalness: 0.2
+            })); glass.position.set(0, 0.15, 0.12);
+            
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.75, 32, 32), suitM);
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 1.2, 32), suitM); body.position.y = -1.0;
+            const pack = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), new THREE.MeshStandardMaterial({color: 0x3b82f6, roughness: 0.6})); pack.position.set(0, -0.9, -0.6);
+            const belt = new THREE.Mesh(new THREE.TorusGeometry(0.56, 0.08, 16, 32), jointM); belt.position.y = -1.5; belt.rotation.x = Math.PI / 2;
+            
+            const limbG = new THREE.CylinderGeometry(0.2, 0.18, 0.8, 32);
+            const armL = new THREE.Mesh(limbG, suitM); armL.position.set(-0.7, -0.8, 0); armL.rotation.z = Math.PI / 4;
+            const armR = new THREE.Mesh(limbG, suitM); armR.position.set(0.7, -0.8, 0); armR.rotation.z = -Math.PI / 4;
+            const legL = new THREE.Mesh(limbG, suitM); legL.position.set(-0.25, -2.0, 0);
+            const legR = new THREE.Mesh(limbG, suitM); legR.position.set(0.25, -2.0, 0);
+
+            astronaut.add(head, glass, body, pack, belt, armL, armR, legL, legR);
+            astronaut.scale.set(1.1, 1.1, 1.1);
+            astronaut.position.set(-7, 2, -8); 
+            scene.add(astronaut);
+        }
+
+        function createTextSprite(text, isCorrect) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.shadowColor = '#fcd34d'; ctx.shadowBlur = 30; ctx.fillStyle = '#fbbf24'; 
+            ctx.beginPath(); ctx.arc(128, 128, 90, 0, Math.PI * 2); ctx.fill();
+            
+            ctx.shadowBlur = 0; ctx.lineWidth = 10; ctx.strokeStyle = '#d97706'; ctx.stroke();
+            ctx.font = "bold 90px 'Fredoka One', sans-serif"; ctx.fillStyle = '#78350f'; 
+            ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(text, 128, 138);
+
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+            sprite.scale.set(3, 3, 1); sprite.userData = { value: text, isCorrect: isCorrect };
+            return sprite;
+        }
+
+        function createMeteor() {
+            const meteor = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8, 0), new THREE.MeshLambertMaterial({color: 0x78350f}));
+            meteor.position.set((Math.random() - 0.5) * 16, 12 + Math.random() * 5, 0);
+            meteor.rotation.set(Math.random(), Math.random(), Math.random());
+            meteor.userData = { speedX: (Math.random() - 0.5) * 0.05, speedY: -(0.05 + Math.random() * 0.05), rotSpeed: Math.random() * 0.05 };
+            scene.add(meteor); meteors.push(meteor);
+        }
+
+        // --- UI MENUS ---
+        function showLevel4Menu() {
+            document.getElementById('main-levels').classList.add('hidden');
+            document.getElementById('btn-lencana').classList.add('hidden');
+            document.getElementById('level4-missions').classList.remove('hidden');
+            document.getElementById('menu-desc').innerText = "Pilih Misi Komander untuk menguji kemahiran lanjutan anda!";
+        }
+
+        function hideLevel4Menu() {
+            document.getElementById('level4-missions').classList.add('hidden');
+            document.getElementById('main-levels').classList.remove('hidden');
+            document.getElementById('btn-lencana').classList.remove('hidden');
+            document.getElementById('menu-desc').innerText = "Selesaikan soalan Matematik dengan menangkap jawapan bintang yang betul!";
+        }
+
+        function showBadgesMenu() {
+            const container = document.getElementById('badges-container');
+            container.innerHTML = '';
+            
+            badgeData.forEach(b => {
+                const hasBadge = userBadges.includes(b.id);
+                // Jika ada lencana warnakan cerah, jika tiada jadikan pudar (kelabu)
+                const opacityClass = hasBadge ? 'opacity-100' : 'opacity-40 grayscale';
+                const bgClass = hasBadge ? 'bg-gradient-to-b from-yellow-500/20 to-yellow-700/40 border-yellow-500/50' : 'bg-white/5 border-white/10';
+                const textClass = hasBadge ? 'text-yellow-300' : 'text-gray-400';
+                const statusText = hasBadge ? '<div class="text-[10px] text-green-400 mt-2 uppercase font-bold bg-green-900/40 px-2 py-1 rounded-full">Dimiliki</div>' : '<div class="text-[10px] text-gray-400 mt-2 uppercase font-bold bg-gray-800/60 px-2 py-1 rounded-full">Terkunci</div>';
+                
+                container.innerHTML += `
+                    <div class="flex flex-col items-center justify-between p-3 md:p-4 rounded-2xl border-2 ${bgClass} ${opacityClass} transition-all">
+                        <div class="text-4xl md:text-5xl mb-2 drop-shadow-md">${b.icon}</div>
+                        <div class="text-xs md:text-sm font-heading ${textClass} leading-tight">${b.name}</div>
+                        ${statusText}
+                    </div>
+                `;
+            });
+
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('badges-screen').classList.remove('hidden');
+        }
+
+        function hideBadgesMenu() {
+            document.getElementById('badges-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+
+        // --- FUNGSI RESET LENCANA ---
+        function confirmResetBadges() {
+            playSound('pop');
+            document.getElementById('reset-confirm-screen').classList.remove('hidden');
+        }
+
+        function cancelResetBadges() {
+            playSound('pop');
+            document.getElementById('reset-confirm-screen').classList.add('hidden');
+        }
+
+        function executeResetBadges() {
+            playSound('pop');
+            userBadges = []; // Kosongkan senarai lencana
+            localStorage.removeItem('MisiAngkasa_Badges'); // Buang data simpanan tempatan
+            document.getElementById('reset-confirm-screen').classList.add('hidden');
+            showBadgesMenu(); // Segar semula paparan menu lencana supaya kembali "Terkunci"
+        }
+
+        // --- MATH QUESTION GENERATOR ---
+        function generateMathLogic() {
+            let qText = "", correct = 0, wrong1 = 0, wrong2 = 0, starCount = 3;
+            let attempts = 0;
+
+            do {
+                if (currentLevel === 1) {
+                    // TAHAP 1: Persediaan Prasekolah (Kiraan objek angkasa & asas nilai)
+                    const type = Math.floor(Math.random() * 3);
+                    starCount = 2; // Tahap 1 sentiasa 2 pilihan
+                    
+                    if (type === 0) {
+                        // Lebih besar / Lebih kecil
+                        if (Math.random() < 0.5) {
+                            let a = Math.floor(Math.random() * 5) + 1;
+                            correct = a + Math.floor(Math.random() * 3) + 1;
+                            qText = `Nombor yang lebih\nbesar daripada ${a}?`;
+                            wrong1 = Math.max(0, a - 1);
+                        } else {
+                            let a = Math.floor(Math.random() * 5) + 4;
+                            correct = a - (Math.floor(Math.random() * 3) + 1);
+                            qText = `Nombor yang lebih\nkecil daripada ${a}?`;
+                            wrong1 = a + 1;
+                        }
+                    } else if (type === 1) {
+                        // Lengkapkan turutan
+                        let start = Math.floor(Math.random() * 5) + 1;
+                        correct = start + 2;
+                        qText = `Lengkapkan:\n${start}, ${start+1}, _ , ${start+3}`;
+                        wrong1 = correct + 1;
+                    } else {
+                        // Kira objek bertemakan angkasa
+                        const emojis = ['🚀', '⭐', '🪐', '🌎', '🛸'];
+                        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                        correct = Math.floor(Math.random() * 5) + 1; // Kira 1 hingga 5
+                        let str = Array(correct).fill(emoji).join(' ');
+                        qText = `Kira bilangan objek:\n${str}`;
+                        wrong1 = correct === 1 ? 2 : correct + (Math.random() < 0.5 ? 1 : -1);
+                    }
+                    
+                } else if (currentLevel === 2) {
+                    // TAHAP 2: Prasekolah - Tahun 1
+                    let type2 = Math.floor(Math.random() * 3);
+                    if (type2 === 0) {
+                        let a = Math.floor(Math.random() * 5) + 1;
+                        let b = Math.floor(Math.random() * 5) + 1;
+                        correct = a + b;
+                        qText = `${a} + ${b} = ?`;
+                    } else if (type2 === 1) {
+                        let a = Math.floor(Math.random() * 5) + 5;
+                        let b = Math.floor(Math.random() * 4) + 1;
+                        correct = a - b;
+                        qText = `${a} - ${b} = ?`;
+                    } else {
+                        let a = Math.floor(Math.random() * 5) + 1;
+                        correct = Math.floor(Math.random() * 5) + 2;
+                        let sum = a + correct;
+                        qText = `${a} + _ = ${sum}`;
+                    }
+                    wrong1 = correct + 1; 
+                    wrong2 = Math.max(0, correct - 1);
+
+                } else if (currentLevel === 3) {
+                    // TAHAP 3: Tahun 1 (Penyelesaian Masalah Ringkas)
+                    let a = Math.floor(Math.random() * 10) + 8;
+                    let b = Math.floor(Math.random() * 6) + 2;
+                    if (Math.random() < 0.5) {
+                        correct = a + b;
+                        qText = `Ali ada ${a} bintang.\nDia dapat ${b} lagi.\nJumlah bintang?`;
+                    } else {
+                        correct = a - b;
+                        qText = `Roket ada ${a} tenaga.\nGuna ${b} tenaga.\nBaki tenaga?`;
+                    }
+                    wrong1 = correct + 2; 
+                    wrong2 = Math.max(1, correct - 1);
+                    
+                } else {
+                    // TAHAP 4: Tahun 1 Lanjutan (Pecahan kepada 4 Misi)
+                    let activeMission = currentMission;
+                    if (activeMission === 1) {
+                        // Misi 1: Bintang Bijak
+                        if (Math.random() < 0.5) {
+                            let a = Math.floor(Math.random() * 20) + 10;
+                            let b = Math.floor(Math.random() * 15) + 5;
+                            correct = a + b;
+                            qText = `${a} + ${b} = ?`;
+                        } else {
+                            let a = Math.floor(Math.random() * 15) + 10;
+                            correct = Math.floor(Math.random() * 12) + 5;
+                            let sum = a + correct;
+                            qText = `${a} + _ = ${sum}`;
+                        }
+                    } else if (activeMission === 2) {
+                        // Misi 2: Cabaran Meteor (Tolak lebih mencabar <= 50)
+                        if (Math.random() < 0.5) {
+                            let a = Math.floor(Math.random() * 20) + 20; // 20-39
+                            let b = Math.floor(Math.random() * 10) + 5;  // 5-14 (Kawal b lebih kecil untuk elak jawapan negatif)
+                            correct = a - b;
+                            qText = `${a} - ${b} = ?`;
+                        } else {
+                            let a = Math.floor(Math.random() * 20) + 20;
+                            correct = Math.floor(Math.random() * 15) + 5;
+                            let diff = a - correct;
+                            qText = `${a} - _ = ${diff}`;
+                        }
+                    } else if (activeMission === 3) {
+                        // Misi 3: Rahsia Planet (Soalan cerita lingkungan 50)
+                        if (Math.random() < 0.5) {
+                            let a = Math.floor(Math.random() * 15) + 15;
+                            let b = Math.floor(Math.random() * 10) + 5;
+                            correct = a + b;
+                            qText = `Ada ${a} planet biru.\nAda ${b} planet merah.\nJumlah planet?`;
+                        } else {
+                            let a = Math.floor(Math.random() * 20) + 25; // 25-44
+                            let b = Math.floor(Math.random() * 10) + 5;  // 5-14 (Kawal b lebih kecil untuk elak baki kotak jadi negatif)
+                            correct = a - b;
+                            qText = `Bawa ${a} kotak.\nTurunkan ${b}.\nBaki kotak?`;
+                        }
+                    } else {
+                        // Misi 4: Misi Komander (Campuran)
+                        let type = Math.floor(Math.random() * 3);
+                        if (type === 0) {
+                            let a = Math.floor(Math.random() * 20) + 15;
+                            let b = Math.floor(Math.random() * 10) + 5;
+                            correct = a + b;
+                            qText = `Misi 4:\n${a} + ${b} = ?`;
+                        } else if (type === 1) {
+                            let a = Math.floor(Math.random() * 30) + 20;
+                            let b = Math.floor(Math.random() * 15) + 5;
+                            correct = a - b;
+                            qText = `Misi 4:\n${a} - ${b} = ?`;
+                        } else {
+                            let a = Math.floor(Math.random() * 15) + 15;
+                            correct = Math.floor(Math.random() * 10) + 10;
+                            let sum = a + correct;
+                            qText = `Misi 4:\n${a} + _ = ${sum}`;
+                        }
+                    }
+                    wrong1 = correct + (Math.floor(Math.random() * 4) + 1); 
+                    // Guna Math.max untuk pastikan jawapan salah yang dicipta TIDAK menjadi nombor negatif
+                    wrong2 = Math.max(0, correct - (Math.floor(Math.random() * 4) + 1)); 
+                }
+            } while (qText === lastQuestionText && attempts++ < 10);
+            
+            lastQuestionText = qText;
+
+            // Pastikan pilihan jawapan berbeza (unik) dan tidak bertindih
+            let answers = [];
+            if (wrong1 === correct) wrong1++;
+            if (wrong2 === correct || wrong2 === wrong1) wrong2 += 2;
+            
+            if (starCount === 3) answers = [correct, wrong1, wrong2];
+            else answers = [correct, wrong1];
+            
+            answers.sort(() => Math.random() - 0.5);
+            return { text: qText, correctAns: correct, options: answers };
+        }
+
+        function loadQuestion() {
+            if (questionCount >= MAX_QUESTIONS) { endGame(); return; }
+
+            const qData = generateMathLogic();
+            currentAnswer = qData.correctAns;
+            isFirstTryCorrect = true; // Set penanda kembali kepada TRUE
+            
+            document.getElementById('question-text').innerText = qData.text;
+            document.getElementById('score-display').innerText = `${score}/10`;
+
+            answerStars.forEach(s => scene.remove(s)); answerStars = [];
+
+            const isMobile = window.innerWidth < 768;
+            let positionsX = qData.options.length === 2 ? 
+                (isMobile ? [-1.8, 1.8] : [-4, 4]) : 
+                (isMobile ? [-2.5, 0, 2.5] : [-5, 0, 5]);
+            
+            qData.options.forEach((opt, idx) => {
+                const star = createTextSprite(opt.toString(), opt === qData.correctAns);
+                star.position.set(positionsX[idx], 10 + Math.random() * 2, 0);
+                scene.add(star); answerStars.push(star);
+            });
+
+            // Meteor difficulty
+            if (currentLevel >= 2) {
+                let maxMeteors = currentLevel === 4 ? 4 : (currentLevel === 3 ? 3 : 2);
+                while(meteors.length < maxMeteors) createMeteor();
+            }
+        }
+
+        // --- GAME FLOW CONTROLS ---
+
+        function startGame(level, mission = 0) {
+            initAudio();
+            if (!rocket) initThree();
+            
+            currentLevel = level; 
+            currentMission = mission;
+            score = 0; 
+            questionCount = 0;
+            
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('hud-screen').classList.remove('hidden');
+            
+            if (rocket) rocket.position.set(0, -6, 0);
+            answerStars.forEach(s => scene.remove(s)); answerStars = [];
+            meteors.forEach(m => scene.remove(m)); meteors = [];
+
+            currentState = GameState.PLAYING;
+            loadQuestion(); playSound('pop');
+        }
+
+        function pauseGame() {
+            if (currentState === GameState.PLAYING) {
+                currentState = GameState.PAUSED;
+                document.getElementById('pause-screen').classList.remove('hidden');
+            }
+        }
+
+        function resumeGame() {
+            if (currentState === GameState.PAUSED) {
+                currentState = GameState.PLAYING;
+                document.getElementById('pause-screen').classList.add('hidden');
+                playSound('pop');
+            }
+        }
+
+        function quitToMenu() {
+            currentState = GameState.MENU;
+            document.getElementById('pause-screen').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('hud-screen').classList.add('hidden');
+            hideLevel4Menu();
+            document.getElementById('menu-screen').classList.remove('hidden');
+        }
+
+        function playAgain() { startGame(currentLevel, currentMission); }
+
+        function endGame() {
+            currentState = GameState.GAMEOVER;
+            document.getElementById('hud-screen').classList.add('hidden');
+            document.getElementById('gameover-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `${score}/10`;
+
+            let title = "", icon = "", msg = "", badgeId = "";
+            
+            if (currentLevel === 1) { title = "Angkasawan Roket Muda"; icon = "👨‍🚀"; badgeId = "t1"; }
+            else if (currentLevel === 2) { title = "Wira Roket Bijak"; icon = "🛸"; badgeId = "t2"; }
+            else if (currentLevel === 3) { title = "Kapten Roket Angkasa"; icon = "👑"; badgeId = "t3"; }
+            else { 
+                icon = "🚀";
+                if (currentMission === 1) { title = "Misi 1: Bintang Bijak"; icon = "🌟"; badgeId = "t4_1"; }
+                else if (currentMission === 2) { title = "Misi 2: Cabaran Meteor"; icon = "☄️"; badgeId = "t4_2"; }
+                else if (currentMission === 3) { title = "Misi 3: Rahsia Planet"; icon = "🪐"; badgeId = "t4_3"; }
+                else { title = "Misi 4: Komander"; icon = "🚀"; badgeId = "t4_4"; } 
+            }
+
+            // --- Logik penganugerahan Lencana Baru ---
+            let newBadgeEarned = false;
+            // Jika berjaya dapat markah baik (>=7) dan lencana belum dimiliki
+            if (score >= 7 && !userBadges.includes(badgeId)) {
+                userBadges.push(badgeId);
+                localStorage.setItem('MisiAngkasa_Badges', JSON.stringify(userBadges));
+                newBadgeEarned = true;
+            }
+
+            if (score === 10) msg = "Sempurna! Semua jawapan tepat.";
+            else if (score >= 7) msg = "Bagus! Teruskan usaha anda.";
+            else msg = "Pengalaman berharga! Mari berlatih lagi.";
+
+            if (newBadgeEarned) {
+                msg = "Tahniah! Anda telah memenangi Lencana baharu!\n" + msg;
+            }
+
+            document.getElementById('end-message').innerText = msg;
+            document.getElementById('badge-name').innerText = title;
+            document.getElementById('badge-icon').innerText = icon;
+            playSound('success');
+        }
+
+        // --- INTERACTION ---
+        function showFeedback(msg, isSuccess) {
+            const el = document.getElementById('feedback-msg');
+            el.innerText = msg;
+            el.className = `absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-6xl font-heading font-bold text-center drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)] z-40 animate-msg ${isSuccess ? 'text-green-400' : 'text-red-400'}`;
+            void el.offsetWidth; // trigger reflow
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 1900);
+        }
+
+        function handleCollision(star) {
+            if (star.userData.isCorrect) {
+                playSound('success');
+                if (isFirstTryCorrect) score++; // Dapat markah jika tiada kesilapan sebelumnya
+                
+                questionCount++;
+                const msgs = ["Hebat!", "Bagus!", "Tepat Sekali!", "Pintar!"];
+                showFeedback(msgs[Math.floor(Math.random() * msgs.length)], true);
+                
+                rocket.scale.set(1.2, 1.2, 1.2);
+                setTimeout(() => rocket.scale.set(0.7, 0.7, 0.7), 200);
+                loadQuestion(); 
+            } else {
+                isFirstTryCorrect = false; // Potong peluang dapat markah soalan ini
+                playSound('error'); showFeedback("Cuba lagi!", false);
+                rocket.position.y -= 2;
+                rocket.children[0].material.color.setHex(0xffaaaa);
+                setTimeout(() => { if(rocket) rocket.children[0].material.color.setHex(0xe2e8f0); }, 300);
+            }
+        }
+
+        // --- MAIN LOOP ---
+        function clampRocketPosition() {
+            const boundX = window.innerWidth < 768 ? 3.5 : 8; 
+            if (rocket.position.x > boundX) rocket.position.x = boundX;
+            if (rocket.position.x < -boundX) rocket.position.x = -boundX;
+            if (rocket.position.y > 6) rocket.position.y = 6;
+            if (rocket.position.y < -8) rocket.position.y = -8;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (currentState === GameState.PLAYING) {
+                const speed = 0.15;
+                if (input.left) rocket.position.x -= speed;
+                if (input.right) rocket.position.x += speed;
+                if (input.up) rocket.position.y += speed;
+                if (input.down) rocket.position.y -= speed;
+                clampRocketPosition();
+
+                const flame = rocket.getObjectByName("flame"); if (flame) flame.scale.y = 0.8 + Math.random() * 0.4;
+                const innerFlame = rocket.getObjectByName("innerFlame"); if (innerFlame) innerFlame.scale.y = 0.8 + Math.random() * 0.4;
+                rocket.rotation.z = Math.sin(Date.now() * 0.002) * 0.1;
+                rocket.rotation.y = Math.sin(Date.now() * 0.001) * 0.1; 
+
+                for (let i = 0; i < answerStars.length; i++) {
+                    let star = answerStars[i];
+                    star.position.y -= 0.04;
+                    star.position.x += Math.sin(Date.now() * 0.002 + i) * 0.01;
+                    if (star.position.y < -10) star.position.y = 10 + Math.random() * 2;
+
+                    if (rocket.position.distanceTo(star.position) < 1.8) {
+                        handleCollision(star);
+                        star.position.y = 15; break; 
+                    }
+                }
+
+                for (let i = 0; i < meteors.length; i++) {
+                    let meteor = meteors[i];
+                    meteor.position.x += meteor.userData.speedX; meteor.position.y += meteor.userData.speedY;
+                    meteor.rotation.x += meteor.userData.rotSpeed; meteor.rotation.y += meteor.userData.rotSpeed;
+                    if (meteor.position.y < -12) meteor.position.set((Math.random() - 0.5) * 16, 12, 0);
+
+                    if (rocket.position.distanceTo(meteor.position) < 1.5) {
+                        playSound('error'); rocket.position.y -= 1.5; meteor.position.y = 12;
+                    }
+                }
+            }
+            
+            // Animasi Sentiasa Berjalan (Menu & Main)
+            if (starLayers && starLayers.length > 0) {
+                starLayers.forEach((layer, i) => {
+                    layer.position.y -= 0.005 * (i + 1);
+                    if (layer.position.y < -30) layer.position.y = 30; 
+                    layer.material.opacity = 0.5 + 0.5 * Math.sin(Date.now() * 0.002 + i * 2);
+                });
+            }
+            if (backgroundPlanets && backgroundPlanets.length > 0) {
+                backgroundPlanets.forEach((p, i) => { p.rotation.y += 0.001 + (i * 0.0005); p.rotation.x += 0.0005; });
+            }
+            if (astronaut) {
+                astronaut.position.y += Math.sin(Date.now() * 0.002) * 0.008;
+                astronaut.rotation.y = Math.sin(Date.now() * 0.001) * 0.3;
+                astronaut.rotation.x = Math.sin(Date.now() * 0.0015) * 0.2;
+            }
+
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function onKeyDown(e) {
+            switch(e.code) {
+                case 'ArrowLeft': case 'KeyA': input.left = true; break;
+                case 'ArrowRight': case 'KeyD': input.right = true; break;
+                case 'ArrowUp': case 'KeyW': input.up = true; break;
+                case 'ArrowDown': case 'KeyS': input.down = true; break;
+                case 'Escape': pauseGame(); break;
+            }
+        }
+        function onKeyUp(e) {
+            switch(e.code) {
+                case 'ArrowLeft': case 'KeyA': input.left = false; break;
+                case 'ArrowRight': case 'KeyD': input.right = false; break;
+                case 'ArrowUp': case 'KeyW': input.up = false; break;
+                case 'ArrowDown': case 'KeyS': input.down = false; break;
+            }
+        }
+
+        // Mulakan dunia 3D serta-merta tanpa menunggu window.onload
+        initThree();
+    </script>
+</body>
+</html>
