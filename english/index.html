@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>if(!(localStorage.getItem("celikplay_games")||"").includes("english")){window.location.href="/";}</script> 
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>English First Words - Little Learners Adventure</title>
+    <!-- Tailwind CSS for rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Quicksand for a friendly, rounded look -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Base styles and utility classes */
+        body {
+            font-family: 'Quicksand', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+            overflow: hidden; /* Prevent body scrolling, handle internally */
+            background-color: #f0f9ff;
+        }
+
+        /* Animations */
+        @keyframes bounce-custom {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+        }
+        @keyframes bounce-talk {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-8px); }
+            75% { transform: translateY(-4px); }
+        }
+        @keyframes shake-custom {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        @keyframes waveHand { 
+            0% { transform: rotate( 0.0deg) } 
+            10% { transform: rotate( 14.0deg) } 
+            20% { transform: rotate(-8.0deg) } 
+            30% { transform: rotate( 14.0deg) } 
+            40% { transform: rotate(-4.0deg) } 
+            50% { transform: rotate( 10.0deg) } 
+            60% { transform: rotate( 0.0deg) } 
+            100% { transform: rotate( 0.0deg) } 
+        }
+        @keyframes fly-bird {
+            0%, 100% { transform: translate(-20px, 10px) rotate(-15deg); }
+            50% { transform: translate(20px, -20px) rotate(15deg); }
+        }
+
+        .anim-bounce { animation: bounce-custom 0.5s ease-in-out; }
+        .anim-talk { animation: bounce-talk 0.4s ease-in-out infinite; }
+        .anim-shake { animation: shake-custom 0.4s ease-in-out; }
+        .anim-pop { animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .anim-float { animation: float 3s ease-in-out infinite; }
+        .anim-fly { animation: fly-bird 1.5s ease-in-out infinite; }
+
+        @keyframes drift {
+            0% { transform: translateX(-20vw); }
+            100% { transform: translateX(120vw); }
+        }
+        .cloud-bg {
+            position: absolute;
+            opacity: 0.4;
+            animation: drift linear infinite;
+            z-index: 0;
+            pointer-events: none;
+            font-size: 5rem;
+        }
+
+        /* Custom Button Styling */
+        .game-btn {
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+        }
+        .game-btn:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+        }
+        .game-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        /* Scrollable container */
+        .app-container {
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            max-width: 768px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #e0f2fe 0%, #fae8ff 100%);
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .hide { display: none !important; }
+        
+        /* Speech Bubbles */
+        .speech-bubble-left::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #93c5fd transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+        .speech-bubble-right::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #f9a8d4 transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container" id="app">
+
+    <!-- Background Clouds -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="cloud-bg" style="top: 10%; animation-duration: 25s;">☁️</div>
+        <div class="cloud-bg" style="top: 30%; animation-duration: 35s; animation-delay: -10s; font-size: 4rem;">☁️</div>
+        <div class="cloud-bg" style="top: 70%; animation-duration: 28s; animation-delay: -5s; font-size: 6rem;">☁️</div>
+    </div>
+
+    <!-- Global Floating Music Button -->
+    <button onclick="toggleGlobalBGM(event)" id="btn-global-bgm" class="absolute top-4 right-4 z-[100] bg-white text-gray-500 rounded-full border-2 border-gray-300 shadow-md px-4 py-2 flex items-center gap-2 font-bold transition-transform active:scale-95">
+        <span id="global-bgm-icon">🔇</span> <span id="global-bgm-text" class="text-sm hidden md:inline">Music OFF</span>
+    </button>
+
+    <!-- Audio BGM Element -->
+    <audio id="bgm-audio" loop preload="auto">
+        <source src="https://opengameart.org/sites/default/files/TownTheme.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 0. START OVERLAY -->
+    <div id="screen-start" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-sky-100 bg-opacity-95 backdrop-blur-sm p-4 md:p-6 text-center">
+        <div class="relative mb-2 md:mb-6 mx-auto anim-float">
+            <!-- Added a glowing background effect and a beautiful fallback if image is missing -->
+            <img src="CP1.jpg" alt="" class="w-48 h-48 md:w-64 md:h-64 object-cover drop-shadow-2xl rounded-full border-4 border-white shadow-lg bg-white relative z-10 p-1" onerror="this.outerHTML='<div class=\'w-48 h-48 md:w-64 md:h-64 drop-shadow-2xl rounded-full border-4 border-white shadow-lg bg-white relative z-10 flex flex-col items-center justify-center\'><h1 class=\'text-4xl md:text-5xl font-extrabold text-blue-600\'>Celik<br><span class=\'text-yellow-500\'>Play</span></h1></div>'">
+            <div class="absolute inset-0 bg-yellow-300 rounded-full blur-xl opacity-50 z-0 animate-pulse"></div>
+        </div>
+        <h1 class="text-5xl md:text-8xl font-extrabold text-blue-600 mb-1 md:mb-2 drop-shadow-md transform md:scale-110 leading-tight mt-1 md:mt-2">English<br>First Words</h1>
+        <h2 class="text-xl md:text-3xl font-bold text-pink-500 mb-6 md:mb-10 drop-shadow-sm mt-2 md:mt-4">Little Learners Adventure</h2>
+        <button id="btn-init" class="game-btn bg-yellow-400 hover:bg-yellow-300 text-yellow-900 font-bold text-2xl md:text-3xl py-3 md:py-4 px-8 md:px-10 rounded-full border-4 border-yellow-500 shadow-lg">
+            Let's Play! 🚀
+        </button>
+        <p class="mt-4 mb-24 md:mb-16 text-gray-500 font-semibold max-w-sm text-sm md:text-base px-4">
+            Tap the button to start the adventure and turn on the sound!<br>
+            <span class="text-xs opacity-75">(Tekan butang untuk mula bermain dan hidupkan bunyi!)</span>
+        </p>
+        
+        <!-- Start Screen Footer -->
+        <div class="absolute bottom-2 md:bottom-4 left-0 w-full text-center px-2 pointer-events-none">
+            <p class="text-[10px] md:text-[12px] text-gray-600 font-semibold leading-tight opacity-80">
+                © 2026 CelikPlay. Hak Cipta Terpelihara.<br>
+                Dikendalikan oleh Nurwan Trading.<br>
+                Untuk kegunaan keluarga pembeli sahaja. Dilarang mengedar atau menjual semula tanpa kebenaran.
+            </p>
+        </div>
+    </div>
+
+    <!-- 1. HOME SCREEN -->
+    <div id="screen-home" class="hide flex-1 flex flex-col p-4 w-full h-full overflow-y-auto pb-10 relative z-10">
+        
+        <!-- CelikPlay Branding at Top of Menu -->
+        <div class="flex justify-center mt-12 mb-[-1rem] relative z-20">
+            <img src="CP1.jpg" alt="" class="w-16 h-16 object-cover rounded-full shadow-lg border-2 border-white bg-white p-1 relative z-20" onerror="this.outerHTML='<div class=\'w-16 h-16 shadow-lg border-2 border-white bg-white rounded-full p-1 relative z-20 flex items-center justify-center\'><h1 class=\'text-[11px] font-extrabold text-blue-600 leading-none text-center\'>Celik<br><span class=\'text-yellow-500\'>Play</span></h1></div>'">
+        </div>
+
+        <!-- Header -->
+        <div class="flex justify-between items-center bg-white bg-opacity-70 rounded-3xl p-4 shadow-sm mb-6 relative z-20 mt-6 md:mt-8">
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="openProfileModal()">
+                    <div id="display-avatar" class="text-5xl bg-blue-100 p-2 rounded-full border-4 border-blue-200 group-hover:scale-110 transition-transform">🦁</div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-blue-800 leading-tight">Hello, <span id="display-name">Learner</span>! <span class="text-sm text-gray-400 ml-1">✏️</span></h1>
+                        <p class="text-pink-600 font-bold">Listen, Learn, Play!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 md:gap-3">
+                <!-- Stickers Button -->
+                <button onclick="showStickers()" class="bg-pink-100 border-2 border-pink-300 rounded-2xl p-2 px-3 flex flex-col items-center justify-center hover:animate-pulse cursor-pointer transition-transform active:scale-95 shadow-sm">
+                    <span class="text-2xl md:text-3xl mb-1">🖼️</span>
+                    <span class="text-xs font-extrabold text-pink-700 whitespace-nowrap">Stickers</span>
+                </button>
+                <!-- Existing Stars/Trophy Button -->
+                <button onclick="openTrophyModal()" class="bg-yellow-100 border-2 border-yellow-300 rounded-2xl p-2 px-3 flex flex-col items-center justify-center hover:animate-pulse cursor-pointer transition-transform active:scale-95 shadow-sm">
+                    <span class="text-2xl md:text-3xl mb-1">⭐</span>
+                    <span id="total-stars" class="text-sm md:text-base font-extrabold text-yellow-700">0</span>
+                </button>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-center text-gray-700 mb-4 relative z-20">Choose an Adventure</h2>
+
+        <!-- Worlds Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 content-start relative z-20">
+            <button onclick="showFirstWordsMenu()" class="game-btn anim-float bg-gradient-to-b from-green-300 to-green-400 rounded-3xl p-6 border-4 border-green-500 flex flex-col items-center gap-2 group relative overflow-hidden" style="animation-delay: 0s;">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-6xl">🍎</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">My First Words</h3>
+            </button>
+            <button onclick="showAnimalMenu()" class="game-btn anim-float bg-gradient-to-b from-orange-300 to-orange-400 rounded-3xl p-6 border-4 border-orange-500 flex flex-col items-center gap-2 group relative overflow-hidden" style="animation-delay: 0.2s;">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-6xl">🐶</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">Animal World</h3>
+            </button>
+            <button onclick="showMatchMenu()" class="game-btn anim-float bg-gradient-to-b from-purple-300 to-purple-400 rounded-3xl p-6 border-4 border-purple-500 flex flex-col items-center gap-2 group relative overflow-hidden" style="animation-delay: 0.4s;">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-6xl">🧩</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">Let's Match!</h3>
+            </button>
+            <button onclick="showSpellingMenu()" class="game-btn anim-float bg-gradient-to-b from-rose-300 to-rose-400 rounded-3xl p-6 border-4 border-rose-500 flex flex-col items-center gap-2 group relative overflow-hidden" style="animation-delay: 0.5s;">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-6xl">🔤</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">Fun Spelling</h3>
+            </button>
+            <button onclick="showSpeakMenu()" class="game-btn anim-float sm:col-span-2 bg-gradient-to-b from-cyan-300 to-cyan-400 rounded-3xl p-6 border-4 border-cyan-500 flex flex-col items-center gap-2 group relative overflow-hidden" style="animation-delay: 0.6s;">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-6xl">💬</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">Let's Speak!</h3>
+            </button>
+        </div>
+
+        <!-- Parents Button -->
+        <div class="mt-6 flex justify-center relative z-20 pb-4">
+            <button onclick="openParentsGate()" class="game-btn bg-white hover:bg-gray-100 text-gray-700 font-bold py-2 px-6 rounded-full border-4 border-gray-300 flex items-center gap-2 text-lg shadow-sm">
+                <span>🔒</span> Parents Area
+            </button>
+        </div>
+        
+        <!-- Home Screen Footer -->
+        <div class="mt-auto pt-8 pb-2 text-center relative z-20 w-full pointer-events-none">
+            <p class="text-[11px] md:text-[12px] text-gray-500 font-semibold leading-tight opacity-80">
+                © 2026 CelikPlay. Hak Cipta Terpelihara.<br>
+                Dikendalikan oleh Nurwan Trading.<br>
+                Untuk kegunaan keluarga pembeli sahaja. Dilarang mengedar atau menjual semula tanpa kebenaran.
+            </p>
+        </div>
+    </div>
+
+    <!-- 1.2 MY FIRST WORDS SUBMENU -->
+    <div id="screen-first-words-menu" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goHome()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-green-600 mb-8 mt-2 drop-shadow-sm anim-bounce">My First Words<br><span class="text-xl md:text-2xl text-green-400">Choose Your Level</span></h2>
+        
+        <div class="flex flex-col items-center gap-6 w-full max-w-md mx-auto z-20 flex-1">
+            <button onclick="startGame(1, 1)" class="game-btn w-full bg-gradient-to-r from-teal-300 to-teal-400 rounded-3xl p-6 border-4 border-teal-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🏠</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 1: House</h3>
+                    <p class="text-teal-100 font-semibold text-sm">Bed, Chair, Cup...</p>
+                </div>
+            </button>
+            <button onclick="startGame(1, 2)" class="game-btn w-full bg-gradient-to-r from-red-300 to-red-400 rounded-3xl p-6 border-4 border-red-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🍞</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 2: Food</h3>
+                    <p class="text-red-100 font-semibold text-sm">Bread, Milk, Rice...</p>
+                </div>
+            </button>
+            <button onclick="startGame(1, 3)" class="game-btn w-full bg-gradient-to-r from-indigo-300 to-indigo-400 rounded-3xl p-6 border-4 border-indigo-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">👕</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 3: Wear</h3>
+                    <p class="text-indigo-100 font-semibold text-sm">Shirt, Shoes, Hat...</p>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 1.5 ANIMAL WORLD SUBMENU -->
+    <div id="screen-animal-menu" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goHome()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-orange-600 mb-8 mt-2 drop-shadow-sm anim-bounce">Animal World<br><span class="text-xl md:text-2xl text-orange-400">Choose Your Level</span></h2>
+        
+        <div class="flex flex-col items-center gap-6 w-full max-w-md mx-auto z-20 flex-1">
+            <button onclick="startGame(2, 1)" class="game-btn w-full bg-gradient-to-r from-pink-300 to-pink-400 rounded-3xl p-6 border-4 border-pink-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🐱</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 1: Pets</h3>
+                    <p class="text-pink-100 font-semibold text-sm">Cat, Dog, Rabbit...</p>
+                </div>
+            </button>
+            <button onclick="startGame(2, 2)" class="game-btn w-full bg-gradient-to-r from-amber-300 to-amber-400 rounded-3xl p-6 border-4 border-amber-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🐮</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 2: Farm</h3>
+                    <p class="text-amber-100 font-semibold text-sm">Cow, Duck, Sheep...</p>
+                </div>
+            </button>
+            <button onclick="startGame(2, 3)" class="game-btn w-full bg-gradient-to-r from-emerald-300 to-emerald-400 rounded-3xl p-6 border-4 border-emerald-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🦁</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 3: Wild</h3>
+                    <p class="text-emerald-100 font-semibold text-sm">Lion, Zebra, Tiger...</p>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 1.6 LET'S MATCH SUBMENU -->
+    <div id="screen-match-menu" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goHome()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-purple-600 mb-8 mt-2 drop-shadow-sm anim-bounce">Let's Match!<br><span class="text-xl md:text-2xl text-purple-400">Choose Your Adventure</span></h2>
+        
+        <div class="flex flex-col items-center gap-6 w-full max-w-md mx-auto z-20 flex-1">
+            <button onclick="startGame(3, 1)" class="game-btn w-full bg-gradient-to-r from-purple-300 to-purple-400 rounded-3xl p-6 border-4 border-purple-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🎨</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 1: Colors & Shapes</h3>
+                    <p class="text-purple-100 font-semibold text-sm">Red, Blue, Circle...</p>
+                </div>
+            </button>
+            <button onclick="startGame(3, 2)" class="game-btn w-full bg-gradient-to-r from-blue-300 to-blue-400 rounded-3xl p-6 border-4 border-blue-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🐘</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 2: Big & Small</h3>
+                    <p class="text-blue-100 font-semibold text-sm">Opposites matching</p>
+                </div>
+            </button>
+            <button onclick="startGame(3, 3)" class="game-btn w-full bg-gradient-to-r from-pink-300 to-pink-400 rounded-3xl p-6 border-4 border-pink-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🏃</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 3: Action Match</h3>
+                    <p class="text-pink-100 font-semibold text-sm">Run, Fly, Sleep...</p>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 1.7 FUN SPELLING SUBMENU -->
+    <div id="screen-spelling-menu" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goHome()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-rose-600 mb-8 mt-2 drop-shadow-sm anim-bounce">Fun Spelling<br><span class="text-xl md:text-2xl text-rose-400">Choose Your Level</span></h2>
+        
+        <div class="flex flex-col items-center gap-6 w-full max-w-md mx-auto z-20 flex-1">
+            <button onclick="startGame(5, 1)" class="game-btn w-full bg-gradient-to-r from-fuchsia-300 to-fuchsia-400 rounded-3xl p-6 border-4 border-fuchsia-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🐱</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 1: 3-Letter</h3>
+                    <p class="text-fuchsia-100 font-semibold text-sm">Cat, Dog, Cup, Hat...</p>
+                </div>
+            </button>
+            <button onclick="startGame(5, 2)" class="game-btn w-full bg-gradient-to-r from-violet-300 to-violet-400 rounded-3xl p-6 border-4 border-violet-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🐟</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 2: 4-Letter</h3>
+                    <p class="text-violet-100 font-semibold text-sm">Milk, Fish, Bird...</p>
+                </div>
+            </button>
+            <button onclick="startGame(5, 3)" class="game-btn w-full bg-gradient-to-r from-cyan-300 to-cyan-400 rounded-3xl p-6 border-4 border-cyan-500 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-5xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🍎</div>
+                <div class="text-left">
+                    <h3 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">Level 3: 5-Letter</h3>
+                    <p class="text-cyan-100 font-semibold text-sm">Apple, Train, Clock...</p>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 1.8 LET'S SPEAK SUBMENU -->
+    <div id="screen-speak-menu" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goHome()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-cyan-600 mb-6 mt-2 drop-shadow-sm anim-bounce">Let's Speak!<br><span class="text-xl md:text-2xl text-cyan-400">Phonics & Talking</span></h2>
+        
+        <div class="flex flex-col items-center gap-4 w-full max-w-md mx-auto z-20 flex-1">
+            <button onclick="showPhonicsGroups()" class="game-btn w-full bg-gradient-to-r from-cyan-400 to-cyan-500 rounded-3xl p-5 border-4 border-cyan-600 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-4xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">🗣️</div>
+                <div class="text-left">
+                    <h3 class="text-xl md:text-2xl font-bold text-white drop-shadow-md">Level 1: Phonics & Words</h3>
+                    <p class="text-cyan-100 font-semibold text-xs md:text-sm">Listen & say sounds (10 questions)</p>
+                </div>
+            </button>
+            <button onclick="startGame(4, 2)" class="game-btn w-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-3xl p-5 border-4 border-blue-600 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-4xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">😊</div>
+                <div class="text-left">
+                    <h3 class="text-xl md:text-2xl font-bold text-white drop-shadow-md">Level 2: Happy Phrases</h3>
+                    <p class="text-blue-100 font-semibold text-xs md:text-sm">Practice short sentences (10 questions)</p>
+                </div>
+            </button>
+            <button onclick="startGame(4, 3)" class="game-btn w-full bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-3xl p-5 border-4 border-indigo-600 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-4xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">👦👧</div>
+                <div class="text-left">
+                    <h3 class="text-xl md:text-2xl font-bold text-white drop-shadow-md">Level 3: Fun Conversations</h3>
+                    <p class="text-indigo-100 font-semibold text-xs md:text-sm">Chat with friends (10 questions)</p>
+                </div>
+            </button>
+            <button onclick="startGame(4, 4)" class="game-btn w-full bg-gradient-to-r from-violet-400 to-violet-500 rounded-3xl p-5 border-4 border-violet-600 flex justify-start items-center gap-4 group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-4xl bg-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-sm">💬</div>
+                <div class="text-left">
+                    <h3 class="text-xl md:text-2xl font-bold text-white drop-shadow-md">Level 4: Chat & Choose</h3>
+                    <p class="text-violet-100 font-semibold text-xs md:text-sm">Pick the right answer (10 questions)</p>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- 1.9 PHONICS GROUPS SUBMENU -->
+    <div id="screen-phonics-groups" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="showSpeakMenu()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-cyan-600 mb-8 mt-2 drop-shadow-sm anim-bounce">Phonics & Words<br><span class="text-xl md:text-2xl text-cyan-400">Choose Group</span></h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md mx-auto z-20 flex-1 content-start">
+            <button onclick="startGame(4, 11)" class="game-btn bg-gradient-to-br from-red-300 to-red-400 rounded-3xl p-6 border-4 border-red-500 flex flex-col items-center justify-center gap-2 relative overflow-hidden group">
+                <div class="text-5xl group-hover:scale-110 transition-transform">🍎</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">A - G</h3>
+            </button>
+            <button onclick="startGame(4, 12)" class="game-btn bg-gradient-to-br from-yellow-300 to-yellow-400 rounded-3xl p-6 border-4 border-yellow-500 flex flex-col items-center justify-center gap-2 relative overflow-hidden group">
+                <div class="text-5xl group-hover:scale-110 transition-transform">🦁</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">H - N</h3>
+            </button>
+            <button onclick="startGame(4, 13)" class="game-btn bg-gradient-to-br from-green-300 to-green-400 rounded-3xl p-6 border-4 border-green-500 flex flex-col items-center justify-center gap-2 relative overflow-hidden group">
+                <div class="text-5xl group-hover:scale-110 transition-transform">☀️</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">O - U</h3>
+            </button>
+            <button onclick="startGame(4, 14)" class="game-btn bg-gradient-to-br from-purple-300 to-purple-400 rounded-3xl p-6 border-4 border-purple-500 flex flex-col items-center justify-center gap-2 relative overflow-hidden group">
+                <div class="text-5xl group-hover:scale-110 transition-transform">🦓</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">V - Z</h3>
+            </button>
+        </div>
+    </div>
+
+    <!-- 2. GAME SCREEN -->
+    <div id="screen-game" class="hide flex-1 flex flex-col w-full h-full relative overflow-y-auto">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goBackToMenu()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+            <div id="session-progress" class="flex flex-wrap justify-center gap-1 bg-white bg-opacity-70 p-2 rounded-2xl max-w-[200px] md:max-w-[300px]">
+                <!-- Stars injected via JS -->
+            </div>
+            <button onclick="replayAudio()" class="game-btn bg-blue-400 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-blue-500 z-30">
+                🔊
+            </button>
+        </div>
+
+        <!-- Question Area -->
+        <div class="flex-1 flex flex-col items-center justify-start md:justify-center p-4 w-full max-w-lg mx-auto relative z-20 pb-10">
+            <div id="question-prompt" class="mb-6 flex flex-col items-center justify-center text-center w-full min-h-[150px]">
+                <!-- Injected via JS -->
+            </div>
+            <div id="options-container" class="w-full flex flex-col gap-4">
+                <!-- Buttons injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. SUMMARY SCREEN -->
+    <div id="screen-summary" class="hide flex-1 flex flex-col items-center justify-center p-6 pt-20 text-center w-full h-full absolute inset-0 z-40 bg-white">
+        <h2 id="summary-title" class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-2">Well Done!</h2>
+        <p class="text-xl text-gray-600 font-bold mb-6">You finished the adventure!</p>
+        <div class="text-8xl mb-6 anim-float" id="summary-mascot">🏆</div>
+        
+        <div class="bg-yellow-100 border-4 border-yellow-400 rounded-3xl p-6 mb-8 w-full max-w-xs md:max-w-md">
+            <p class="text-lg font-bold text-yellow-800 mb-2">Stars Earned</p>
+            <div class="flex justify-center flex-wrap gap-1 text-2xl md:text-3xl mb-2" id="summary-stars-earned"></div>
+            <p class="text-gray-500 font-bold text-xl"><span id="summary-score-text">10</span> / <span id="summary-total-text">10</span> Correct</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 w-full max-w-xs md:max-w-xl">
+            <button onclick="startGame(currentWorld, currentSubLevel)" class="game-btn bg-green-400 hover:bg-green-300 text-white font-extrabold text-lg md:text-xl py-4 rounded-2xl border-b-4 border-green-600">
+                Play Again 🔄
+            </button>
+            <button onclick="goBackToMenu()" class="game-btn bg-blue-400 hover:bg-blue-300 text-white font-extrabold text-lg md:text-xl py-4 rounded-2xl border-b-4 border-blue-600">
+                Level Menu 🔙
+            </button>
+            <button onclick="goHome()" class="game-btn bg-gray-200 hover:bg-gray-100 text-gray-700 font-extrabold text-lg md:text-xl py-4 rounded-2xl border-b-4 border-gray-400">
+                Home 🏠
+            </button>
+        </div>
+    </div>
+
+    <!-- 3.5 STICKER BOOK SCREEN -->
+    <div id="screen-stickers" class="hide flex-1 flex flex-col p-4 w-full h-full relative overflow-y-auto pb-10 z-10">
+        <!-- Top Bar -->
+        <div class="flex justify-between items-center p-4 mt-12 md:mt-14 relative z-20">
+            <button onclick="goHome()" class="game-btn bg-white text-gray-700 w-12 h-12 rounded-full flex items-center justify-center text-2xl border-2 border-gray-200 z-30">
+                🔙
+            </button>
+            <div class="bg-yellow-100 border-2 border-yellow-300 rounded-2xl p-2 px-4 flex items-center justify-center gap-2 shadow-sm">
+                <span class="text-xl">⭐</span>
+                <span id="sticker-stars-display" class="text-xl font-extrabold text-yellow-700">0</span>
+            </div>
+        </div>
+        
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center text-pink-500 mb-8 mt-2 drop-shadow-sm anim-bounce">My Sticker Book<br><span class="text-xl md:text-2xl text-pink-400">Collect Them All!</span></h2>
+        
+        <div id="sticker-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-2xl mx-auto z-20 flex-1 content-start">
+            <!-- Stickers injected via JS -->
+        </div>
+    </div>
+
+    <!-- 4. PROFILE MODAL -->
+    <div id="modal-profile" class="hide absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-all relative">
+            <h2 class="text-2xl font-bold text-blue-600 mb-4 text-center">Edit Profile</h2>
+            <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2">Your Name:</label>
+                <input type="text" id="input-name" class="w-full border-4 border-blue-200 rounded-xl p-3 text-xl font-bold text-center focus:outline-none focus:border-blue-400" maxlength="12" placeholder="Learner">
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 font-bold mb-2">Choose Avatar:</label>
+                <div class="grid grid-cols-4 gap-2" id="avatar-grid"></div>
+            </div>
+            <button onclick="saveProfile()" class="game-btn w-full bg-green-400 hover:bg-green-300 text-white font-bold text-xl py-3 rounded-2xl border-b-4 border-green-600 mb-3">Save</button>
+            <button onclick="closeProfileModal()" class="w-full text-gray-500 hover:text-gray-700 font-bold py-2 bg-gray-100 rounded-xl">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 5. TROPHY MODAL -->
+    <div id="modal-trophy" class="hide absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-all text-center">
+            <h2 class="text-3xl font-extrabold text-yellow-500 mb-2">My Trophies</h2>
+            <p class="text-gray-500 font-bold mb-6">Collect stars to unlock!</p>
+            
+            <div class="flex flex-col gap-4 mb-6">
+                <div id="trophy-10" class="flex items-center bg-orange-50 p-3 rounded-2xl border-2 border-orange-200 grayscale opacity-60 transition-all duration-500">
+                    <div class="text-5xl mr-4">🐻</div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-orange-800">Bronze Bear</h3>
+                        <p class="text-sm text-orange-600">10 Stars</p>
+                    </div>
+                </div>
+                <div id="trophy-25" class="flex items-center bg-gray-100 p-3 rounded-2xl border-2 border-gray-300 grayscale opacity-60 transition-all duration-500">
+                    <div class="text-5xl mr-4">🦊</div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-gray-700">Silver Fox</h3>
+                        <p class="text-sm text-gray-500">25 Stars</p>
+                    </div>
+                </div>
+                <div id="trophy-50" class="flex items-center bg-yellow-50 p-3 rounded-2xl border-2 border-yellow-300 grayscale opacity-60 transition-all duration-500">
+                    <div class="text-5xl mr-4 drop-shadow-md">🦁</div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-yellow-700">Gold Lion</h3>
+                        <p class="text-sm text-yellow-600">50 Stars</p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeTrophyModal()" class="game-btn w-full bg-blue-400 hover:bg-blue-300 text-white font-bold text-xl py-3 rounded-2xl border-b-4 border-blue-600">Awesome!</button>
+        </div>
+    </div>
+
+    <!-- 6. PARENTS GATE MODAL -->
+    <div id="modal-parents-gate" class="hide absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center">
+            <div class="text-4xl mb-4">🔒</div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Parents Only</h2>
+            <p class="text-gray-500 mb-6">To access settings, please answer:</p>
+            <div class="text-3xl font-extrabold text-blue-600 mb-6" id="math-question">5 + 4 = ?</div>
+            
+            <div class="grid grid-cols-3 gap-3 mb-6" id="math-options"></div>
+            <button onclick="closeParentsGate()" class="w-full text-gray-500 hover:text-gray-700 font-bold py-2 bg-gray-100 rounded-xl">Cancel</button>
+        </div>
+    </div>
+
+    <!-- 7. PARENTS DASHBOARD MODAL -->
+    <div id="modal-parents-dash" class="hide absolute inset-0 z-[60] flex items-center justify-center bg-gray-100 bg-opacity-95 p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-blue-800">Learning Progress</h2>
+                <button onclick="closeParentsDash()" class="text-3xl text-gray-400 hover:text-red-500">&times;</button>
+            </div>
+            <div class="overflow-y-auto flex-1 pr-2 space-y-4" id="stats-container">
+                <!-- Stats injected via JS -->
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="closeParentsDash()" class="flex-1 text-gray-600 hover:text-gray-800 font-bold py-3 bg-gray-100 rounded-xl border-2 border-gray-200 transition-colors">Tutup ❌</button>
+                <button onclick="openResetConfirm()" id="btn-dash-reset" class="flex-1 text-red-500 hover:text-red-700 font-bold py-3 bg-red-50 rounded-xl border-2 border-red-200 transition-colors">Reset Progress</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.5 RESET CONFIRMATION MODAL -->
+    <div id="modal-reset-confirm" class="hide absolute inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center anim-pop">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h2 class="text-2xl font-bold text-red-600 mb-1">Reset All Data?</h2>
+            <h2 class="text-xl font-bold text-red-500 mb-3">Padam Semua Data?</h2>
+            <p class="text-gray-600 text-sm font-bold mb-2">This will clear all learning progress, stars, and stickers. This action cannot be undone.</p>
+            <p class="text-gray-500 text-xs font-semibold mb-6">Ini akan memadam semua kemajuan belajar, bintang dan pelekat. Tindakan ini tidak boleh dikembalikan.</p>
+            
+            <div class="flex gap-3">
+                <button onclick="closeResetConfirm()" class="flex-1 text-gray-600 hover:text-gray-800 font-bold py-3 bg-gray-100 rounded-xl border-2 border-gray-200 active:scale-95 transition-transform">Cancel / Batal</button>
+                <button onclick="executeFullReset()" class="flex-1 text-white hover:bg-red-500 font-bold py-3 bg-red-400 rounded-xl border-b-4 border-red-600 active:scale-95 transition-transform">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. CUSTOM ALERT MODAL -->
+    <div id="modal-alert" class="hide absolute inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center anim-pop">
+            <div id="alert-emoji" class="text-6xl mb-4 anim-bounce">🌟</div>
+            <h2 id="alert-title" class="text-2xl font-bold text-gray-800 mb-2">Notice</h2>
+            <p id="alert-message" class="text-gray-600 font-semibold mb-6">Keep playing to get more stars!</p>
+            <button onclick="document.getElementById('modal-alert').classList.add('hide')" class="game-btn w-full bg-blue-400 hover:bg-blue-300 text-white font-bold text-xl py-3 rounded-2xl border-b-4 border-blue-600">Okay!</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* =========================================================================
+       DATA BANKS (Content for the 4 Worlds) - EXACTLY 20 PER WORLD
+       ========================================================================= */
+    
+    const wordsPool = [
+        { word: "apple", emoji: "🍎" }, { word: "banana", emoji: "🍌" }, 
+        { word: "orange", emoji: "🍊" }, { word: "grapes", emoji: "🍇" },
+        { word: "red", emoji: "🔴" }, { word: "blue", emoji: "🔵" },
+        { word: "yellow", emoji: "🟡" }, { word: "green", emoji: "🟢" },
+        { word: "circle", emoji: "⭕" }, { word: "square", emoji: "⏹️" },
+        { word: "star", emoji: "⭐" }, { word: "one", emoji: "1️⃣" },
+        { word: "two", emoji: "2️⃣" }, { word: "three", emoji: "3️⃣" },
+        { word: "book", emoji: "📖" }, { word: "bag", emoji: "🎒" },
+        { word: "cup", emoji: "☕" }, { word: "ball", emoji: "⚽" },
+        { word: "pencil", emoji: "✏️" }, { word: "shoe", emoji: "👞" }
+    ];
+
+    const housePool = [
+        { word: "bed", emoji: "🛏️" }, { word: "chair", emoji: "🪑" },
+        { word: "cup", emoji: "☕" }, { word: "clock", emoji: "⏰" },
+        { word: "key", emoji: "🔑" }
+    ];
+
+    const foodPool = [
+        { word: "bread", emoji: "🍞" }, { word: "milk", emoji: "🥛" },
+        { word: "rice", emoji: "🍚" }, { word: "apple", emoji: "🍎" },
+        { word: "egg", emoji: "🥚" }
+    ];
+
+    const wearPool = [
+        { word: "shirt", emoji: "👕" }, { word: "shoes", emoji: "👞" },
+        { word: "hat", emoji: "🧢" }, { word: "socks", emoji: "🧦" },
+        { word: "bag", emoji: "🎒" }
+    ];
+
+    const animalsPool = [
+        { word: "lion", emoji: "🦁" }, { word: "tiger", emoji: "🐯" },
+        { word: "monkey", emoji: "🐒" }, { word: "bird", emoji: "🐦" },
+        { word: "fish", emoji: "🐟" }, { word: "frog", emoji: "🐸" },
+        { word: "cow", emoji: "🐮" }, { word: "pig", emoji: "🐷" },
+        { word: "sheep", emoji: "🐑" }, { word: "horse", emoji: "🐴" },
+        { word: "cat", emoji: "🐱" }, { word: "dog", emoji: "🐶" },
+        { word: "rabbit", emoji: "🐰" }, { word: "elephant", emoji: "🐘" },
+        { word: "duck", emoji: "🦆" }, { word: "butterfly", emoji: "🦋" },
+        { word: "bear", emoji: "🐻" }, { word: "panda", emoji: "🐼" },
+        { word: "penguin", emoji: "🐧" }, { word: "owl", emoji: "🦉" }
+    ];
+
+    const petsPool = [
+        { word: "cat", emoji: "🐱" }, { word: "dog", emoji: "🐶" },
+        { word: "rabbit", emoji: "🐰" }, { word: "fish", emoji: "🐟" },
+        { word: "bird", emoji: "🐦" }
+    ];
+
+    const farmPool = [
+        { word: "cow", emoji: "🐮" }, { word: "duck", emoji: "🦆" },
+        { word: "chicken", emoji: "🐔" }, { word: "sheep", emoji: "🐑" },
+        { word: "horse", emoji: "🐴" }
+    ];
+
+    const wildPool = [
+        { word: "lion", emoji: "🦁" }, { word: "elephant", emoji: "🐘" },
+        { word: "monkey", emoji: "🐒" }, { word: "zebra", emoji: "🦓" },
+        { word: "tiger", emoji: "🐯" }
+    ];
+
+    const matchL1Pool = [
+        { prompt: "Red", audio: "Red", correctEmoji: "🍎", wrongEmojis: ["🥦", "🍇"] },
+        { prompt: "Blue", audio: "Blue", correctEmoji: "👖", wrongEmojis: ["🎒", "🧦"] },
+        { prompt: "Yellow", audio: "Yellow", correctEmoji: "☀️", wrongEmojis: ["🚗", "☁️"] },
+        { prompt: "Green", audio: "Green", correctEmoji: "🌳", wrongEmojis: ["🍓", "🍆"] },
+        { prompt: "Circle", audio: "Circle", correctEmoji: "🟠", wrongEmojis: ["⏹️", "🔺"] }
+    ];
+
+    const matchL2Pool = [
+        { prompt: "Big", audio: "Big", correctEmoji: "🐘", wrongEmojis: ["🐜", "🐭"] },
+        { prompt: "Small", audio: "Small", correctEmoji: "🐭", wrongEmojis: ["🐘", "🐻"] },
+        { prompt: "Tall", audio: "Tall", correctEmoji: "🦒", wrongEmojis: ["🐢", "🐛"] },
+        { prompt: "Short", audio: "Short", correctEmoji: "🐛", wrongEmojis: ["🦒", "🌳"] },
+        { prompt: "Fast", audio: "Fast", correctEmoji: "🐆", wrongEmojis: ["🐢", "🐌"] }
+    ];
+
+    const matchL3Pool = [
+        { prompt: "Run", audio: "Run", correctEmoji: "🏃", wrongEmojis: ["🧍", "😴"] },
+        { prompt: "Fly", audio: "Fly", correctEmoji: "🦅", wrongEmojis: ["🐍", "🐟"] },
+        { prompt: "Swim", audio: "Swim", correctEmoji: "🏊", wrongEmojis: ["🚶", "🧗"] },
+        { prompt: "Sleep", audio: "Sleep", correctEmoji: "😴", wrongEmojis: ["🏃", "💃"] },
+        { prompt: "Eat", audio: "Eat", correctEmoji: "🍽️", wrongEmojis: ["📖", "✍️"] }
+    ];
+
+    const spellL1Pool = [
+        { word: "CAT", prompt: "C _ T", missing: "A", wrong: ["E", "I"], emoji: "🐱" },
+        { word: "DOG", prompt: "D _ G", missing: "O", wrong: ["A", "E"], emoji: "🐶" },
+        { word: "CUP", prompt: "C _ P", missing: "U", wrong: ["O", "I"], emoji: "☕" },
+        { word: "HAT", prompt: "H _ T", missing: "A", wrong: ["E", "O"], emoji: "🧢" },
+        { word: "BAG", prompt: "B _ G", missing: "A", wrong: ["U", "E"], emoji: "🎒" }
+    ];
+
+    const spellL2Pool = [
+        { word: "MILK", prompt: "M _ L K", missing: "I", wrong: ["A", "E"], emoji: "🥛" },
+        { word: "FISH", prompt: "F _ S H", missing: "I", wrong: ["A", "O"], emoji: "🐟" },
+        { word: "BIRD", prompt: "B _ R D", missing: "I", wrong: ["E", "A"], emoji: "🐦" },
+        { word: "FROG", prompt: "F _ O G", missing: "R", wrong: ["L", "P"], emoji: "🐸" },
+        { word: "BALL", prompt: "B _ L L", missing: "A", wrong: ["O", "E"], emoji: "⚽" }
+    ];
+
+    const spellL3Pool = [
+        { word: "APPLE", prompt: "A _ P L E", missing: "P", wrong: ["X", "M"], emoji: "🍎" },
+        { word: "TRAIN", prompt: "T R _ I N", missing: "A", wrong: ["E", "O"], emoji: "🚂" },
+        { word: "CLOCK", prompt: "C L O _ K", missing: "C", wrong: ["S", "T"], emoji: "⏰" },
+        { word: "SHIRT", prompt: "S H _ R T", missing: "I", wrong: ["A", "E"], emoji: "👕" },
+        { word: "ZEBRA", prompt: "Z E _ R A", missing: "B", wrong: ["D", "P"], emoji: "🦓" }
+    ];
+
+    // World 4: Phonics & Speech Practice Contexts
+    const phonicsAG = [
+        { text: "A is for Apple", sound: "A... for Apple", emoji: "🍎" },
+        { text: "B is for Ball", sound: "B... for Ball", emoji: "⚽" },
+        { text: "C is for Cat", sound: "C... for Cat", emoji: "🐱" },
+        { text: "D is for Dog", sound: "D... for Dog", emoji: "🐶" },
+        { text: "E is for Egg", sound: "E... for Egg", emoji: "🥚" },
+        { text: "F is for Fish", sound: "F... for Fish", emoji: "🐟" },
+        { text: "G is for Goat", sound: "G... for Goat", emoji: "🐐" }
+    ];
+
+    const phonicsHN = [
+        { text: "H is for Hat", sound: "H... for Hat", emoji: "🎩" },
+        { text: "I is for Ink", sound: "I... for Ink", emoji: `<svg width="100" height="120" viewBox="0 -10 100 130" class="drop-shadow-md mx-auto anim-float">
+            <path d="M 50 35 Q 70 -10 90 -5 Q 95 15 50 35 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+            <path d="M 50 35 L 85 0" stroke="#94a3b8" stroke-width="2"/>
+            <rect x="38" y="30" width="24" height="20" fill="#475569" rx="3"/>
+            <rect x="34" y="25" width="32" height="10" fill="#334155" rx="4"/>
+            <path d="M 20 110 Q 15 110 15 100 L 25 50 Q 25 40 40 40 L 60 40 Q 75 40 75 50 L 85 100 Q 85 110 80 110 Z" fill="#1e3a8a"/>
+            <path d="M 23 105 Q 20 105 20 98 L 28 52 Q 28 45 40 45 L 60 45 Q 72 45 72 52 L 80 98 Q 80 105 77 105 Z" fill="#3b82f6" opacity="0.6"/>
+            <rect x="30" y="65" width="40" height="25" fill="#ffffff" rx="4"/>
+            <text x="50" y="83" font-size="14" font-weight="900" font-family="sans-serif" fill="#1e3a8a" text-anchor="middle">INK</text>
+            <path d="M 15 115 Q 10 125 20 125 Q 30 125 25 115 Q 20 105 15 115 Z" fill="#1e3a8a"/>
+        </svg>` },
+        { text: "J is for Jam", sound: "J... for Jam", emoji: `<svg width="100" height="120" viewBox="0 0 100 120" class="drop-shadow-md mx-auto anim-float">
+            <path d="M 20 40 L 80 40 C 90 40, 95 50, 90 110 C 88 115, 80 120, 50 120 C 20 120, 12 115, 10 110 C 5 50, 10 40, 20 40 Z" fill="#fca5a5" stroke="#b91c1c" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M 15 65 Q 50 75 85 65 L 88 108 C 85 115, 75 117, 50 117 C 25 117, 15 115, 12 108 Z" fill="#ef4444"/>
+            <rect x="25" y="10" width="50" height="25" rx="5" fill="#f97316" stroke="#c2410c" stroke-width="4"/>
+            <line x1="35" y1="10" x2="35" y2="35" stroke="#c2410c" stroke-width="3"/>
+            <line x1="45" y1="10" x2="45" y2="35" stroke="#c2410c" stroke-width="3"/>
+            <line x1="55" y1="10" x2="55" y2="35" stroke="#c2410c" stroke-width="3"/>
+            <line x1="65" y1="10" x2="65" y2="35" stroke="#c2410c" stroke-width="3"/>
+            <rect x="30" y="70" width="40" height="25" rx="4" fill="#ffffff" stroke="#fca5a5" stroke-width="2"/>
+            <text x="50" y="88" font-size="16" font-weight="900" font-family="sans-serif" fill="#b91c1c" text-anchor="middle">JAM</text>
+        </svg>` },
+        { text: "K is for Key", sound: "K... for Key", emoji: "🔑" },
+        { text: "L is for Lion", sound: "L... for Lion", emoji: "🦁" },
+        { text: "M is for Mat", sound: "M... for Mat", emoji: `<svg width="140" height="100" viewBox="0 0 140 100" class="drop-shadow-md mx-auto anim-float">
+            <g stroke="#d97706" stroke-width="3" stroke-linecap="round">
+                <line x1="15" y1="20" x2="5" y2="20"/><line x1="15" y1="30" x2="5" y2="30"/>
+                <line x1="15" y1="40" x2="5" y2="40"/><line x1="15" y1="50" x2="5" y2="50"/>
+                <line x1="15" y1="60" x2="5" y2="60"/><line x1="15" y1="70" x2="5" y2="70"/>
+                <line x1="15" y1="80" x2="5" y2="80"/>
+            </g>
+            <g stroke="#d97706" stroke-width="3" stroke-linecap="round">
+                <line x1="125" y1="20" x2="135" y2="20"/><line x1="125" y1="30" x2="135" y2="30"/>
+                <line x1="125" y1="40" x2="135" y2="40"/><line x1="125" y1="50" x2="135" y2="50"/>
+                <line x1="125" y1="60" x2="135" y2="60"/><line x1="125" y1="70" x2="135" y2="70"/>
+                <line x1="125" y1="80" x2="135" y2="80"/>
+            </g>
+            <rect x="15" y="10" width="110" height="80" rx="8" fill="#fde047" stroke="#b45309" stroke-width="4"/>
+            <rect x="25" y="14" width="15" height="72" fill="#ef4444"/>
+            <rect x="50" y="14" width="15" height="72" fill="#3b82f6"/>
+            <rect x="75" y="14" width="15" height="72" fill="#22c55e"/>
+            <rect x="100" y="14" width="15" height="72" fill="#a855f7"/>
+            <rect x="20" y="10" width="100" height="80" rx="5" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.5"/>
+        </svg>` },
+        { text: "N is for Net", sound: "N... for Net", emoji: "🥅" }
+    ];
+
+    const phonicsOU = [
+        { text: "O is for Orange", sound: "O... for Orange", emoji: "🍊" },
+        { text: "P is for Pen", sound: "P... for Pen", emoji: "🖊️" },
+        { text: "Q is for Queen", sound: "Q... for Queen", emoji: "👸" },
+        { text: "R is for Ruler", sound: "R... for Ruler", emoji: "📏" },
+        { text: "S is for Sun", sound: "S... for Sun", emoji: "☀️" },
+        { text: "T is for Tree", sound: "T... for Tree", emoji: "🌳" },
+        { text: "U is for Umbrella", sound: "U... for Umbrella", emoji: "☂️" }
+    ];
+
+    const phonicsVZ = [
+        { text: "V is for Van", sound: "V... for Van", emoji: "🚐" },
+        { text: "W is for Window", sound: "W... for Window", emoji: `<svg width="100" height="100" viewBox="0 0 100 100" class="drop-shadow-md mx-auto"><rect x="10" y="10" width="80" height="80" fill="#7dd3fc" stroke="#64748b" stroke-width="6" rx="5"/><line x1="50" y1="10" x2="50" y2="90" stroke="#64748b" stroke-width="6"/><line x1="10" y1="50" x2="90" y2="50" stroke="#64748b" stroke-width="6"/><path d="M 10 10 Q 30 10 30 50 Q 30 90 10 90 Z" fill="#f472b6"/><path d="M 90 10 Q 70 10 70 50 Q 70 90 90 90 Z" fill="#f472b6"/><circle cx="80" cy="30" r="15" fill="#fef08a"/></svg>` },
+        { text: "X is for X-ray", sound: "X... for X-ray", emoji: `<svg width="120" height="140" viewBox="0 0 120 140" class="drop-shadow-md mx-auto"><rect width="120" height="140" rx="10" fill="#1e293b" stroke="#cbd5e1" stroke-width="4"/><g stroke="#bae6fd" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="40" y="25" width="40" height="35" rx="15" fill="#bae6fd" stroke="none"/><rect x="50" y="55" width="20" height="10" rx="3" fill="#bae6fd" stroke="none"/><circle cx="50" cy="40" r="6" fill="#1e293b" stroke="none"/><circle cx="70" cy="40" r="6" fill="#1e293b" stroke="none"/><polygon points="60,45 57,50 63,50" fill="#1e293b" stroke="none"/><line x1="52" y1="60" x2="68" y2="60" stroke="#1e293b" stroke-width="2"/><line x1="56" y1="58" x2="56" y2="62" stroke="#1e293b" stroke-width="2"/><line x1="60" y1="58" x2="60" y2="62" stroke="#1e293b" stroke-width="2"/><line x1="64" y1="58" x2="64" y2="62" stroke="#1e293b" stroke-width="2"/><line x1="60" y1="70" x2="60" y2="125" stroke-width="8" stroke-dasharray="6,4"/><path d="M 60 80 C 40 75 35 90 35 95" stroke-width="5"/><path d="M 60 80 C 80 75 85 90 85 95" stroke-width="5"/><path d="M 60 95 C 35 95 30 110 30 110" stroke-width="5"/><path d="M 60 95 C 85 95 90 110 90 110" stroke-width="5"/><path d="M 60 110 C 40 110 35 125 35 125" stroke-width="5"/><path d="M 60 110 C 80 110 85 125 85 125" stroke-width="5"/><line x1="38" y1="75" x2="25" y2="115" stroke-width="6"/><line x1="82" y1="75" x2="95" y2="115" stroke-width="6"/></g></svg>` },
+        { text: "Y is for Yo-yo", sound: "Y... for Yo-yo", emoji: `<svg width="100" height="120" viewBox="0 0 100 120" class="drop-shadow-md mx-auto"><g><animateTransform attributeName="transform" type="translate" values="0,10; 0,60; 0,10" dur="1.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1" keyTimes="0; 0.5; 1"/><circle cx="50" cy="30" r="25" fill="#ef4444" stroke="#b91c1c" stroke-width="4"/><circle cx="50" cy="30" r="10" fill="#f87171"/><path d="M 50 30 L 50 -100" stroke="#e2e8f0" stroke-width="3"/></g><ellipse cx="50" cy="5" rx="8" ry="4" fill="none" stroke="#94a3b8" stroke-width="3"/></svg>` },
+        { text: "Z is for Zebra", sound: "Z... for Zebra", emoji: "🦓" }
+    ];
+
+    const speakL2Pool = [
+        { text: "I love cats!", sound: "I love cats!", emoji: `<div class="relative w-48 h-40 mx-auto flex items-end justify-center pb-4"><div class="text-6xl anim-bounce" style="transform: scaleX(-1);">🐈</div><div class="text-7xl anim-bounce" style="z-index: 2; animation-delay: 0.2s; margin: 0 -10px;">🐈</div><div class="text-6xl anim-bounce" style="animation-delay: 0.4s;">🐱</div><div class="absolute inset-0 pointer-events-none"><div class="absolute text-3xl anim-float" style="top: 10%; left: 15%;">❤️</div><div class="absolute text-4xl anim-float" style="top: -5%; right: 25%; animation-delay: 0.5s;">💖</div><div class="absolute text-2xl anim-float" style="top: 25%; right: 5%; animation-delay: 1s;">💕</div></div></div>` },
+        { text: "Red apple!", sound: "Red apple!", emoji: "🍎🔴" },
+        { text: "Hello friend!", sound: "Hello friend!", emoji: "👋😊" },
+        { text: "Good morning!", sound: "Good morning!", emoji: "🌅" },
+        { text: "Thank you!", sound: "Thank you!", emoji: `<svg width="150" height="150" viewBox="0 0 150 150" class="drop-shadow-lg mx-auto"><g class="anim-float"><text x="15" y="60" font-size="24">⭐</text><text x="110" y="40" font-size="28">❤️</text><text x="100" y="90" font-size="20">✨</text></g><rect x="75" y="90" width="10" height="30" fill="#1d4ed8" stroke="#000" stroke-width="2.5" rx="3"/><rect x="63" y="92" width="10" height="30" fill="#3b82f6" stroke="#000" stroke-width="2.5" rx="3"/><path d="M 75 120 L 92 120 A 5 5 0 0 1 87 127 L 75 127 Z" fill="#b91c1c" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/><path d="M 63 122 L 80 122 A 5 5 0 0 1 75 129 L 63 129 Z" fill="#ef4444" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/><g><animateTransform attributeName="transform" type="rotate" values="0 70 95; 25 70 95; 0 70 95" dur="2.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0; 0.5; 1" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" /><circle cx="96" cy="68" r="5" fill="#fdba74" stroke="#000" stroke-width="2.5"/><path d="M 50 55 Q 85 45 85 95 L 55 95 Q 45 75 50 55 Z" fill="#facc15" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/><circle cx="70" cy="35" r="22" fill="#fed7aa" stroke="#000" stroke-width="2.5"/><path d="M 50 35 C 45 10, 85 10, 92 30 C 95 38, 85 30, 75 25 C 65 20, 50 25, 48 45 Z" fill="#451a03" stroke="#000" stroke-width="2.5" stroke-linejoin="round"/><path d="M 48 40 Q 52 55 60 50" fill="none" stroke="#451a03" stroke-width="6" stroke-linecap="round"/><circle cx="60" cy="38" r="4" fill="#fed7aa" stroke="#000" stroke-width="2"/><path d="M 78 32 Q 83 35 88 32" stroke="#000" stroke-width="2.5" stroke-linecap="round" fill="none"/><circle cx="80" cy="40" r="5" fill="#fca5a5" opacity="0.6"/><path d="M 85 45 Q 88 47 90 44" stroke="#000" stroke-width="2.5" stroke-linecap="round" fill="none"/><path d="M 65 58 Q 80 75 90 72" stroke="#000" stroke-width="14" stroke-linecap="round" fill="none"/><path d="M 65 58 Q 80 75 90 72" stroke="#facc15" stroke-width="9" stroke-linecap="round" fill="none"/><circle cx="90" cy="72" r="6" fill="#fed7aa" stroke="#000" stroke-width="2.5"/></g></svg>` },
+        { text: "It is big!", sound: "It is big!", emoji: "🐘" },
+        { text: "Let's play!", sound: "Let's play!", emoji: "⚽🏃" },
+        { text: "I can run!", sound: "I can run!", emoji: "🏃💨" },
+        { text: "Yummy food!", sound: "Yummy food!", emoji: "😋🍽️" },
+        { text: "See you later!", sound: "See you later!", emoji: "👋🚶" }
+    ];
+
+    const speakL3Pool = [
+        { boy: "Hello! What is your name?", girl: "My name is Aisyah.", visual: `<svg width="80" height="80" viewBox="0 0 100 100" class="anim-shake"><text x="50" y="80" font-size="70" text-anchor="middle">👋</text></svg>` },
+        { boy: "How old are you?", girl: "I am six years old.", visual: `<div class="text-7xl anim-bounce">🎂</div>` },
+        { boy: "How are you today?", girl: "I am fine, thank you.", visual: `<div class="text-7xl anim-float">😊</div>` },
+        { boy: "Where do you live?", girl: "I live in Malaysia.", visual: `<div class="text-7xl">🇲🇾</div>` },
+        { boy: "Nice to meet you!", girl: "Nice to meet you too!", visual: `<div class="text-7xl anim-shake">🤝</div>` },
+        { boy: "Do you like apples?", girl: "Yes, I like apples.", visual: `<div class="flex justify-center items-end anim-bounce"><div class="text-5xl">🍎</div><div class="text-7xl mx-2">🍎</div><div class="text-5xl">🍎</div></div>` },
+        { boy: "What is your favorite color?", girl: "My favorite color is pink.", visual: `<div class="w-24 h-24 bg-pink-400 rounded-full border-4 border-pink-500 shadow-md anim-float mx-auto"></div>` },
+        { boy: "What are you doing?", girl: "I am reading a book.", visual: `<svg width="80" height="80" viewBox="0 0 100 100" class="anim-float"><text x="50" y="80" font-size="70" text-anchor="middle">📖</text></svg>` },
+        { boy: "Where are you going?", girl: "I am going to the park.", visual: `<svg width="80" height="80" viewBox="0 0 100 100" class="anim-float"><text x="50" y="80" font-size="70" text-anchor="middle">🏞️</text></svg>` },
+        { boy: "Can I borrow your pencil, please?", girl: "Yes, here you go.", visual: `<div class="text-7xl anim-bounce">✏️</div>` }
+    ];
+
+    const speakL4Pool = [
+        { boy: "Can you jump really high?", visual: `<svg width="120" height="150" viewBox="0 0 120 150" class="drop-shadow-md mx-auto"><ellipse cx="60" cy="140" rx="35" ry="8" fill="#cbd5e1"><animate attributeName="rx" values="35; 15; 35" dur="1s" repeatCount="indefinite" /><animate attributeName="opacity" values="1; 0.2; 1" dur="1s" repeatCount="indefinite" /></ellipse><g><animateTransform attributeName="transform" type="translate" values="0,0; 0,-60; 0,0" dur="1s" repeatCount="indefinite" calcMode="spline" keyTimes="0; 0.5; 1" keySplines="0.4 0 0.2 1; 0.4 0 0.2 1" /><path d="M 50 85 Q 30 70 35 45" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M 70 85 Q 90 70 85 45" stroke="#fbbf24" stroke-width="6" stroke-linecap="round" fill="none"/><line x1="50" y1="115" x2="45" y2="135" stroke="#fbbf24" stroke-width="6" stroke-linecap="round"/><line x1="70" y1="115" x2="75" y2="135" stroke="#fbbf24" stroke-width="6" stroke-linecap="round"/><rect x="35" y="132" width="16" height="10" rx="5" fill="#f43f5e"/><rect x="69" y="132" width="16" height="10" rx="5" fill="#f43f5e"/><path d="M 45 75 L 75 75 L 85 115 L 35 115 Z" fill="#ec4899" stroke="#be185d" stroke-width="2" stroke-linejoin="round"/><text x="60" y="77" font-size="45" text-anchor="middle">👧</text></g></svg>`, correct: "Yes, I can !", wrong: ["Yes, I can't !", "Yes, it can !"] },
+        { boy: "What time is it?", visual: `<svg width="100" height="100" viewBox="0 0 120 120" class="drop-shadow-md"><rect x="15" y="50" width="90" height="60" fill="#fca5a5" rx="5"/><polygon points="10,50 60,20 110,50" fill="#b91c1c" stroke-linejoin="round"/><rect x="50" y="80" width="20" height="30" fill="#78350f" rx="2"/><rect x="25" y="60" width="70" height="16" fill="#ffffff" rx="4"/><text x="60" y="72" font-size="11" font-family="sans-serif" font-weight="900" fill="#1e3a8a" text-anchor="middle">SCHOOL</text></svg>`, correct: "It is time for school.", wrong: ["I am eating.", "It is yellow."] },
+        { boy: "Are you hungry?", visual: `<div class="relative w-32 h-32 mx-auto flex items-center justify-center"><div class="text-7xl absolute left-0 bottom-2 anim-shake" style="transform-origin: bottom center;">🙅‍♂️</div><div class="text-5xl absolute right-2 top-2 opacity-60">🍔</div><div class="absolute right-0 top-0 text-red-500 font-extrabold anim-pop" style="font-size: 4rem; line-height: 1;">❌</div></div>`, correct: "No, I'm not", wrong: ["No, it isn't", "Yes, I'm not"] },
+        { boy: "Where is the little cat?", visual: `<svg width="100" height="100" viewBox="0 0 120 120" class="drop-shadow-md"><rect x="10" y="40" width="100" height="10" fill="#92400e" rx="3"/><rect x="20" y="50" width="10" height="50" fill="#92400e" rx="2"/><rect x="90" y="50" width="10" height="50" fill="#92400e" rx="2"/><text x="60" y="95" font-size="50" text-anchor="middle">🐈</text></svg>`, correct: "Under the table.", wrong: ["In the sky.", "I have a dog."] },
+        { boy: "Do you like playing football?", visual: "⚽", correct: "Yes, it is fun!", wrong: ["No, it is red.", "I am six."] },
+        { boy: "What is in your bag?", visual: `<svg width="120" height="120" viewBox="0 0 120 120" class="drop-shadow-md mx-auto"><g><animateTransform attributeName="transform" type="translate" values="0,40; 0,-5; 0,40" dur="2s" repeatCount="indefinite" /><rect x="35" y="40" width="50" height="60" fill="#3b82f6" rx="4"/><rect x="40" y="45" width="40" height="50" fill="#ffffff" rx="2"/><line x1="45" y1="55" x2="75" y2="55" stroke="#9ca3af" stroke-width="4" stroke-linecap="round"/><line x1="45" y1="65" x2="75" y2="65" stroke="#9ca3af" stroke-width="4" stroke-linecap="round"/></g><path d="M 20 60 Q 20 40 60 40 Q 100 40 100 60 L 100 100 Q 100 110 90 110 L 30 110 Q 20 110 20 100 Z" fill="#f43f5e"/><path d="M 20 60 Q 60 70 100 60 L 100 70 Q 60 80 20 70 Z" fill="#e11d48"/><rect x="35" y="75" width="50" height="30" fill="#be123c" rx="5"/></svg>`, correct: "There is a book.", wrong: ["I am fine.", "Thank you."] },
+        { boy: "Who is that?", visual: `<div class="bg-indigo-100 rounded-full w-24 h-24 flex items-center justify-center border-4 border-indigo-300 drop-shadow-md mx-auto"><span class="text-6xl">👨‍🦱</span></div>`, correct: "He is my friend.", wrong: ["It is an apple.", "Yes, I can."] },
+        { boy: "Can you see the bird?", visual: `<svg width="100" height="100" viewBox="0 0 120 120" class="drop-shadow-md anim-fly"><polygon points="30,60 10,45 10,75" fill="#60a5fa"/><path d="M 55 50 Q 70 15 90 20 Q 75 40 65 50 Z" fill="#2563eb"><animateTransform attributeName="transform" type="rotate" values="0 55 50; -30 55 50; 0 55 50" dur="0.3s" repeatCount="indefinite"/></path><ellipse cx="60" cy="60" rx="35" ry="25" fill="#3b82f6"/><polygon points="85,55 110,60 85,65" fill="#fbbf24"/><circle cx="80" cy="50" r="4" fill="#1e3a8a"/><path d="M 50 55 Q 30 0 70 0 Q 65 35 65 55 Z" fill="#93c5fd"><animateTransform attributeName="transform" type="rotate" values="0 50 55; 50 50 55; 0 50 55" dur="0.3s" repeatCount="indefinite"/></path></svg>`, correct: "Yes, it is flying.", wrong: ["I am jumping.", "No, it is a fish."] },
+        { boy: "Do you want some milk?", visual: "🥛", correct: "Yes, please.", wrong: ["It is a pencil.", "I am walking."] },
+        { boy: "What is the sky?", visual: `<svg width="100" height="100" viewBox="0 0 120 120" class="drop-shadow-md"><rect width="120" height="120" rx="20" fill="#bae6fd"/><text x="35" y="65" font-size="45" class="anim-float">☀️</text><text x="75" y="50" font-size="40" class="anim-float" style="animation-delay: -1s">☁️</text><text x="15" y="90" font-size="35" class="anim-float" style="animation-delay: -2s">☁️</text></svg>`, correct: "It is blue and big.", wrong: ["I like cats.", "It is under the table."] }
+    ];
+
+    const positiveFeedback = ["Brilliant!", "Well done!", "Excellent listening!", "Superb!", "Great job!"];
+    const negativeFeedback = ["Good try! Let's look again.", "Almost there! Keep trying.", "You're learning! Try one more time."];
+
+    /* =========================================================================
+       AUDIO SYSTEM (Speech Synthesis)
+       ========================================================================= */
+    const AudioSys = {
+        synth: window.speechSynthesis,
+        voice: null,
+        initialized: false,
+        lastUtterance: null,
+        convoTimeout: null,
+
+        init: function() {
+            if (this.initialized) return;
+            const setVoice = () => {
+                const voices = this.synth.getVoices();
+                this.voice = voices.find(v => v.lang === 'en-GB' || v.lang === 'en_GB') || voices.find(v => v.lang.startsWith('en')) || voices[0];
+            };
+            setVoice();
+            if (this.synth.onvoiceschanged !== undefined) this.synth.onvoiceschanged = setVoice;
+            this.speak(" ", true); 
+            this.initialized = true;
+        },
+
+        speak: function(text, silent = false, customRate = 0.9, pitch = 1.1, onEndCallback = null) {
+            this.stop(); 
+            if (!this.synth) return;
+
+            // Tambah sedikit delay (50ms) supaya sistem enjin audio peranti sempat 'clear' dan tidak jem
+            setTimeout(() => {
+                if (!isGameActive) return;
+                const utterance = new SpeechSynthesisUtterance(text);
+                if (this.voice) utterance.voice = this.voice;
+                utterance.lang = 'en-GB';
+                utterance.rate = customRate; 
+                utterance.pitch = pitch; 
+                if (silent) utterance.volume = 0;
+                if (onEndCallback) utterance.onend = onEndCallback;
+
+                this.lastUtterance = utterance;
+                this.synth.speak(utterance);
+            }, 50);
+        },
+
+        playConversation: function(boyText, girlText, customRate = 0.8) {
+            this.stop();
+            if (!this.synth) return;
+
+            const boyChar = document.getElementById('boy-char');
+            const girlChar = document.getElementById('girl-char');
+
+            // Tambah delay (50ms) sebelum mula berbual jika audio lama (dari jawapan salah) baru sahaja dimatikan
+            setTimeout(() => {
+                if (!isGameActive) return;
+                const boyUtterance = new SpeechSynthesisUtterance(boyText);
+                if (this.voice) boyUtterance.voice = this.voice;
+                boyUtterance.lang = 'en-GB';
+                boyUtterance.rate = customRate;
+                boyUtterance.pitch = 1.0; 
+                
+                boyUtterance.onstart = () => { if (boyChar) boyChar.classList.add('anim-talk'); };
+                boyUtterance.onend = () => {
+                    if (boyChar) boyChar.classList.remove('anim-talk');
+                    if (!isGameActive) return; 
+
+                    this.convoTimeout = setTimeout(() => {
+                        if (!isGameActive) return; 
+                        const girlUtterance = new SpeechSynthesisUtterance(girlText);
+                        if (this.voice) girlUtterance.voice = this.voice;
+                        girlUtterance.lang = 'en-GB';
+                        girlUtterance.rate = customRate;
+                        girlUtterance.pitch = 1.3; 
+
+                        girlUtterance.onstart = () => { if (girlChar) girlChar.classList.add('anim-talk'); };
+                        girlUtterance.onend = () => { if (girlChar) girlChar.classList.remove('anim-talk'); };
+
+                        this.synth.speak(girlUtterance);
+                    }, 500); 
+                };
+                
+                this.synth.speak(boyUtterance);
+            }, 50);
+        },
+
+        stop: function() {
+            if (this.convoTimeout) {
+                clearTimeout(this.convoTimeout);
+                this.convoTimeout = null;
+            }
+            if (this.synth) this.synth.cancel(); 
+            const boyChar = document.getElementById('boy-char');
+            const girlChar = document.getElementById('girl-char');
+            if (boyChar) boyChar.classList.remove('anim-talk');
+            if (girlChar) girlChar.classList.remove('anim-talk');
+        }
+    };
+
+    /* =========================================================================
+       STICKER BOOK SYSTEM
+       ========================================================================= */
+    const stickerData = [
+        { name: "Super Lion", emoji: "🦁🦸", cost: 10, bg: "bg-orange-100" },
+        { name: "Space Cat", emoji: "🐱🚀", cost: 15, bg: "bg-blue-100" },
+        { name: "Dancing Boy", emoji: "👦🕺", cost: 20, bg: "bg-green-100" },
+        { name: "Yummy Apple", emoji: "🍎😋", cost: 25, bg: "bg-red-100" },
+        { name: "Cool Elephant", emoji: "🐘🕶️", cost: 30, bg: "bg-indigo-100" },
+        { name: "Star Catcher Wizard", emoji: "🧙‍♂️⭐", cost: 40, bg: "bg-purple-100" }
+    ];
+    let unlockedStickers = JSON.parse(localStorage.getItem('ela_stickers')) || [false, false, false, false, false, false];
+
+    function showStickers() {
+        showScreen('screen-stickers');
+        renderStickers();
+    }
+
+    function renderStickers() {
+        document.getElementById('sticker-stars-display').innerText = totalStars;
+        const grid = document.getElementById('sticker-grid');
+        grid.innerHTML = '';
+        stickerData.forEach((st, idx) => {
+            const isUnlocked = unlockedStickers[idx];
+            const btn = document.createElement('button');
+            btn.className = `game-btn rounded-3xl p-4 border-4 flex flex-col items-center justify-center gap-2 group relative overflow-hidden transition-all duration-300 min-h-[140px] ${isUnlocked ? st.bg + ' border-white shadow-md' : 'bg-gray-100 border-gray-300'}`;
+            
+            if (isUnlocked) {
+                btn.innerHTML = `
+                    <div class="text-5xl md:text-6xl drop-shadow-md anim-float" style="animation-delay: ${idx * 0.1}s">${st.emoji}</div>
+                    <h3 class="text-xs md:text-sm font-bold text-gray-800 text-center mt-2 leading-tight">${st.name}</h3>
+                `;
+                btn.onclick = () => showCustomAlert("You already unlocked this cute sticker!", "Sticker Owned", "💖");
+            } else {
+                btn.innerHTML = `
+                    <div class="text-5xl md:text-6xl grayscale opacity-20 blur-[2px] select-none pointer-events-none">${st.emoji}</div>
+                    <div class="flex items-center gap-1 bg-white px-3 py-1 rounded-full border-2 border-yellow-300 mt-2 shadow-sm">
+                        <span>⭐</span> <span class="font-bold text-yellow-600">${st.cost}</span>
+                    </div>
+                `;
+                btn.onclick = () => attemptUnlock(idx);
+            }
+            grid.appendChild(btn);
+        });
+    }
+
+    function attemptUnlock(idx) {
+        const st = stickerData[idx];
+        if (totalStars >= st.cost) {
+            totalStars -= st.cost;
+            unlockedStickers[idx] = true;
+            saveStars(); 
+            localStorage.setItem('ela_stickers', JSON.stringify(unlockedStickers));
+            renderStickers();
+            
+            AudioSys.speak("Yay! New sticker unlocked!");
+            showCustomAlert("You unlocked the " + st.name + " sticker! 🎉", "Awesome!", "🎊");
+        } else {
+            AudioSys.speak("Keep playing to get more stars!");
+            showCustomAlert("You need " + (st.cost - totalStars) + " more stars to unlock this sticker. Keep playing!", "Need More Stars!", "🌟");
+        }
+    }
+
+    function showCustomAlert(msg, title = "Oops!", emoji = "🌟") {
+        document.getElementById('alert-title').innerText = title;
+        document.getElementById('alert-message').innerText = msg;
+        document.getElementById('alert-emoji').innerText = emoji;
+        document.getElementById('modal-alert').classList.remove('hide');
+    }
+
+    /* =========================================================================
+       STATE MANAGEMENT & STATS
+       ========================================================================= */
+    let totalStars = parseInt(localStorage.getItem('ela_totalStars')) || 0;
+    let userName = localStorage.getItem('ela_userName') || 'Learner';
+    let userAvatar = localStorage.getItem('ela_userAvatar') || '🦁';
+    
+    let defaultStats = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+    let learnStats = JSON.parse(localStorage.getItem('ela_stats')) || defaultStats;
+    if (!learnStats[5]) learnStats[5] = {}; // Fallback for older saves
+
+    let isGameActive = false; 
+    let nextQuestionTimeout = null; 
+
+    let currentWorld = 0;
+    let currentSubLevel = 0;
+    let sessionQuestions = [];
+    let currentQuestionIndex = 0;
+    let currentQuestionAttempts = 0; 
+    let sessionScore = 0;
+    let currentAudioPrompt = "";
+    let isBgmPlaying = false;
+
+    const avatarList = ["🦁", "🐶", "🐱", "🐻", "🐰", "🦊", "🐼", "🐯"];
+    let tempAvatar = userAvatar;
+
+    function saveStars() {
+        localStorage.setItem('ela_totalStars', totalStars.toString());
+        document.getElementById('total-stars').innerText = totalStars;
+    }
+
+    function updateProfileUI() {
+        document.getElementById('display-name').innerText = userName;
+        document.getElementById('display-avatar').innerText = userAvatar;
+    }
+
+    function renderAvatars() {
+        const grid = document.getElementById('avatar-grid');
+        grid.innerHTML = '';
+        avatarList.forEach(av => {
+            const btn = document.createElement('button');
+            btn.className = `text-4xl p-2 rounded-xl border-4 transition-transform active:scale-95 ${av === tempAvatar ? 'border-blue-500 bg-blue-100 scale-110' : 'border-transparent bg-gray-50 hover:bg-gray-200'}`;
+            btn.innerText = av;
+            btn.onclick = () => { tempAvatar = av; renderAvatars(); };
+            grid.appendChild(btn);
+        });
+    }
+
+    function openProfileModal() {
+        document.getElementById('input-name').value = userName;
+        tempAvatar = userAvatar;
+        renderAvatars();
+        document.getElementById('modal-profile').classList.remove('hide');
+    }
+    function closeProfileModal() { document.getElementById('modal-profile').classList.add('hide'); }
+
+    function saveProfile() {
+        let newName = document.getElementById('input-name').value.trim();
+        if (newName) userName = newName;
+        userAvatar = tempAvatar;
+        localStorage.setItem('ela_userName', userName);
+        localStorage.setItem('ela_userAvatar', userAvatar);
+        updateProfileUI();
+        closeProfileModal();
+    }
+
+    function shuffleArray(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId];
+            array[curId] = array[randId];
+            array[randId] = tmp;
+        }
+        return array;
+    }
+    function getRandomElements(arr, n) { return shuffleArray([...arr]).slice(0, n); }
+
+    /* =========================================================================
+       DOM MANIPULATION & NAVIGATION
+       ========================================================================= */
+    function showScreen(screenId) {
+        ['screen-start', 'screen-home', 'screen-first-words-menu', 'screen-animal-menu', 'screen-match-menu', 'screen-spelling-menu', 'screen-speak-menu', 'screen-phonics-groups', 'screen-game', 'screen-summary', 'screen-stickers'].forEach(id => {
+            document.getElementById(id).classList.add('hide');
+        });
+        document.getElementById(screenId).classList.remove('hide');
+        document.getElementById(screenId).classList.add('anim-pop');
+        setTimeout(() => document.getElementById(screenId).classList.remove('anim-pop'), 500);
+    }
+
+    function goHome() {
+        isGameActive = false; 
+        if (nextQuestionTimeout) { clearTimeout(nextQuestionTimeout); nextQuestionTimeout = null; }
+        AudioSys.stop();
+        window.speechSynthesis.cancel(); 
+        document.getElementById('total-stars').innerText = totalStars;
+        showScreen('screen-home');
+    }
+
+    function showFirstWordsMenu() {
+        showScreen('screen-first-words-menu');
+    }
+
+    function showAnimalMenu() {
+        showScreen('screen-animal-menu');
+    }
+
+    function showMatchMenu() {
+        showScreen('screen-match-menu');
+    }
+
+    function showSpellingMenu() {
+        showScreen('screen-spelling-menu');
+    }
+
+    function showSpeakMenu() {
+        showScreen('screen-speak-menu');
+    }
+
+    function showPhonicsGroups() {
+        showScreen('screen-phonics-groups');
+    }
+
+    function goBackToMenu() {
+        isGameActive = false; 
+        if (nextQuestionTimeout) { clearTimeout(nextQuestionTimeout); nextQuestionTimeout = null; }
+        AudioSys.stop();
+        window.speechSynthesis.cancel(); 
+        
+        if (currentWorld === 1) showFirstWordsMenu();
+        else if (currentWorld === 2) showAnimalMenu();
+        else if (currentWorld === 3) showMatchMenu();
+        else if (currentWorld === 5) showSpellingMenu();
+        else if (currentWorld === 4) {
+            if (currentSubLevel >= 11 && currentSubLevel <= 14) showPhonicsGroups();
+            else showSpeakMenu();
+        }
+        else goHome(); 
+    }
+
+    /* =========================================================================
+       GAME LOGIC
+       ========================================================================= */
+    document.getElementById('btn-init').addEventListener('click', () => {
+        AudioSys.init();
+        goHome();
+    });
+
+    function startGame(worldId, subLevel = 0) {
+        isGameActive = true; 
+        currentWorld = worldId;
+        currentSubLevel = subLevel;
+        currentQuestionIndex = 0;
+        sessionScore = 0;
+        sessionQuestions = generateQuestions(worldId, subLevel);
+        
+        // Auto pause BGM when game starts so audio isn't distracted
+        if (isBgmPlaying) {
+            pauseBGM();
+        }
+
+        showScreen('screen-game');
+        loadQuestion();
+    }
+
+    function generateQuestions(worldId, subLevel = 0) {
+        let qs = [];
+        let pool = [];
+        
+        if (worldId === 1) {
+            if (subLevel === 1) pool = housePool;
+            else if (subLevel === 2) pool = foodPool;
+            else if (subLevel === 3) pool = wearPool;
+            else pool = wordsPool;
+        }
+        else if (worldId === 2) {
+            if (subLevel === 1) pool = petsPool;
+            else if (subLevel === 2) pool = farmPool;
+            else if (subLevel === 3) pool = wildPool;
+            else pool = animalsPool;
+        }
+        
+        if (worldId === 1 || worldId === 2) {
+            let qCount = ((worldId === 1 || worldId === 2) && subLevel > 0) ? 5 : 10;
+            let targets = getRandomElements(pool, qCount);
+            targets.forEach(target => {
+                let wrongOptions = getRandomElements(pool.filter(item => item.word !== target.word), 2);
+                let options = [
+                    { isCorrect: true, display: target.emoji, val: target.word },
+                    { isCorrect: false, display: wrongOptions[0].emoji, val: wrongOptions[0].word },
+                    { isCorrect: false, display: wrongOptions[1].emoji, val: wrongOptions[1].word }
+                ];
+                qs.push({ id: target.word, audio: target.word, visual: "Listen and find:", options: shuffleArray(options) });
+            });
+        } else if (worldId === 3) {
+            let matchPool = [];
+            if (subLevel === 1) matchPool = matchL1Pool;
+            else if (subLevel === 2) matchPool = matchL2Pool;
+            else if (subLevel === 3) matchPool = matchL3Pool;
+            
+            let targets = getRandomElements(matchPool, 5);
+            targets.forEach(t => {
+                let options = [
+                    { isCorrect: true, display: t.correctEmoji, type: 'emoji' },
+                    { isCorrect: false, display: t.wrongEmojis[0], type: 'emoji' },
+                    { isCorrect: false, display: t.wrongEmojis[1], type: 'emoji' }
+                ];
+                qs.push({
+                    id: t.prompt, audio: t.prompt,
+                    visual: `<div class="text-2xl font-bold text-purple-600 mb-2">Find the match:</div><div class="text-4xl md:text-5xl font-extrabold tracking-widest text-blue-700 bg-white px-6 py-4 rounded-2xl shadow-inner border-2 border-blue-100">${t.prompt}</div>`,
+                    options: shuffleArray(options), isHtmlVisual: true
+                });
+            });
+        } else if (worldId === 5) {
+            let spellPool = [];
+            if (subLevel === 1) spellPool = spellL1Pool;
+            else if (subLevel === 2) spellPool = spellL2Pool;
+            else if (subLevel === 3) spellPool = spellL3Pool;
+            
+            let targets = getRandomElements(spellPool, 10);
+            targets.forEach(t => {
+                let wrongLetters = getRandomElements(t.wrong, 2);
+                let options = [
+                    { isCorrect: true, display: t.missing, type: 'text' },
+                    { isCorrect: false, display: wrongLetters[0], type: 'text' },
+                    { isCorrect: false, display: wrongLetters[1], type: 'text' }
+                ];
+                qs.push({
+                    id: t.word, audio: t.word,
+                    visual: `<div class="text-6xl mb-4 anim-float">${t.emoji}</div><div class="text-4xl md:text-5xl font-extrabold tracking-widest text-blue-700 bg-white px-6 py-4 rounded-2xl shadow-inner border-2 border-blue-100">${t.prompt}</div>`,
+                    options: shuffleArray(options), isHtmlVisual: true
+                });
+            });
+        } else if (worldId === 4) {
+            let speakNewPool = [];
+            let qCount = 10;
+            
+            if (subLevel === 11) { speakNewPool = phonicsAG; qCount = phonicsAG.length; }
+            else if (subLevel === 12) { speakNewPool = phonicsHN; qCount = phonicsHN.length; }
+            else if (subLevel === 13) { speakNewPool = phonicsOU; qCount = phonicsOU.length; }
+            else if (subLevel === 14) { speakNewPool = phonicsVZ; qCount = phonicsVZ.length; }
+            else if (subLevel === 2) speakNewPool = speakL2Pool;
+            else if (subLevel === 3) speakNewPool = speakL3Pool;
+            else if (subLevel === 4) speakNewPool = speakL4Pool;
+            
+            let targets = getRandomElements(speakNewPool, qCount);
+            targets.forEach(t => {
+                if (subLevel === 3) {
+                    qs.push({
+                        id: t.boy,
+                        boyAudio: t.boy,
+                        girlCorrect: t.girl,
+                        audio: t.boy + ". " + t.girl,
+                        visual: t.visual,
+                        isSpeakActivity: true,
+                        isConversation: true
+                    });
+                } else if (subLevel === 4) {
+                    let options = [
+                        { isCorrect: true, display: t.correct, type: 'text' },
+                        { isCorrect: false, display: t.wrong[0], type: 'text' },
+                        { isCorrect: false, display: t.wrong[1], type: 'text' }
+                    ];
+                    qs.push({
+                        id: t.boy,
+                        boyAudio: t.boy,
+                        girlCorrect: t.correct,
+                        audio: t.boy,
+                        visual: `<div class="text-7xl anim-float">${t.visual}</div>`,
+                        isSpeakActivity: false,
+                        isConversation: true,
+                        isChatAndChoose: true,
+                        options: shuffleArray(options)
+                    });
+                } else {
+                    qs.push({
+                        id: t.text, audio: t.sound, visual: t.emoji, isSpeakActivity: true
+                    });
+                }
+            });
+        }
+        return qs;
+    }
+
+    function loadQuestion() {
+        currentQuestionAttempts = 0; 
+        const totalQ = sessionQuestions.length;
+        if (currentQuestionIndex >= totalQ) { endSession(); return; }
+
+        const q = sessionQuestions[currentQuestionIndex];
+        currentAudioPrompt = q.audio;
+        
+        const progressDiv = document.getElementById('session-progress');
+        progressDiv.innerHTML = '';
+        for (let i = 0; i < totalQ; i++) {
+            let star = document.createElement('span');
+            star.className = 'text-2xl transition-all duration-300';
+            star.innerText = i < currentQuestionIndex ? '⭐' : '☆';
+            star.style.color = i < currentQuestionIndex ? '#fbbf24' : '#d1d5db';
+            progressDiv.appendChild(star);
+        }
+
+        const promptDiv = document.getElementById('question-prompt');
+        promptDiv.innerHTML = '';
+        
+        if (currentWorld === 1 || currentWorld === 2) {
+            promptDiv.innerHTML = `
+                <h2 class="text-3xl font-extrabold text-blue-600 mb-4">Listen & Find:</h2>
+                <button onclick="replayAudio()" class="game-btn bg-cyan-100 border-4 border-cyan-400 rounded-3xl px-8 py-4 flex flex-col items-center justify-center gap-2 hover:bg-cyan-200 shadow-sm mx-auto group w-full max-w-[250px]">
+                    <span class="text-5xl md:text-6xl group-hover:scale-110 transition-transform">🔊</span>
+                    <span class="text-base md:text-lg font-bold text-cyan-800">Tap to listen</span>
+                </button>
+            `;
+        } else if (currentWorld === 4) {
+            if (q.isConversation) {
+                let helperText = q.isChatAndChoose ? "Listen, then pick the correct answer!" : "Listen, then tap the mic to practice the reply!";
+                let girlBubbleInit = q.isChatAndChoose ? "..." : "Tap Listen!";
+                promptDiv.innerHTML = `
+                    <div class="flex justify-between items-end w-full max-w-sm mx-auto mb-6 mt-4">
+                        <div id="boy-char" class="flex flex-col items-center w-[30%]">
+                            <div class="speech-bubble-left bg-blue-100 border-2 border-blue-300 rounded-2xl p-2 md:p-3 mb-3 text-xs md:text-sm font-bold text-blue-800 text-center w-full shadow-sm">"${q.boyAudio}"</div>
+                            <div class="text-5xl md:text-6xl">👦</div>
+                        </div>
+                        <div class="text-4xl md:text-5xl pb-10 w-[40%] flex justify-center">${q.visual}</div>
+                        <div id="girl-char" class="flex flex-col items-center w-[30%]">
+                            <div id="girl-bubble" class="speech-bubble-right bg-pink-50 border-2 border-pink-200 rounded-2xl p-2 md:p-3 mb-3 text-xs md:text-sm font-bold text-pink-400 text-center w-full shadow-sm border-dashed">"${girlBubbleInit}"</div>
+                            <div class="text-5xl md:text-6xl">👧</div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 font-bold mt-2 text-center text-sm md:text-base">${helperText}</p>
+                `;
+            } else {
+                promptDiv.innerHTML = `
+                    <div class="text-7xl md:text-8xl anim-float mb-6 w-full flex justify-center drop-shadow-md">${q.visual}</div>
+                    <div class="text-2xl md:text-3xl font-extrabold text-blue-700 bg-white px-8 py-4 rounded-3xl shadow-inner border-4 border-blue-100 tracking-wide text-center">${q.id}</div>
+                    <div class="mt-4 text-center flex flex-col items-center">
+                        <p class="text-purple-600 font-extrabold text-lg md:text-xl">Listen 👂 Say it out loud 🗣️ then tap the mic!</p>
+                        <p class="text-gray-500 font-semibold text-sm md:text-base mt-1">(Dengar, kemudian sebut kuat-kuat dan tekan mikrofon!)</p>
+                    </div>
+                `;
+            }
+        } else {
+            promptDiv.innerHTML = q.isHtmlVisual ? q.visual : `<div class="text-6xl">${q.visual}</div>`;
+            
+            // Tambahan butang Dengar Semula di tengah gambar untuk Level 3 & 5
+            if (currentWorld === 3 || currentWorld === 5) {
+                promptDiv.innerHTML += `
+                <button onclick="replayAudio()" class="game-btn mt-5 bg-cyan-100 border-4 border-cyan-400 rounded-full px-6 py-2 flex items-center justify-center gap-3 hover:bg-cyan-200 shadow-sm mx-auto group">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">🔊</span>
+                    <span class="text-sm md:text-base font-bold text-cyan-800">Tap to listen</span>
+                </button>`;
+            }
+        }
+
+        const optionsDiv = document.getElementById('options-container');
+        optionsDiv.innerHTML = '';
+        
+        if (currentWorld === 4 && !q.isChatAndChoose) {
+            optionsDiv.className = "w-full grid grid-cols-2 gap-4 px-2 mt-2"; 
+            
+            const listenBtn = document.createElement('button');
+            listenBtn.className = "game-btn bg-white border-4 border-cyan-200 rounded-3xl flex flex-col items-center justify-center p-4 md:p-6 w-full text-cyan-700 hover:bg-cyan-50 transition-colors";
+            listenBtn.innerHTML = `<span class="text-5xl md:text-6xl mb-2 drop-shadow-sm">🔊</span><span class="text-lg md:text-xl font-bold">Listen</span>`;
+            listenBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (q.isConversation) {
+                    const girlBubble = document.getElementById('girl-bubble');
+                    if (girlBubble) {
+                        girlBubble.innerHTML = `"${q.girlCorrect}"`;
+                        girlBubble.className = "speech-bubble-right bg-pink-100 border-2 border-pink-300 rounded-2xl p-2 md:p-3 mb-3 text-xs md:text-sm font-bold text-pink-800 text-center w-full shadow-sm";
+                    }
+                    AudioSys.playConversation(q.boyAudio, q.girlCorrect, 0.8);
+                } else {
+                    playOptionAudio(e, q.audio);
+                }
+            };
+            
+            const micBtn = document.createElement('button');
+            micBtn.className = "game-btn bg-white border-4 border-green-200 rounded-3xl flex flex-col items-center justify-center p-4 md:p-6 w-full text-green-700 hover:bg-green-50 transition-colors";
+            micBtn.innerHTML = `<span class="text-5xl md:text-6xl mb-2 drop-shadow-sm">🎤</span><span class="text-lg md:text-xl font-bold">I said it!</span>`;
+            micBtn.onclick = () => handleAnswer(micBtn, true, q);
+
+            optionsDiv.appendChild(listenBtn);
+            optionsDiv.appendChild(micBtn);
+        } else {
+            let isTextOption = q.options.some(o => o.type === 'text' && o.display.length > 2);
+            optionsDiv.className = isTextOption ? "w-full flex flex-col gap-3 md:gap-4 px-2" : "w-full grid grid-cols-1 md:grid-cols-3 gap-4 px-2"; 
+
+            q.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                let btnClass = "game-btn border-4 rounded-3xl flex items-center p-3 md:p-4 bg-white hover:bg-gray-50 focus:outline-none w-full relative ";
+                
+                if (opt.type === 'text') {
+                    btnClass += "justify-center ";
+                    if (opt.display.length === 1) btnClass += "text-5xl font-extrabold text-purple-700 border-purple-200 h-24";
+                    else btnClass += "text-xl md:text-2xl font-bold text-gray-700 border-blue-200 min-h-[80px]";
+                    
+                    if (q.isChatAndChoose) {
+                        btnClass += " text-left px-4"; 
+                        btn.innerHTML = `<span class="speaker-btn text-3xl mr-4 bg-gray-100 p-2 rounded-full border-2 border-gray-200 hover:bg-gray-200 active:scale-95 transition-transform" onclick="playOptionAudio(event, '${opt.display.replace(/'/g, "\\'")}')">🔊</span> <span class="flex-1 text-center pr-8">${opt.display}</span>`;
+                        btn.onclick = () => handleAnswer(btn, opt.isCorrect, q);
+                    } else {
+                        btn.innerHTML = opt.display;
+                        btn.onclick = () => handleAnswer(btn, opt.isCorrect);
+                    }
+                } else {
+                    btnClass += "justify-center text-7xl h-32 md:h-40 border-gray-200";
+                    btn.innerHTML = opt.display;
+                    btn.onclick = () => handleAnswer(btn, opt.isCorrect);
+                }
+                btn.className = btnClass;
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        optionsDiv.classList.add('anim-pop');
+        setTimeout(() => optionsDiv.classList.remove('anim-pop'), 500);
+
+        setTimeout(() => replayAudio(), 400);
+    }
+
+    window.playOptionAudio = function(event, text) {
+        event.stopPropagation(); 
+        AudioSys.speak(text, false, currentWorld === 4 ? 0.8 : 0.9, 1.1, () => {
+            if (!isGameActive) window.speechSynthesis.cancel();
+        });
+    };
+
+    function replayAudio() {
+        if (!isGameActive) return;
+        const q = sessionQuestions[currentQuestionIndex];
+        if (currentWorld === 4 && q && q.isConversation) {
+            if (q.isChatAndChoose) {
+                AudioSys.speak(q.boyAudio, false, 0.8);
+            } else {
+                const girlBubble = document.getElementById('girl-bubble');
+                if (girlBubble) {
+                    girlBubble.innerHTML = `"${q.girlCorrect}"`;
+                    girlBubble.className = "speech-bubble-right bg-pink-100 border-2 border-pink-300 rounded-2xl p-2 md:p-3 mb-3 text-xs md:text-sm font-bold text-pink-800 text-center w-full shadow-sm";
+                }
+                AudioSys.playConversation(q.boyAudio, q.girlCorrect, 0.8);
+            }
+        } else if (currentAudioPrompt) {
+            AudioSys.speak(currentAudioPrompt, false, currentWorld === 4 ? 0.8 : 0.9);
+        }
+    }
+
+    function handleAnswer(buttonElement, isCorrect, qObj = null) {
+        if (!isGameActive) return;
+
+        currentQuestionAttempts++;
+        const qKey = sessionQuestions[currentQuestionIndex].id;
+
+        if (!learnStats[currentWorld][qKey]) learnStats[currentWorld][qKey] = { firstTryCorrect: false, eventuallyCorrect: false };
+        if (currentQuestionAttempts === 1) learnStats[currentWorld][qKey].firstTryCorrect = isCorrect;
+
+        const buttons = document.getElementById('options-container').querySelectorAll('button');
+        buttons.forEach(b => b.disabled = true);
+        const speakers = document.querySelectorAll('.speaker-btn');
+        speakers.forEach(s => s.classList.add('pointer-events-none', 'opacity-50'));
+
+        if (isCorrect) {
+            learnStats[currentWorld][qKey].eventuallyCorrect = true;
+            localStorage.setItem('ela_stats', JSON.stringify(learnStats));
+
+            buttonElement.classList.replace('bg-white', 'bg-green-300');
+            buttonElement.classList.remove('border-gray-200', 'border-blue-200');
+            buttonElement.classList.add('border-green-500', 'anim-bounce');
+            
+            let nextDelay = 1500;
+            if (currentWorld === 4 && qObj && qObj.isConversation) {
+                const girlBubble = document.getElementById('girl-bubble');
+                if (girlBubble) {
+                    girlBubble.innerHTML = `"${qObj.girlCorrect}"`;
+                    girlBubble.className = "speech-bubble-right bg-pink-100 border-2 border-pink-300 rounded-2xl p-2 md:p-3 mb-3 text-xs md:text-sm font-bold text-pink-800 text-center w-full shadow-sm";
+                }
+                AudioSys.playConversation(qObj.boyAudio, qObj.girlCorrect, 0.8);
+                const textLength = qObj.boyAudio.length + qObj.girlCorrect.length;
+                nextDelay = Math.max(5000, textLength * 120); 
+            } else {
+                AudioSys.speak(positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)]);
+            }
+            
+            sessionScore++; totalStars++; saveStars();
+
+            if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+            nextQuestionTimeout = setTimeout(() => {
+                if (!isGameActive) return; 
+                currentQuestionIndex++; loadQuestion();
+            }, nextDelay);
+
+        } else {
+            localStorage.setItem('ela_stats', JSON.stringify(learnStats));
+            buttonElement.classList.replace('bg-white', 'bg-red-200');
+            buttonElement.classList.remove('border-gray-200', 'border-blue-200');
+            buttonElement.classList.add('border-red-400', 'anim-shake');
+            AudioSys.speak(negativeFeedback[Math.floor(Math.random() * negativeFeedback.length)]);
+
+            setTimeout(() => {
+                if (!isGameActive) return;
+                buttonElement.classList.remove('bg-red-200', 'border-red-400', 'anim-shake');
+                buttonElement.classList.add('bg-white', currentWorld === 4 ? 'border-blue-200' : 'border-gray-200');
+                buttons.forEach(b => b.disabled = false);
+                speakers.forEach(s => s.classList.remove('pointer-events-none', 'opacity-50'));
+            }, 1200);
+        }
+    }
+
+    function endSession() {
+        const starContainer = document.getElementById('summary-stars-earned');
+        const totalQ = sessionQuestions.length;
+        starContainer.innerHTML = '';
+        for (let i = 0; i < totalQ; i++) {
+            let s = document.createElement('span');
+            s.innerText = i < sessionScore ? '⭐' : '☆';
+            s.className = i < sessionScore ? 'anim-bounce inline-block text-yellow-400 drop-shadow-md text-3xl md:text-4xl' : 'inline-block text-gray-300 text-3xl md:text-4xl';
+            if(i < sessionScore) s.style.animationDelay = `${(i % 5) * 0.15}s`;
+            starContainer.appendChild(s);
+        }
+
+        document.getElementById('summary-score-text').innerText = sessionScore;
+        document.getElementById('summary-total-text').innerText = totalQ;
+        let title = document.getElementById('summary-title');
+        let mascot = document.getElementById('summary-mascot');
+        
+        if (sessionScore === totalQ) {
+            title.innerHTML = "Perfect Score,<br>You Are Amazing<br>" + userName + "!"; 
+            title.className = "text-3xl md:text-4xl font-extrabold text-green-500 mb-2 mt-10 md:mt-0 capitalize leading-tight"; 
+            mascot.innerText = "🏆";
+            AudioSys.speak("perfect score, you are amazing " + userName);
+        } else if (sessionScore >= Math.floor(totalQ * 0.6)) {
+            title.innerHTML = "Great Job,<br>" + userName + "!"; 
+            title.className = "text-4xl md:text-5xl font-extrabold text-blue-500 mb-2 mt-10 md:mt-0 capitalize leading-tight"; 
+            mascot.innerText = "🌟";
+            AudioSys.speak("Great job " + userName + "!");
+        } else {
+            title.innerHTML = "Good Try,<br>" + userName + "!"; 
+            title.className = "text-4xl md:text-5xl font-extrabold text-orange-500 mb-2 mt-10 md:mt-0 capitalize leading-tight"; 
+            mascot.innerText = "👍";
+            AudioSys.speak("Great job " + userName + ", keep trying!");
+        }
+        showScreen('screen-summary');
+    }
+
+    document.getElementById('total-stars').innerText = totalStars;
+    updateProfileUI();
+
+    /* =========================================================================
+       BGM, TROPHIES, AND PARENTS DASHBOARD
+       ========================================================================= */
+    let bgmUnlocked = false;
+
+    function playBGM() {
+        const bgm = document.getElementById('bgm-audio');
+        bgm.volume = 0.2; 
+        const playPromise = bgm.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => { isBgmPlaying = true; updateGlobalBgmUI(); })
+            .catch(() => { isBgmPlaying = false; updateGlobalBgmUI(); });
+        }
+    }
+
+    function pauseBGM() {
+        document.getElementById('bgm-audio').pause();
+        isBgmPlaying = false; updateGlobalBgmUI();
+    }
+
+    function toggleGlobalBGM(event) {
+        if(event) event.stopPropagation();
+        isBgmPlaying ? pauseBGM() : playBGM();
+    }
+
+    function updateGlobalBgmUI() {
+        const btn = document.getElementById('btn-global-bgm');
+        const icon = document.getElementById('global-bgm-icon');
+        const text = document.getElementById('global-bgm-text');
+        if (isBgmPlaying) {
+            icon.innerText = "🔊"; text.innerText = "Music ON";
+            btn.classList.remove('bg-white', 'text-gray-500', 'border-gray-300');
+            btn.classList.add('bg-purple-100', 'text-purple-600', 'border-purple-300');
+        } else {
+            icon.innerText = "🔇"; text.innerText = "Music OFF";
+            btn.classList.remove('bg-purple-100', 'text-purple-600', 'border-purple-300');
+            btn.classList.add('bg-white', 'text-gray-500', 'border-gray-300');
+        }
+    }
+
+    document.getElementById('btn-init').addEventListener('click', () => {
+        if (!bgmUnlocked) { playBGM(); bgmUnlocked = true; }
+    });
+
+    function openTrophyModal() {
+        document.getElementById('modal-trophy').classList.remove('hide');
+        if (totalStars >= 10) document.getElementById('trophy-10').classList.remove('grayscale', 'opacity-60');
+        if (totalStars >= 25) document.getElementById('trophy-25').classList.remove('grayscale', 'opacity-60');
+        if (totalStars >= 50) document.getElementById('trophy-50').classList.remove('grayscale', 'opacity-60');
+    }
+    function closeTrophyModal() { document.getElementById('modal-trophy').classList.add('hide'); }
+
+    function openParentsGate() { document.getElementById('modal-parents-gate').classList.remove('hide'); generateMathQuestion(); }
+    function closeParentsGate() { document.getElementById('modal-parents-gate').classList.add('hide'); }
+
+    let currentMathAnswer = 0;
+    function generateMathQuestion() {
+        const num1 = Math.floor(Math.random() * 5) + 5; 
+        const num2 = Math.floor(Math.random() * 5) + 5;
+        currentMathAnswer = num1 + num2;
+        document.getElementById('math-question').innerText = `Parents Only: ${num1} + ${num2} = ?`;
+        
+        let options = shuffleArray([currentMathAnswer, currentMathAnswer + 1, currentMathAnswer - 2]);
+        const grid = document.getElementById('math-options');
+        grid.innerHTML = '';
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "game-btn text-2xl font-bold p-3 bg-blue-100 text-blue-700 rounded-xl border-2 border-blue-300 hover:bg-blue-200";
+            btn.innerText = opt;
+            btn.onclick = () => {
+                if (opt === currentMathAnswer) { closeParentsGate(); openParentsDash(); } 
+                else { closeParentsGate(); }
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function openParentsDash() { document.getElementById('modal-parents-dash').classList.remove('hide'); renderStats(); }
+    function closeParentsDash() { document.getElementById('modal-parents-dash').classList.add('hide'); }
+
+    function renderStats() {
+        const container = document.getElementById('stats-container');
+        container.innerHTML = '';
+        
+        const worldNames = ["My First Words", "Animal World", "Let's Match!", "Let's Speak!", "Fun Spelling"];
+        const icons = ["🍎", "🐶", "🧩", "💬", "🔤"];
+        let totalOverallUnique = 0; let totalOverallFirstTryCorrect = 0;
+
+        for (let i = 1; i <= 5; i++) {
+            let data = learnStats[i];
+            let totalUnique = Object.keys(data).length;
+            let firstTryCorrectCount = 0;
+            
+            Object.keys(data).forEach(key => { if (data[key].firstTryCorrect) firstTryCorrectCount++; });
+
+            let firstTryWrongCount = totalUnique - firstTryCorrectCount;
+            let accuracy = totalUnique > 0 ? Math.round((firstTryCorrectCount / totalUnique) * 100) : 0;
+            
+            totalOverallUnique += totalUnique;
+            totalOverallFirstTryCorrect += firstTryCorrectCount;
+            
+            container.innerHTML += `
+                <div class="bg-gray-50 p-4 rounded-2xl border-2 border-gray-200 mb-4">
+                    <div class="flex items-center gap-3 mb-4 border-b-2 border-gray-200 pb-2">
+                        <div class="text-3xl">${icons[i-1]}</div>
+                        <h3 class="font-bold text-gray-800 text-lg">${worldNames[i-1]}</h3>
+                    </div>
+                    <div class="space-y-2 text-sm font-semibold mb-4">
+                        <div class="flex justify-between text-gray-700"><span>Jumlah soalan unik dicuba:</span> <span>${totalUnique}</span></div>
+                        <div class="flex justify-between text-green-600"><span>Betul pada percubaan pertama:</span> <span>${firstTryCorrectCount}</span></div>
+                        <div class="flex justify-between text-orange-500"><span>Salah pada percubaan pertama:</span> <span>${firstTryWrongCount}</span></div>
+                    </div>
+                    <div class="mt-2 bg-white p-3 rounded-xl border border-gray-200">
+                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                            <span>Ketepatan Percubaan Pertama</span>
+                            <span class="${accuracy >= 80 ? 'text-green-500' : (accuracy >= 50 ? 'text-orange-500' : 'text-red-500')}">${accuracy}%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div class="bg-green-400 h-3 rounded-full transition-all duration-500" style="width: ${accuracy}%"></div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        let overallAcc = totalOverallUnique > 0 ? Math.round((totalOverallFirstTryCorrect / totalOverallUnique) * 100) : 0;
+        container.insertAdjacentHTML('afterbegin', `
+            <div class="bg-blue-50 p-4 rounded-2xl border-2 border-blue-200 mb-4 text-center">
+                <h3 class="font-bold text-blue-800 mb-1">Kemahiran Keseluruhan Dikuasai</h3>
+                <div class="text-4xl font-extrabold text-blue-600 my-2">${overallAcc}%</div>
+            </div>`);
+    }
+
+    function openResetConfirm() {
+        document.getElementById('modal-reset-confirm').classList.remove('hide');
+    }
+
+    function closeResetConfirm() {
+        document.getElementById('modal-reset-confirm').classList.add('hide');
+    }
+
+    function executeFullReset() {
+        // 1. Reset Stats
+        learnStats = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
+        localStorage.setItem('ela_stats', JSON.stringify(learnStats));
+        
+        // 2. Reset Stars
+        totalStars = 0;
+        saveStars();
+        
+        // 3. Reset Stickers
+        unlockedStickers = [false, false, false, false, false, false];
+        localStorage.setItem('ela_stickers', JSON.stringify(unlockedStickers));
+        renderStickers();
+
+        // 4. Update UI
+        renderStats();
+        closeResetConfirm();
+        
+        // 5. Visual Confirmation Feedback on Button
+        const btn = document.getElementById('btn-dash-reset');
+        let oldText = "Reset Progress";
+        btn.innerText = "All Data Cleared!";
+        btn.classList.replace('text-red-500', 'text-green-600');
+        btn.classList.replace('bg-red-50', 'bg-green-50');
+        btn.classList.replace('border-red-200', 'border-green-200');
+        setTimeout(() => {
+            btn.innerText = oldText;
+            btn.classList.replace('text-green-600', 'text-red-500');
+            btn.classList.replace('bg-green-50', 'bg-red-50');
+            btn.classList.replace('border-green-200', 'border-red-200');
+        }, 2500);
+    }
+</script>
+</body>
+</html>
