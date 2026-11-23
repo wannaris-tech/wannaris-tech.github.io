@@ -71,17 +71,19 @@
       </ul>
     </div>
 
-   <a class="btn-wa" href="https://whatsapp.com.">
+  <a id="btnWa" class="btn-wa" href="#">
     Belum Terima E-mel? Hubungi Kami
   </a>
-    <div class="nota-kecil">© 2026 CelikPlay • Nurwan Trading</div>
-  </div>
 
-  <script>
-    const kodNegara = "6014";
-    const bakiNombor = "2461981";
-    document.getElementById("pautanWa").href = "https://wa.me/" + kodNegara + bakiNombor + "?text=Hai%20CelikPlay,%20saya%20belum%20terima%20emel%20akses";
-  </script>
+  <div class="nota-kecil">© 2026 CelikPlay • Nurwan Trading</div>
+</div>
+
+<script>
+  var domainWa = "https://wa.me";
+  var noTel = "60142461981";
+  var mesej = encodeURIComponent("Hai CelikPlay, saya sudah buat bayaran tetapi belum terima e-mel kod akses.");
+  document.getElementById("btnWa").href = domainWa + noTel + "?text=" + mesej;
+</script>
 
 </body>
 </html>
