@@ -18,6 +18,7 @@
     .badge { background: #8b5cf6; color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .borang input[type="text"], .borang input[type="email"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
     .jumlah-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+    .pecahan-harga { font-size: 13px; color: #64748b; margin-bottom: 8px; line-height: 1.6; }
     .harga-besar { font-size: 28px; font-weight: bold; color: #10b981; }
     .btn-bayar { width: 100%; background: #10b981; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; }
     .btn-bayar:disabled { background: #94a3b8; }
@@ -77,7 +78,8 @@
   </div>
 
   <div class="jumlah-box">
-    <div style="font-size:13px; color:#64748b;">Jumlah Bayaran:</div>
+    <div class="pecahan-harga" id="pecahanHarga">Pilih permainan untuk melihat jumlah bayaran</div>
+    <div style="font-size:13px; color:#64748b;">Jumlah Keseluruhan:</div>
     <div class="harga-besar" id="paparanHarga">RM 0.00</div>
   </div>
 
@@ -113,14 +115,27 @@
     const kotakBonus = document.getElementById('kotakBonus');
     const statusBonus = document.getElementById('statusBonus');
     const paparanHarga = document.getElementById('paparanHarga');
+    const pecahanHarga = document.getElementById('pecahanHarga');
+
+    if (jumlahDipilih === 0) {
+      pecahanHarga.innerHTML = "Pilih permainan untuk melihat jumlah bayaran";
+      paparanHarga.innerText = "RM 0.00";
+      kotakBonus.classList.remove('terbuka');
+      statusBonus.innerText = "Pilih kesemua 3 game di atas untuk buka bonus ini";
+      return;
+    }
+
+    let hargaGame = (jumlahDipilih === 3) ? 49.90 : (jumlahDipilih * 19.90);
+    let cajFpx = 1.50;
+    let total = (hargaGame + cajFpx).toFixed(2);
+
+    pecahanHarga.innerHTML = "Harga Permainan: <strong>RM " + hargaGame.toFixed(2) + "</strong><br>Caj Pengurusan FPX: <strong>RM 1.50</strong>";
+    paparanHarga.innerText = "RM " + total;
 
     if (jumlahDipilih === 3) {
-      paparanHarga.innerText = "RM 49.90";
       kotakBonus.classList.add('terbuka');
       statusBonus.innerText = "Tahniah! Game Misi Angkasa disertakan percuma.";
     } else {
-      let total = (jumlahDipilih * 19.90).toFixed(2);
-      paparanHarga.innerText = "RM " + total;
       kotakBonus.classList.remove('terbuka');
       statusBonus.innerText = "Pilih kesemua 3 game di atas untuk buka bonus ini";
     }
