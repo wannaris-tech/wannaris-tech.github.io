@@ -3,71 +3,194 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Status Pembayaran - CelikPlay</title>
+  <title>CelikPlay - Permainan Pendidikan Interaktif Anak</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; margin: 0; padding: 20px; color: #1e293b; display: flex; justify-content: center; align-items: center; min-height: 90vh; }
-    .kad { max-width: 450px; width: 100%; background: white; padding: 30px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; }
-    h1 { color: #10b981; margin: 10px 0; font-size: 26px; }
-    p { color: #475569; font-size: 15px; line-height: 1.6; }
-    .kotak-panduan { background: #fefce8; border: 1.5px dashed #eab308; border-radius: 12px; padding: 18px; margin: 22px 0; text-align: left; }
-    .kotak-panduan strong { color: #854d0e; font-size: 15px; display: block; margin-bottom: 8px; }
-    .kotak-panduan ul { margin: 0; padding-left: 20px; color: #713f12; font-size: 14px; line-height: 1.6; }
-    .kotak-panduan li { margin-bottom: 6px; }
-    .btn-wa { display: block; background: #16a34a; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; margin-top: 15px; }
-    .btn-semula { display: block; background: #0f172a; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; margin-top: 15px; }
-    .nota-kecil { font-size: 12px; color: #94a3b8; margin-top: 20px; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+    .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+    h1 { text-align: center; color: #0f172a; margin-bottom: 5px; }
+    .sub { text-align: center; color: #64748b; font-size: 14px; margin-bottom: 25px; }
+    .btn-combo { width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(245,158,11,0.3); }
+    .pilihan-game { border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+    .pilihan-game.aktif { border-color: #10b981; background: #ecfdf5; }
+    .pilihan-game input { width: 20px; height: 20px; accent-color: #10b981; }
+    .bonus-box { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 20px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; opacity: 0.6; transition: 0.3s; }
+    .bonus-box.terbuka { border-color: #8b5cf6; background: #f5f3ff; opacity: 1; }
+    .badge { background: #8b5cf6; color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
+    .borang input[type="text"], .borang input[type="email"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+    .jumlah-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+    .harga-besar { font-size: 28px; font-weight: bold; color: #10b981; }
+    .btn-bayar { width: 100%; background: #10b981; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; }
+    .btn-bayar:disabled { background: #94a3b8; }
+    .nota-terma { font-size: 11px; color: #64748b; text-align: center; margin-top: 14px; line-height: 1.5; }
+    .jenama-footer { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 18px; border-top: 1px solid #f1f5f9; padding-top: 12px; }
   </style>
 </head>
 <body>
 
-<div class="kad">
-  <div style="text-align: center; margin-bottom: 12px;">
-    <img src="logo.png" alt="CelikPlay Logo" style="width: 110px; height: auto; border-radius: 50%;">
+<div class="container">
+  <div style="text-align: center; margin-bottom: 10px;">
+    <img src="logo.png" alt="CelikPlay Logo" style="width: 140px; height: auto; border-radius: 50%;">
+  </div>
+  <p class="sub">Pilih permainan pendidikan untuk anak anda (Sah 3 peranti keluarga)</p>
+
+  <button type="button" class="btn-combo" onclick="pilihSemuaCombo()">
+    ⭐ PILIH COMBO SEMUA GAME (RM49.90)<br>
+    <span style="font-size:12px; font-weight:normal;">Jimat RM9.80 + PERCUMA Game Misi Angkasa!</span>
+  </button>
+
+  <label class="pilihan-game" id="label-tappy">
+    <div>
+      <strong>🍞 Kedai Roti Tappy</strong><br>
+      <span style="font-size:13px; color:#64748b;">Belajar mengira & pengurusan wang</span>
+    </div>
+    <div>
+      <span style="font-weight:bold; margin-right:8px;">RM19.90</span>
+      <input type="checkbox" value="tappy" class="chk-game" onchange="kemaskiniHarga()">
+    </div>
+  </label>
+
+  <label class="pilihan-game" id="label-english">
+    <div>
+      <strong>🔤 English First Words</strong><br>
+      <span style="font-size:13px; color:#64748b;">Kosa kata & ejaan asas Bahasa Inggeris</span>
+    </div>
+    <div>
+      <span style="font-weight:bold; margin-right:8px;">RM19.90</span>
+      <input type="checkbox" value="english" class="chk-game" onchange="kemaskiniHarga()">
+    </div>
+  </label>
+
+  <label class="pilihan-game" id="label-pasar">
+    <div>
+      <strong>🛒 Pasar Mini Bijak</strong><br>
+      <span style="font-size:13px; color:#64748b;">Logik, padanan & kemahiran berfikir</span>
+    </div>
+    <div>
+      <span style="font-weight:bold; margin-right:8px;">RM19.90</span>
+      <input type="checkbox" value="pasar" class="chk-game" onchange="kemaskiniHarga()">
+    </div>
+  </label>
+
+  <div class="bonus-box" id="kotakBonus">
+    <div>
+      <span class="badge">BONUS COMBO</span><br>
+      <strong>🚀 Misi Angkasa</strong><br>
+      <span id="statusBonus" style="font-size:12px; color:#64748b;">Pilih kesemua 3 game di atas untuk buka bonus ini</span>
+    </div>
+    <div style="font-weight:bold; color:#8b5cf6;">PERCUMA</div>
   </div>
 
-  <h1 id="tajukStatus">Pembayaran Berjaya!</h1>
-  <p id="subStatus">Terima kasih kerana mendapatkan permainan <strong>CelikPlay</strong> untuk anak anda.</p>
-
-  <div class="kotak-panduan" id="kotakLangkah">
-    <strong>Langkah Seterusnya:</strong>
-    <ul>
-      <li>Sistem telah menghantar <strong>Pautan Terus &amp; Kod Akses</strong> ke e-mel anda.</li>
-      <li>Sila semak peti masuk (<em>Inbox</em>) atau folder <strong>Spam</strong> dalam masa 1–3 minit.</li>
-      <li>Simpan pautan tersebut ke dalam <strong>WhatsApp anda sendiri</strong> supaya mudah dibuka di tablet anak atau telefon pasangan (sah untuk 3 peranti).</li>
-    </ul>
+  <div class="jumlah-box">
+    <div style="font-size:13px; color:#64748b;">Jumlah Keseluruhan (Tiada Caj Tersembunyi):</div>
+    <div class="harga-besar" id="paparanHarga">RM 0.00</div>
   </div>
 
-  <a id="btnUtama" class="btn-wa" href="#">
-    Belum Terima E-mel? Hubungi Kami
-  </a>
+  <div class="borang">
+    <input type="text" id="namaPembeli" placeholder="Nama Penuh Anda" required>
+    <input type="email" id="emailPembeli" placeholder="Alamat E-mel (Untuk terima kod akses)" required>
+    <button type="button" id="btnBayar" class="btn-bayar" onclick="prosesBayaran()">Teruskan ke Pembayaran FPX</button>
+    
+    <div class="nota-terma">
+      Dengan meneruskan pembelian ini, anda bersetuju dengan <strong>Syarat &amp; Terma CelikPlay</strong>: Akses produk digital ini adalah untuk kegunaan peribadi keluarga (maksimum 3 peranti sahaja) dan tiada pemulangan wang (<em>no refund</em>) selepas kod akses dijana.
+    </div>
+  </div>
 
-  <div class="nota-kecil">© 2026 CelikPlay • Nurwan Trading</div>
+  <div class="jenama-footer">
+    © 2026 CelikPlay • Dimiliki oleh Nurwan Trading
+  </div>
 </div>
 
 <script>
-  var domainWa = "https://wa.me";
-  var noTel = "/60142461981";
-  var mesej = encodeURIComponent("Hai CelikPlay, saya sudah buat bayaran tetapi belum terima e-mel kod akses.");
-  var btnUtama = document.getElementById("btnUtama");
-  btnUtama.href = domainWa + noTel + "?text=" + mesej;
+  const URL_APPS_SCRIPT = ["https:", "", "script." + "google.com", "macros", "s", "AKfycbx93hmttJCzlsVMqk2K1Ly34eFvPtUeaDcishAYvoL3KNu9qdB-as1-V_H4lw2mBLCUDw", "exec"].join("/");
 
-  // Semak jika pembeli membatalkan pembayaran di Billplz
-  var urlParams = window.location.search.toLowerCase();
-  if (urlParams.indexOf("paid%5d=false") > -1 || urlParams.indexOf("paid]=false") > -1 || urlParams.indexOf("paid=false") > -1) {
-    document.getElementById("tajukStatus").innerText = "Pembayaran Dibatalkan";
-    document.getElementById("tajukStatus").style.color = "#ef4444";
-    document.getElementById("subStatus").innerHTML = "Transaksi anda tidak selesai dan <strong>tiada bayaran ditolak</strong> daripada akaun anda.";
+  function pilihSemuaCombo() {
+    document.querySelectorAll('.chk-game').forEach(chk => chk.checked = true);
+    kemaskiniHarga();
+  }
+
+  function kemaskiniHarga() {
+    const checkboxes = document.querySelectorAll('.chk-game');
+    let jumlahDipilih = 0;
+
+    checkboxes.forEach(chk => {
+      const label = document.getElementById('label-' + chk.value);
+      if (chk.checked) {
+        jumlahDipilih++;
+        label.classList.add('aktif');
+      } else {
+        label.classList.remove('aktif');
+      }
+    });
+
+    const kotakBonus = document.getElementById('kotakBonus');
+    const statusBonus = document.getElementById('statusBonus');
+    const paparanHarga = document.getElementById('paparanHarga');
+
+    let total = 0;
+    if (jumlahDipilih === 3) {
+      total = 49.90;
+      kotakBonus.classList.add('terbuka');
+      statusBonus.innerText = "Tahniah! Game Misi Angkasa disertakan percuma.";
+    } else {
+      total = jumlahDipilih * 19.90;
+      kotakBonus.classList.remove('terbuka');
+      statusBonus.innerText = "Pilih kesemua 3 game di atas untuk buka bonus ini";
+    }
+
+    paparanHarga.innerText = "RM " + total.toFixed(2);
+  }
+
+  function prosesBayaran() {
+    const nama = document.getElementById('namaPembeli').value.trim();
+    const email = document.getElementById('emailPembeli').value.trim();
+    const btn = document.getElementById('btnBayar');
     
-    var kotak = document.getElementById("kotakLangkah");
-    kotak.style.background = "#fef2f2";
-    kotak.style.borderColor = "#f87171";
-    kotak.innerHTML = "<strong style='color:#991b1b;'>Apa Yang Berlaku?</strong><ul style='color:#7f1d1d;'><li>Anda telah membatalkan transaksi atau sesi bank FPX telah tamat tempoh.</li><li>Tiada kod akses dijana untuk cubaan ini.</li></ul>";
-    
-    btnUtama.innerText = "Kembali ke Halaman Jualan";
-    btnUtama.className = "btn-semula";
-    btnUtama.href = "sales.html";
+    let gamesDipilih = [];
+    document.querySelectorAll('.chk-game:checked').forEach(chk => {
+      gamesDipilih.push(chk.value);
+    });
+
+    if (gamesDipilih.length === 0) {
+      alert("Sila pilih sekurang-kurangnya 1 permainan.");
+      return;
+    }
+    if (!nama || !email) {
+      alert("Sila isi nama dan alamat e-mel anda.");
+      return;
+    }
+
+    if (gamesDipilih.length === 3) {
+      gamesDipilih.push("angkasa");
+    }
+
+    btn.innerText = "Menjana Bil Billplz...";
+    btn.disabled = true;
+
+    fetch(URL_APPS_SCRIPT, {
+      method: "POST",
+      body: JSON.stringify({
+        tindakan: "cipta_bil",
+        nama: nama,
+        email: email,
+        games: gamesDipilih
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Ralat menjana bil. Sila cuba lagi.");
+        btn.innerText = "Teruskan ke Pembayaran FPX";
+        btn.disabled = false;
+      }
+    })
+    .catch(err => {
+      alert("Ralat sambungan. Sila semak internet anda.");
+      btn.innerText = "Teruskan ke Pembayaran FPX";
+      btn.disabled = false;
+    });
   }
 </script>
-
 </body>
 </html>
