@@ -101,7 +101,7 @@
 </div>
 
 <script>
-  const URL_APPS_SCRIPT = "https://google.com" + "AKfycbx93hmttJCzlsVMqk2K1Ly34eFvPtUeaDcishAYvoL3KNu9qdB-as1-V_H4lw2mBLCUDw/exec";
+  const URL_APPS_SCRIPT = ["https:", "", "://google.com", "macros", "s", "AKfycbx93hmttJCzlsVMqk2K1Ly34eFvPtUeaDcishAYvoL3KNu9qdB-as1-V_H4lw2mBLCUDw", "exec"].join("/");
 
   function pilihSemuaCombo() {
     document.querySelectorAll('.chk-game').forEach(chk => chk.checked = true);
