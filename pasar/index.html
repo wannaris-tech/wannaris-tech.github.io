@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
- <script>if(!(localStorage.getItem("celikplay_games")||"").includes("pasar")){window.location.href="/";}</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pasar Mini Bijak</title>
@@ -187,7 +186,7 @@
       if (shopOsc) { try { shopOsc.stop(); } catch(e){} shopOsc = null; }
 
       if (state.audioOn) {
-        if (state.gameState !== 'shop' && state.gameState !== 'checkout' && state.gameState !== 'bubbleGame') {
+        if (state.gameState !== 'shop' && state.gameState !== 'checkout' && state.gameState !== 'bubbleGame' && state.gameState !== 'cashier') {
           const melody = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
           let i = 0;
           bgInterval = setInterval(() => {
@@ -196,7 +195,7 @@
                i++;
             }
           }, 450);
-        } else if ((state.gameState === 'shop' || state.gameState === 'checkout') && initAudio()) {
+        } else if ((state.gameState === 'shop' || state.gameState === 'checkout' || state.gameState === 'cashier') && initAudio()) {
           const cheerfulMelody = [523.25, 659.25, 783.99, 659.25, 523.25, 783.99, 1046.50, 783.99];
           let j = 0;
           bgInterval = setInterval(() => {
@@ -212,7 +211,13 @@
     // ==========================================
     // 2. DATA & CONSTANTS
     // ==========================================
-    const formatMoney = (amount) => `RM ${amount.toFixed(2)}`;
+    const formatMoney = (amount) => {
+      const val = Math.round(amount * 100) / 100;
+      if (val === 0) return 'RM 0';
+      if (val < 1) return `${Math.round(val * 100)} sen`;
+      if (Number.isInteger(val)) return `RM ${val}`;
+      return `RM ${val.toFixed(2)}`;
+    };
     const getRandomItems = (arr, n) => [...arr].sort(() => 0.5 - Math.random()).slice(0, n);
 
     const CATALOG = [
@@ -257,6 +262,16 @@
       { id: 'a4', title: 'Pentas Juara', theme: 'bg-yellow-100', stickerIds: ['s15', 's16'] },
     ];
 
+    const REWARD_ITEMS = [
+      { id: 'hat', name: 'Topi Juruwang', cost: 5, type: 'accessory', icon: '🧢', desc: 'Aksesori watak juruwang' },
+      { id: 'balloon', name: 'Belon Ceria', cost: 8, type: 'decor', icon: '🎈', desc: 'Hiasan rak & kaunter kedai' },
+      { id: 'apron', name: 'Apron Emas', cost: 10, type: 'accessory', icon: '🦺', desc: 'Aksesori watak juruwang' },
+      { id: 'plant', name: 'Pokok Hiasan', cost: 12, type: 'decor', icon: '🪴', desc: 'Hiasan rak & kaunter kedai' },
+      { id: 'glasses', name: 'Cermin Mata', cost: 15, type: 'accessory', icon: '🕶️', desc: 'Aksesori watak juruwang' },
+    ];
+
+    const STORAGE_PREFIX = 'pasarMiniKPM_';
+
     // ==========================================
     // 3. UI COMPONENTS (HTML Template Strings)
     // ==========================================
@@ -278,30 +293,108 @@
 
     const Shopkeeper = (size = null, className = "") => {
       const inlineStyle = size ? `width: ${size}px; height: ${size}px;` : '';
-      return `<img src="juruwang.png" alt="Pekedai" style="${inlineStyle}" class="object-contain animate-invite ${className}" />`;
+      const eq = (typeof state !== 'undefined' && state.equippedRewards) ? state.equippedRewards : [];
+      const hatOverlay = eq.includes('hat') ? `
+        <svg viewBox="0 0 100 50" class="absolute -top-[14%] left-1/2 -translate-x-1/2 w-[56%] pointer-events-none z-20 drop-shadow-md">
+          <path d="M18 36 Q50 2 82 36 Z" fill="#ef4444" stroke="#991b1b" stroke-width="3"/>
+          <path d="M10 36 Q50 26 92 38 Q50 45 10 36 Z" fill="#b91c1c"/>
+          <circle cx="50" cy="22" r="7" fill="#fef08a"/>
+          <text x="50" y="25" font-size="9" font-weight="900" fill="#b91c1c" text-anchor="middle">★</text>
+        </svg>` : '';
+      const glassesOverlay = eq.includes('glasses') ? `
+        <svg viewBox="0 0 100 35" class="absolute top-[28%] left-1/2 -translate-x-1/2 w-[44%] pointer-events-none z-20 drop-shadow-sm">
+          <rect x="6" y="6" width="36" height="22" rx="8" fill="#0f172a" fill-opacity="0.82" stroke="#facc15" stroke-width="3.5"/>
+          <rect x="58" y="6" width="36" height="22" rx="8" fill="#0f172a" fill-opacity="0.82" stroke="#facc15" stroke-width="3.5"/>
+          <line x1="42" y1="15" x2="58" y2="15" stroke="#facc15" stroke-width="3.5"/>
+          <line x1="13" y1="12" x2="23" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+          <line x1="65" y1="12" x2="75" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        </svg>` : '';
+      const apronOverlay = eq.includes('apron') ? `
+        <svg viewBox="0 0 100 70" class="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-[52%] pointer-events-none z-20 drop-shadow-md">
+          <defs>
+            <linearGradient id="goldApron" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#fef08a"/>
+              <stop offset="50%" stop-color="#facc15"/>
+              <stop offset="100%" stop-color="#d97706"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 6 L76 6 L84 62 Q50 70 16 62 Z" fill="url(#goldApron)" stroke="#b45309" stroke-width="3"/>
+          <rect x="34" y="28" width="32" height="20" rx="5" fill="#fef9c3" stroke="#ca8a04" stroke-width="2"/>
+          <text x="50" y="42" font-size="11" font-weight="900" fill="#b45309" text-anchor="middle">VIP</text>
+        </svg>` : '';
+
+      return `
+        <div style="${inlineStyle}" class="relative inline-block animate-invite ${className}">
+          <img src="https://i.ibb.co/k6Mh7Gnk/Whats-App-Image-2026-11-02-at-5-36-08-PM-removebg-preview.png" alt="Pekedai" class="w-full h-full object-contain" />
+          ${hatOverlay}
+          ${glassesOverlay}
+          ${apronOverlay}
+        </div>`;
+    };
+
+    const renderShelfDecor = () => {
+      const eq = (typeof state !== 'undefined' && state.equippedRewards) ? state.equippedRewards : [];
+      let html = '';
+      if (eq.includes('balloon')) {
+        html += `
+          <div class="absolute top-20 left-2 z-20 pointer-events-none animate-bounce-slight">
+            <svg width="46" height="66" viewBox="0 0 50 70" class="drop-shadow-md">
+              <path d="M18 36 Q16 55 24 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <path d="M34 32 Q34 52 24 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <ellipse cx="18" cy="22" rx="13" ry="16" fill="#f43f5e"/>
+              <ellipse cx="14" cy="16" rx="3" ry="5" fill="white" opacity="0.5"/>
+              <ellipse cx="34" cy="18" rx="12" ry="15" fill="#38bdf8"/>
+              <ellipse cx="30" cy="12" rx="3" ry="5" fill="white" opacity="0.5"/>
+            </svg>
+          </div>
+          <div class="absolute top-20 right-2 z-20 pointer-events-none animate-bounce-slight" style="animation-delay: 0.6s">
+            <svg width="46" height="66" viewBox="0 0 50 70" class="drop-shadow-md">
+              <path d="M18 32 Q18 52 26 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <path d="M34 36 Q34 55 26 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+              <ellipse cx="18" cy="18" rx="12" ry="15" fill="#facc15"/>
+              <ellipse cx="14" cy="12" rx="3" ry="5" fill="white" opacity="0.5"/>
+              <ellipse cx="34" cy="22" rx="13" ry="16" fill="#a855f7"/>
+              <ellipse cx="30" cy="16" rx="3" ry="5" fill="white" opacity="0.5"/>
+            </svg>
+          </div>`;
+      }
+      if (eq.includes('plant')) {
+        html += `
+          <div class="absolute bottom-24 right-2 z-20 pointer-events-none">
+            <svg width="46" height="58" viewBox="0 0 50 60" class="drop-shadow-md">
+              <path d="M25 34 Q10 18 14 8 Q24 14 25 34 Z" fill="#22c55e"/>
+              <path d="M25 34 Q40 18 36 8 Q26 14 25 34 Z" fill="#16a34a"/>
+              <path d="M25 34 Q25 10 25 4 Q32 18 25 34 Z" fill="#4ade80"/>
+              <polygon points="14,34 36,34 32,56 18,56" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+              <rect x="12" y="31" width="26" height="5" rx="2" fill="#f59e0b" stroke="#92400e" stroke-width="1.5"/>
+            </svg>
+          </div>`;
+      }
+      return html;
     };
 
     const SpeechBubble = (text, className = "", tailPos = "bottom") => `
       <div class="relative bg-gradient-to-br from-amber-100 to-yellow-300 rounded-3xl p-3 shadow-[0_4px_0_#d97706] border-2 border-amber-400 min-w-[160px] text-center animate-bounce-slight ${className}">
         <p class="text-slate-900 font-extrabold text-sm leading-snug drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)] whitespace-pre-line">${text}</p>
-        ${tailPos === 'bottom' 
+        ${tailPos === 'bottom'
           ? `<div class="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-t-[16px] border-t-amber-400 border-r-[12px] border-r-transparent filter drop-shadow-sm"></div>`
           : `<div class="absolute -left-3 bottom-4 w-0 h-0 border-t-[8px] border-t-transparent border-r-[14px] border-r-amber-400 border-b-[8px] border-b-transparent filter drop-shadow-sm"></div>`
         }
       </div>`;
 
-    const Firework = (delay = 0, left, top, scale = 1) => {
+    const Firework = (delay = 0, left = '50%', top = '20%', scale = 1) => {
       const colors = ['#ef4444', '#3b82f6', '#10b981', '#facc15', '#a855f7', '#ec4899'];
-      let html = `<div class="absolute pointer-events-none z-10" style="left: ${left}; top: ${top}; transform: translate(-50%, -50%) scale(${scale})">
-        <svg class="w-32 h-32 animate-firework" style="animation-delay: ${delay}s" viewBox="0 0 100 100">`;
-      for(let i=0; i<12; i++) {
-        html += `<g transform="rotate(${i * 30} 50 50)">
-            <circle cx="50" cy="10" r="4" fill="${colors[i % colors.length]}" />
-            <line x1="50" y1="50" x2="50" y2="25" stroke="${colors[(i + 1) % colors.length]}" stroke-width="3" stroke-linecap="round" opacity="0.8" />
-          </g>`;
-      }
-      html += `</svg></div>`;
-      return html;
+      return `
+        <div class="absolute pointer-events-none z-10" style="left: ${left}; top: ${top}; transform: translate(-50%, -50%) scale(${scale});">
+          <svg class="w-32 h-32 animate-firework" style="animation-delay: ${delay}s" viewBox="0 0 100 100">
+            ${Array.from({length: 12}).map((_, i) => `
+              <g transform="rotate(${i * 30} 50 50)">
+                <circle cx="50" cy="10" r="4" fill="${colors[i % colors.length]}" />
+                <line x1="50" y1="50" x2="50" y2="25" stroke="${colors[(i + 1) % colors.length]}" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+              </g>
+            `).join('')}
+          </svg>
+        </div>`;
     };
 
     // ==========================================
@@ -502,7 +595,7 @@
       missions: [],
       currentMissionIndex: 0,
       unlockedStickers: [],
-      levelProgress: { '1A': 0, '1B': 0, '2A': 0, '2B': 0, '3A': 0, '3B': 0 },
+      levelProgress: { '1A': 0, '1B': 0, '2A': 0, '2B': 0, '3A': 0, '3B': 0, '3C': 0 },
       newStickerWon: null,
       parentMath: { q: '', a: 0 },
       parentInput: '',
@@ -510,6 +603,8 @@
       showParentError: false,
       showResetConfirm: false,
       showResetSuccess: false,
+      showUnlockSuccess: false,
+      unlockAll: false,
       shelfItems: [],
       basket: [],
       wallet: [],
@@ -520,45 +615,215 @@
       audioOn: false,
       poppingBubble: null,
       mistakesCount: 0,
-      levelStars: { '1A': 0, '1B': 0, '2A': 0, '2B': 0, '3A': 0, '3B': 0 },
+      levelStars: { '1A': 0, '1B': 0, '2A': 0, '2B': 0, '3A': 0, '3B': 0, '3C': 0 },
       lastEarnedStars: 0,
       showVictory: false,
       activeAlbum: null,
-      activeHint: null
+      activeHint: null,
+      // Sistem Ganjaran Bintang & Mod Tauke Kedai
+      bonusStars: 0,
+      spentStars: 0,
+      unlockedRewards: [],
+      equippedRewards: [],
+      cashierMode: null, // 'relaxed' | 'timed'
+      cashierMission: null,
+      cashierServed: 0,
+      cashierSessionStars: 0,
+      cashierTimeLeft: 120,
+      cashierEnded: false,
+      cashierHighScore: 0
     };
 
-    window.getMissionData = () => state.missions[state.currentMissionIndex];
+    let cashierTimerInterval = null;
 
-    window.setGameState = (s) => { state.gameState = s; renderApp(); manageAudioLoops(); };
-    window.setPlayerName = (val) => { 
-      state.playerName = val.toUpperCase(); 
-      const displayEl = document.getElementById('display-name');
-      if (displayEl) {
-         displayEl.innerText = state.playerName || 'BIJAK';
+    // ==========================================
+    // 5B. STORAN KEKAL (localStorage) & GANJARAN
+    // ==========================================
+    const saveProgress = () => {
+      try {
+        localStorage.setItem(STORAGE_PREFIX + 'levelProgress', JSON.stringify(state.levelProgress));
+        localStorage.setItem(STORAGE_PREFIX + 'levelStars', JSON.stringify(state.levelStars));
+        localStorage.setItem(STORAGE_PREFIX + 'unlockedStickers', JSON.stringify(state.unlockedStickers));
+        localStorage.setItem(STORAGE_PREFIX + 'playerName', state.playerName || '');
+        localStorage.setItem(STORAGE_PREFIX + 'unlockAll', JSON.stringify(!!state.unlockAll));
+        localStorage.setItem(STORAGE_PREFIX + 'cashierHighScore', JSON.stringify(state.cashierHighScore || 0));
+        localStorage.setItem(STORAGE_PREFIX + 'rewards', JSON.stringify({
+          bonusStars: state.bonusStars || 0,
+          spentStars: state.spentStars || 0,
+          unlockedRewards: state.unlockedRewards || [],
+          equippedRewards: state.equippedRewards || []
+        }));
+      } catch (e) {
+        // Abaikan jika pelayar menyekat localStorage
       }
     };
-    window.setParentInput = (val) => { state.parentInput = val; };
+
+    const loadProgress = () => {
+      try {
+        const savedProgress = localStorage.getItem(STORAGE_PREFIX + 'levelProgress');
+        if (savedProgress) {
+          state.levelProgress = { ...state.levelProgress, ...JSON.parse(savedProgress) };
+        }
+
+        const savedStars = localStorage.getItem(STORAGE_PREFIX + 'levelStars');
+        if (savedStars) {
+          state.levelStars = { ...state.levelStars, ...JSON.parse(savedStars) };
+        }
+
+        const savedStickers = localStorage.getItem(STORAGE_PREFIX + 'unlockedStickers');
+        if (savedStickers) {
+          const parsed = JSON.parse(savedStickers);
+          if (Array.isArray(parsed)) state.unlockedStickers = parsed;
+        }
+
+        const savedName = localStorage.getItem(STORAGE_PREFIX + 'playerName');
+        if (savedName !== null) state.playerName = savedName;
+
+        const savedUnlockAll = localStorage.getItem(STORAGE_PREFIX + 'unlockAll');
+        if (savedUnlockAll) state.unlockAll = JSON.parse(savedUnlockAll) === true;
+
+        const savedHighScore = localStorage.getItem(STORAGE_PREFIX + 'cashierHighScore');
+        if (savedHighScore) {
+          const parsedScore = parseInt(JSON.parse(savedHighScore), 10);
+          if (!isNaN(parsedScore)) state.cashierHighScore = parsedScore;
+        }
+
+        const savedRewards = localStorage.getItem(STORAGE_PREFIX + 'rewards');
+        if (savedRewards) {
+          const r = JSON.parse(savedRewards);
+          state.bonusStars = r.bonusStars || 0;
+          state.spentStars = r.spentStars || 0;
+          state.unlockedRewards = Array.isArray(r.unlockedRewards) ? r.unlockedRewards : [];
+          state.equippedRewards = Array.isArray(r.equippedRewards) ? r.equippedRewards : [];
+        }
+      } catch (e) {
+        // Abaikan jika data rosak atau localStorage disekat
+      }
+    };
+
+    const clearSavedProgress = () => {
+      try {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith(STORAGE_PREFIX)) keysToRemove.push(k);
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+      } catch (e) {
+        // Abaikan jika localStorage disekat
+      }
+    };
+
+    const getTotalStarsEarned = () => {
+      const levelTotal = Object.values(state.levelStars).reduce((acc, s) => acc + (s || 0), 0);
+      return levelTotal + (state.bonusStars || 0);
+    };
+
+    const getAvailableStars = () => {
+      return Math.max(0, getTotalStarsEarned() - (state.spentStars || 0));
+    };
+
+    window.buyOrToggleReward = (itemId) => {
+      const item = REWARD_ITEMS.find(r => r.id === itemId);
+      if (!item) return;
+
+      if (state.unlockedRewards.includes(itemId)) {
+        if (state.equippedRewards.includes(itemId)) {
+          state.equippedRewards = state.equippedRewards.filter(id => id !== itemId);
+        } else {
+          state.equippedRewards = [...state.equippedRewards, itemId];
+        }
+        playCorrect();
+        saveProgress();
+        renderApp();
+      } else {
+        if (getAvailableStars() >= item.cost) {
+          state.spentStars += item.cost;
+          state.unlockedRewards = [...state.unlockedRewards, itemId];
+          state.equippedRewards = [...state.equippedRewards, itemId];
+          playTing();
+          saveProgress();
+          renderApp();
+        } else {
+          playWrong();
+        }
+      }
+    };
+
+    window.unlockAllLevels = () => {
+      state.unlockAll = true;
+      state.showUnlockSuccess = true;
+      playCorrect();
+      saveProgress();
+      renderApp();
+    };
+
+    window.resetAllPlayerData = () => {
+      state.levelProgress = { '1A': 0, '1B': 0, '2A': 0, '2B': 0, '3A': 0, '3B': 0, '3C': 0 };
+      state.levelStars = { '1A': 0, '1B': 0, '2A': 0, '2B': 0, '3A': 0, '3B': 0, '3C': 0 };
+      state.unlockedStickers = [];
+      state.bonusStars = 0;
+      state.spentStars = 0;
+      state.unlockedRewards = [];
+      state.equippedRewards = [];
+      state.unlockAll = false;
+      state.cashierHighScore = 0;
+      clearSavedProgress();
+      state.showResetConfirm = false;
+      state.showResetSuccess = true;
+      renderApp();
+    };
+
+    // ==========================================
+    // 5C. NAVIGASI & ENJIN PERMAINAN
+    // ==========================================
+    const stopCashierTimer = () => {
+      if (cashierTimerInterval) {
+        clearInterval(cashierTimerInterval);
+        cashierTimerInterval = null;
+      }
+    };
+
+    window.setGameState = (newState) => {
+      if (newState !== 'cashier') stopCashierTimer();
+      state.gameState = newState;
+      state.feedback = null;
+      manageAudioLoops();
+      renderApp();
+    };
+
+    window.setPlayerName = (val) => {
+      state.playerName = val.toUpperCase();
+      saveProgress();
+      const bannerNameEl = document.getElementById('banner-player-name');
+      if (bannerNameEl) bannerNameEl.textContent = state.playerName || 'BIJAK';
+    };
+
+    window.setParentInput = (val) => {
+      state.parentInput = val;
+    };
+
+    const getMissionData = () => state.missions[state.currentMissionIndex];
 
     window.startLevel = (levelType) => {
       enableAudio();
-      playMusic(); 
+      playMusic();
       state.mistakesCount = 0;
       state.showVictory = false;
       let newMissions = [];
-      
+
       const wholeItems = CATALOG.filter(item => Number.isInteger(item.price) && !['Beras', 'Telur'].includes(item.name));
       const snacksItems = CATALOG.filter(item => ['Biskut', 'Coklat', 'Air Kotak', 'Ais Krim', 'Air Mineral', 'Susu', 'Oren', 'Epal', 'Pisang', 'Roti', 'Keropok'].includes(item.name));
-      
+
       if (levelType === '1A') {
         const uniqueVals = getRandomItems(PRESCHOOL_MONEY_VALUES, 5);
         for (let i = 0; i < 5; i++) {
           const val = uniqueVals[i];
           const type = val >= 1 ? 'note' : 'coin';
-          const name = type === 'note' ? `Wang Kertas RM${val}` : `Syiling ${val * 100} Sen`;
+          const name = type === 'note' ? `Wang Kertas RM ${val}` : `Syiling ${Math.round(val * 100)} Sen`;
           newMissions.push({ level: '1A', question: `Sila berikan ${name}`, answerVal: val, answerType: type });
         }
-      } 
-      else if (levelType === '1B') {
+      } else if (levelType === '1B') {
         const validPrices = [10, 5, 1, 0.50, 0.20, 0.10];
         const exactItems = CATALOG.filter(item => validPrices.includes(item.price));
         const targets = getRandomItems(exactItems, 5);
@@ -566,11 +831,11 @@
           const target = targets[i];
           newMissions.push({ level: '1B', item: target, question: `Harga ${target.name} ialah ${formatMoney(target.price)}. Klik nilainya!`, answerVal: target.price });
         }
-      }
-      else if (levelType === '2A') {
+      } else if (levelType === '2A') {
         const itemGula = CATALOG.find(i => i.id === 'Gula-gula');
         const itemLollipop = CATALOG.find(i => i.id === 'Lollipop');
         const itemCoklatKecil = CATALOG.find(i => i.id === 'Coklat Kecil');
+
         for (let i = 0; i < 5; i++) {
           let items;
           if (i === 0) items = [itemGula, itemLollipop];
@@ -578,18 +843,16 @@
           else items = getRandomItems(snacksItems, 2);
           newMissions.push({ level: '2A', itemsToBuy: items, totalPrice: items.reduce((sum, item) => sum + item.price, 0) });
         }
-      }
-      else if (levelType === '2B') {
+      } else if (levelType === '2B') {
         const uniqueItems = getRandomItems(snacksItems.filter(i => i.price <= 9), 5);
         for (let i = 0; i < 5; i++) {
           const item = uniqueItems[i];
           let pay = item.price < 5 ? 5 : 10;
           if (item.price === 5) pay = 10;
-          let change = pay - item.price;
-          newMissions.push({ level: '2B', cost: item.price, pay: pay, change: change, question: `Beli RM${item.price}, bayar RM${pay}. Pilih baki RM${change} di rak!` });
+          const change = pay - item.price;
+          newMissions.push({ level: '2B', cost: item.price, pay: pay, change: change, question: `Beli ${formatMoney(item.price)}, bayar ${formatMoney(pay)}. Pilih baki ${formatMoney(change)} di rak!` });
         }
-      }
-      else if (levelType === '3A') {
+      } else if (levelType === '3A') {
         for (let i = 0; i < 5; i++) {
           let items, total;
           do {
@@ -598,13 +861,77 @@
           } while (total > 10);
           newMissions.push({ level: '3A', itemsToBuy: items, totalPrice: total });
         }
-      }
-      else if (levelType === '3B') {
+      } else if (levelType === '3B') {
         const budgets = [5, 6, 7, 8, 9, 10];
         const uniqueBudgets = getRandomItems(budgets, 5);
         for (let i = 0; i < 5; i++) {
           const b = uniqueBudgets[i];
-          newMissions.push({ level: '3B', budget: b, question: `Beli 2 atau lebih barang dengan jumlah TEPAT RM${b}!` });
+          newMissions.push({ level: '3B', budget: b, question: `Beli 2 atau lebih barang berjumlah tepat ${formatMoney(b)}!` });
+        }
+      } else if (levelType === '3C') {
+        const chosenItems = getRandomItems(snacksItems, 5);
+        for (let i = 0; i < 5; i++) {
+          const item = chosenItems[i];
+          if (i % 2 === 0) {
+            // Jenis Soalan A: Banding Harga (Pilih Paling Murah)
+            const p1 = Math.floor(Math.random() * 6) + 2; // RM 2 - RM 7
+            let p2 = p1 + (Math.random() < 0.5 ? 2 : -1);
+            if (p2 < 1 || p2 === p1) p2 = p1 + 2;
+            const cheaper = Math.min(p1, p2);
+            const opts = [
+              { uid: `cmp_${i}_0`, id: item.id, name: item.name, price: p1 },
+              { uid: `cmp_${i}_1`, id: item.id, name: item.name, price: p2 }
+            ].sort(() => Math.random() - 0.5);
+            newMissions.push({
+              level: '3C',
+              subType: 'compare',
+              question: `Mana satu ${item.name} yang PALING MURAH?`,
+              options: opts,
+              answerPrice: cheaper
+            });
+          } else {
+            // Jenis Soalan B: Potongan Harga (Tolak RM atau Sen, tiada %)
+            const useSen = i === 3;
+            let origPrice, discount, newPrice, choicesVals;
+            if (useSen) {
+              const senItem = CATALOG.find(c => c.id === 'Gula-gula') || item;
+              origPrice = [0.50, 0.60, 0.70, 0.80, 0.90][Math.floor(Math.random() * 5)];
+              discount = [0.10, 0.20][Math.floor(Math.random() * 2)];
+              newPrice = Math.round((origPrice - discount) * 100) / 100;
+              choicesVals = [
+                newPrice,
+                Math.round((newPrice + 0.10) * 100) / 100,
+                Math.max(0.10, Math.round((newPrice - 0.10) * 100) / 100)
+              ];
+              if (new Set(choicesVals).size < 3) choicesVals[2] = Math.round((origPrice + 0.10) * 100) / 100;
+              newMissions.push({
+                level: '3C',
+                subType: 'discount',
+                item: senItem,
+                origPrice,
+                discount,
+                answerPrice: newPrice,
+                question: `Harga asal ${formatMoney(origPrice)}. Tolak potongan ${formatMoney(discount)}. Pilih harga baharu!`,
+                priceChoices: choicesVals.sort(() => Math.random() - 0.5).map((v, idx) => ({ uid: `disc_${i}_${idx}`, val: v }))
+              });
+            } else {
+              origPrice = Math.floor(Math.random() * 6) + 3; // RM 3 - RM 8
+              discount = Math.random() < 0.6 ? 1 : 2;
+              newPrice = origPrice - discount;
+              choicesVals = [newPrice, newPrice + 1, Math.max(1, newPrice - 1)];
+              if (new Set(choicesVals).size < 3) choicesVals[2] = origPrice + 1;
+              newMissions.push({
+                level: '3C',
+                subType: 'discount',
+                item,
+                origPrice,
+                discount,
+                answerPrice: newPrice,
+                question: `Harga asal ${formatMoney(origPrice)}. Tolak potongan ${formatMoney(discount)}. Pilih harga baharu!`,
+                priceChoices: choicesVals.sort(() => Math.random() - 0.5).map((v, idx) => ({ uid: `disc_${i}_${idx}`, val: v }))
+              });
+            }
+          }
         }
       }
 
@@ -618,94 +945,102 @@
     const setupShopPhase = (mission) => {
       state.basket = [];
       state.tray = [];
-      
+      state.poppingBubble = null;
+
       if (mission.level === '1A' || mission.level === '1B') {
-        let availableItems = [
+        const availableItems = [
           { id: 'n10', val: 10, type: 'note' }, { id: 'n5', val: 5, type: 'note' }, { id: 'n1', val: 1, type: 'note' },
           { id: 'c50', val: 0.5, type: 'coin' }, { id: 'c20', val: 0.2, type: 'coin' }, { id: 'c10', val: 0.1, type: 'coin' }
         ];
-
-        let selectedShelf = getRandomItems(availableItems, 5); 
-        let hasAnswer = selectedShelf.some(item => item.val === mission.answerVal);
+        let selectedShelf = getRandomItems(availableItems, 5);
+        const hasAnswer = selectedShelf.some(item => item.val === mission.answerVal);
         if (!hasAnswer) {
-           const answerItem = availableItems.find(item => item.val === mission.answerVal);
-           if (answerItem) selectedShelf[0] = answerItem;
+          const answerItem = availableItems.find(item => item.val === mission.answerVal);
+          if (answerItem) selectedShelf[0] = answerItem;
         }
-
         selectedShelf = selectedShelf.sort(() => Math.random() - 0.5).map((item, idx) => ({
-           ...item,
-           uid: Math.random().toString(36).substring(2, 9),
-           bubbleId: Math.random().toString(),
-           left: 5 + (idx * 18) + (Math.random() * 5) + '%',
-           delay: (Math.random() * 3) + 's',
-           duration: 7 + (Math.random() * 4) + 's'
+          ...item,
+          uid: `bub_${idx}_${Math.random().toString(36).substring(7)}`,
+          bubbleId: `b_${idx}_${Math.random().toString(36).substring(7)}`,
+          left: 5 + (idx * 18) + (Math.random() * 5) + '%',
+          delay: (Math.random() * 3) + 's',
+          duration: 7 + (Math.random() * 4) + 's'
         }));
-
         state.shelfItems = selectedShelf;
         state.tinaMsg = mission.question;
         state.gameState = 'bubbleGame';
       } else if (mission.level === '2B') {
-        let availableItems = [
+        const availableItems = [
           { id: 'n1', val: 1, type: 'note' }, { id: 'n5', val: 5, type: 'note' },
           { id: 'n10', val: 10, type: 'note' },
           { id: 'n1_2', val: 1, type: 'note' }, { id: 'n5_2', val: 5, type: 'note' },
           { id: 'n1_3', val: 1, type: 'note' }, { id: 'n1_4', val: 1, type: 'note' }
         ];
-        let selectedShelf = getRandomItems(availableItems, 6);
-        state.shelfItems = selectedShelf.sort(() => Math.random() - 0.5).map(item => ({...item, uid: Math.random().toString(36).substring(2, 9)}));
+        state.shelfItems = getRandomItems(availableItems, 6)
+          .sort(() => Math.random() - 0.5)
+          .map((item, idx) => ({ ...item, uid: `m2b_${idx}_${Math.random().toString(36).substring(7)}` }));
         state.tinaMsg = mission.question;
         state.gameState = 'shop';
       } else if (mission.level === '3B') {
         const wholeItems = CATALOG.filter(item => Number.isInteger(item.price) && !['Beras', 'Telur'].includes(item.name));
-        state.shelfItems = getRandomItems(wholeItems, 12).map(item => ({...item, uid: Math.random().toString(36).substring(2, 9)}));
+        state.shelfItems = getRandomItems(wholeItems, 12)
+          .map((item, idx) => ({ ...item, uid: `m3b_${idx}_${Math.random().toString(36).substring(7)}` }));
+        state.tinaMsg = mission.question;
+        state.gameState = 'shop';
+      } else if (mission.level === '3C') {
+        state.shelfItems = mission.subType === 'compare' ? mission.options : mission.priceChoices;
         state.tinaMsg = mission.question;
         state.gameState = 'shop';
       } else {
-        let targets = [...mission.itemsToBuy];
-        const allowedDistractors = (mission.level === '2A') 
-           ? CATALOG.filter(i => ['Biskut', 'Coklat', 'Air Kotak', 'Ais Krim', 'Air Mineral', 'Keropok', 'Lollipop', 'Coklat Kecil', 'Gula-gula'].includes(i.id)) 
-           : CATALOG.filter(item => Number.isInteger(item.price) && !['Beras', 'Telur'].includes(item.name));
-           
-        let distractors = getRandomItems(allowedDistractors.filter(c => !targets.map(t=>t.id).includes(c.id)), 5);
-        state.shelfItems = [...targets, ...distractors].sort(() => Math.random() - 0.5).map(item => ({...item, uid: Math.random().toString(36).substring(2, 9)}));
+        const targets = [...mission.itemsToBuy];
+        const allowedDistractors = (mission.level === '2A')
+          ? CATALOG.filter(i => ['Biskut', 'Coklat', 'Air Kotak', 'Ais Krim', 'Air Mineral', 'Keropok', 'Lollipop', 'Coklat Kecil', 'Gula-gula'].includes(i.id))
+          : CATALOG.filter(item => Number.isInteger(item.price) && !['Beras', 'Telur'].includes(item.name));
+        const distractors = getRandomItems(allowedDistractors.filter(c => !targets.map(t => t.id).includes(c.id)), 5);
+        state.shelfItems = [...targets, ...distractors]
+          .sort(() => Math.random() - 0.5)
+          .map((item, idx) => ({ ...item, uid: `sh_${idx}_${Math.random().toString(36).substring(7)}` }));
         const itemNames = mission.itemsToBuy.map(i => i.name).join(' & ');
         state.tinaMsg = `Mari beli: ${itemNames}!`;
         state.gameState = 'shop';
       }
-      renderApp(); manageAudioLoops();
+      manageAudioLoops();
+      renderApp();
     };
 
-    window.generateWallet = (targetAmount) => {
+    const generateWallet = (targetAmount) => {
       let required = [];
       let remaining = targetAmount;
       for (let val of ALL_MONEY_VALUES) {
-        while (remaining >= val - 0.001) { 
+        while (remaining >= val - 0.001) {
           required.push(val);
           remaining -= val;
         }
       }
-      let distractors = state.currentLevel.startsWith('3') ? [1, 5, 10] : [0.5, 0.2, 0.1, 1, 5];
-      let initialWallet = [...required, ...distractors].sort((a,b) => b - a);
+      const distractors = state.currentLevel.startsWith('3') ? [1, 5, 10] : [0.5, 0.2, 0.1, 1, 5];
+      const initialWallet = [...required, ...distractors].sort((a, b) => b - a);
       state.wallet = initialWallet.map((val, idx) => ({ id: `w_${idx}`, val, type: val >= 1 ? 'note' : 'coin' }));
     };
 
     window.handleShelfClick = (uid) => {
-      const clickedItem = state.shelfItems.find(i => i.uid === uid);
-      if (!clickedItem) return;
       const mission = getMissionData();
       if (state.feedback !== null || state.poppingBubble !== null) return;
+      const clickedItem = state.shelfItems.find(item => item.uid === uid);
+      if (!clickedItem) return;
 
       if (mission.level === '1A') {
         if (clickedItem.val === mission.answerVal && clickedItem.type === mission.answerType) {
-          state.poppingBubble = clickedItem.bubbleId; renderApp();
-          setTimeout(() => { playCorrect(); successFeedback(); state.poppingBubble = null; renderApp(); }, 300);
+          state.poppingBubble = clickedItem.bubbleId;
+          renderApp();
+          setTimeout(() => { playCorrect(); state.poppingBubble = null; successFeedback(); }, 300);
         } else {
           playWrong(); wrongFeedback("Bukan yang itu. " + mission.question);
         }
       } else if (mission.level === '1B') {
         if (clickedItem.val === mission.answerVal) {
-          state.poppingBubble = clickedItem.bubbleId; renderApp();
-          setTimeout(() => { playCorrect(); successFeedback(); state.poppingBubble = null; renderApp(); }, 300);
+          state.poppingBubble = clickedItem.bubbleId;
+          renderApp();
+          setTimeout(() => { playCorrect(); state.poppingBubble = null; successFeedback(); }, 300);
         } else {
           playWrong(); wrongFeedback(`Cari wang yang nilainya tepat ${formatMoney(mission.answerVal)}!`);
         }
@@ -715,24 +1050,43 @@
         if (Math.abs(newSum - mission.change) < 0.01) {
           playCorrect(); successFeedback();
         } else if (newSum > mission.change) {
-          playWrong(); wrongFeedback("Terlebih baki! Mula semula."); state.basket = []; renderApp();
+          playWrong(); state.basket = []; wrongFeedback("Terlebih baki! Mula semula.");
         } else {
           playTone(600, 'sine', 0.1, 0.1);
-          state.basket.push(clickedItem);
+          state.basket = [...state.basket, clickedItem];
           state.tinaMsg = `Baki dikumpul: ${formatMoney(newSum)}. Perlukan ${formatMoney(mission.change)}`;
           renderApp();
         }
       } else if (mission.level === '3B') {
         playTone(600, 'sine', 0.1, 0.1);
-        state.basket.push(clickedItem);
-        state.tinaMsg = `Masuk bakul! Jumlah: ${formatMoney(state.basket.reduce((a,b) => a + (b.price || 0), 0))}`;
+        state.basket = [...state.basket, clickedItem];
+        const sum = state.basket.reduce((a, b) => a + (b.price || 0), 0);
+        state.tinaMsg = `Masuk bakul! Jumlah: ${formatMoney(sum)}`;
         renderApp();
+      } else if (mission.level === '3C') {
+        if (mission.subType === 'compare') {
+          if (Math.abs(clickedItem.price - mission.answerPrice) < 0.005) {
+            playCorrect();
+            successFeedback(`Bijak! ${formatMoney(clickedItem.price)} paling murah!`);
+          } else {
+            playWrong();
+            wrongFeedback("Cuba bandingkan semula! Pilih harga yang lebih kecil.");
+          }
+        } else {
+          if (Math.abs(clickedItem.val - mission.answerPrice) < 0.005) {
+            playCorrect();
+            successFeedback(`Tepat! ${formatMoney(mission.origPrice)} - ${formatMoney(mission.discount)} = ${formatMoney(mission.answerPrice)}!`);
+          } else {
+            playWrong();
+            wrongFeedback(`Cuba kira semula: ${formatMoney(mission.origPrice)} tolak ${formatMoney(mission.discount)}.`);
+          }
+        }
       } else {
         const targetCount = mission.itemsToBuy.filter(i => i.id === clickedItem.id).length;
         const basketCount = state.basket.filter(i => i.id === clickedItem.id).length;
         if (basketCount < targetCount) {
           playCorrect();
-          state.basket.push(clickedItem);
+          state.basket = [...state.basket, clickedItem];
           state.tinaMsg = "Bagus! Masuk dalam bakul.";
           renderApp();
           if (state.basket.length === mission.itemsToBuy.length) {
@@ -740,8 +1094,9 @@
               state.tinaMsg = `Jom bayar ${formatMoney(mission.totalPrice)}!`;
               generateWallet(mission.totalPrice);
               state.gameState = 'checkout';
-              renderApp(); manageAudioLoops();
-            }, 1500);
+              manageAudioLoops();
+              renderApp();
+            }, 1200);
           }
         } else {
           playWrong(); wrongFeedback("Kita tak perlukan ini, cari yang dalam senarai!");
@@ -750,381 +1105,747 @@
     };
 
     window.moveMoneyToTray = (id) => {
-      const item = state.wallet.find(m => m.id === id);
+      const moneyItem = state.wallet.find(m => m.id === id);
+      if (!moneyItem) return;
+      if (moneyItem.type === 'coin') {
+        playTone(1350, 'sine', 0.08, 0.12);
+        setTimeout(() => playTone(1850, 'sine', 0.06, 0.08), 35);
+      } else {
+        playTone(720, 'triangle', 0.07, 0.12);
+      }
       state.wallet = state.wallet.filter(m => m.id !== id);
-      state.tray.push(item);
+      state.tray = [...state.tray, moneyItem];
       renderApp();
     };
-    
+
     window.moveMoneyToWallet = (id) => {
-      const item = state.tray.find(m => m.id === id);
+      const moneyItem = state.tray.find(m => m.id === id);
+      if (!moneyItem) return;
+      playTone(520, 'sine', 0.07, 0.1);
       state.tray = state.tray.filter(m => m.id !== id);
-      state.wallet.push(item);
-      state.wallet.sort((a,b) => b.val - a.val);
+      state.wallet = [...state.wallet, moneyItem].sort((a, b) => b.val - a.val);
       renderApp();
     };
 
     window.handlePayment = () => {
+      if (state.feedback !== null) return;
       const mission = getMissionData();
       const sum = state.tray.reduce((acc, item) => acc + item.val, 0);
       if (Math.abs(sum - mission.totalPrice) < 0.01) {
         playTing(); successFeedback();
       } else {
-        playWrong(); state.wobbleTray = true;
+        playWrong();
+        state.wobbleTray = true;
         wrongFeedback(`Alamak, jumlah belum tepat. Harga ialah ${formatMoney(mission.totalPrice)}.`);
-        renderApp();
-        setTimeout(() => { state.wobbleTray = false; renderApp(); }, 500);
+        setTimeout(() => { state.wobbleTray = false; }, 500);
       }
     };
 
-    window.successFeedback = (customMsg = null) => {
+    const successFeedback = (customMsg = null) => {
       state.feedback = 'correct';
       state.tinaMsg = customMsg || "Wah, tepat sekali! Pandai!";
       renderApp();
     };
-    
-    window.wrongFeedback = (msg) => {
-      state.mistakesCount++;
-      state.feedback = 'wrong'; 
+
+    let wrongTimeout = null;
+    const wrongFeedback = (msg) => {
+      state.mistakesCount += 1;
+      state.feedback = 'wrong';
       state.tinaMsg = "Ops! Cuba lagi sekali, anda pasti boleh! 💪\n" + msg;
       renderApp();
-      setTimeout(() => { state.feedback = null; renderApp(); }, 2500);
+      if (wrongTimeout) clearTimeout(wrongTimeout);
+      wrongTimeout = setTimeout(() => {
+        state.feedback = null;
+        state.wobbleTray = false;
+        renderApp();
+      }, 2500);
     };
 
     window.nextMission = () => {
-      state.feedback = null; 
+      state.feedback = null;
+      if (state.gameState === 'cashier') {
+        generateCashierMission();
+        renderApp();
+        return;
+      }
       if (state.currentMissionIndex + 1 < state.missions.length) {
-        state.currentMissionIndex++;
+        state.currentMissionIndex += 1;
         setupShopPhase(state.missions[state.currentMissionIndex]);
       } else {
         handleGameComplete();
       }
     };
 
-    window.handleGameComplete = () => {
+    const handleGameComplete = () => {
       let earnedStars = 1;
       if (state.mistakesCount === 0) earnedStars = 3;
       else if (state.mistakesCount <= 2) earnedStars = 2;
 
-      state.levelStars[state.currentLevel] = Math.max(state.levelStars[state.currentLevel], earnedStars);
+      state.levelStars[state.currentLevel] = Math.max(state.levelStars[state.currentLevel] || 0, earnedStars);
       state.lastEarnedStars = earnedStars;
-      state.levelProgress[state.currentLevel]++;
+      state.levelProgress[state.currentLevel] = (state.levelProgress[state.currentLevel] || 0) + 1;
 
       let won = null;
       if (earnedStars === 3 && state.unlockedStickers.length < STICKERS.length) {
-          const allLocked = STICKERS.filter(s => !state.unlockedStickers.includes(s.id));
-          if (allLocked.length > 0) {
-              const levelSpecificLocked = allLocked.filter(s => s.hint.includes(state.currentLevel));
-              const pool = levelSpecificLocked.length > 0 ? levelSpecificLocked : allLocked;
-              won = pool[Math.floor(Math.random() * pool.length)];
-              state.unlockedStickers.push(won.id);
-              state.newStickerWon = won;
-          }
+        const allLocked = STICKERS.filter(s => !state.unlockedStickers.includes(s.id));
+        if (allLocked.length > 0) {
+          const levelSpecificLocked = allLocked.filter(s => s.hint.includes(state.currentLevel));
+          const pool = levelSpecificLocked.length > 0 ? levelSpecificLocked : allLocked;
+          won = pool[Math.floor(Math.random() * pool.length)];
+          state.unlockedStickers = [...state.unlockedStickers, won.id];
+          state.newStickerWon = won;
+        }
       }
+
+      saveProgress();
       state.gameState = 'result';
-      state.tinaMsg = won ? "Wah, kamu dapat sticker baharu!" : (earnedStars === 3 ? "Tahniah! Anda sangat bijak!" : "Dapatkan 3 Bintang ⭐⭐⭐ untuk membuka Stiker seterusnya!");
-      renderApp(); manageAudioLoops();
+      state.tinaMsg = won
+        ? "Wah, kamu dapat sticker baharu!"
+        : (earnedStars === 3 ? "Tahniah! Anda sangat bijak!" : "Dapatkan 3 Bintang ⭐⭐⭐ untuk membuka Stiker seterusnya!");
+      manageAudioLoops();
+      renderApp();
     };
 
+    // ==========================================
+    // 5D. PANGKAT 4: TAUKE KEDAI (MOD JURUWANG)
+    // ==========================================
+    window.startCashierMode = (mode) => {
+      enableAudio();
+      playMusic();
+      stopCashierTimer();
+      state.cashierMode = mode;
+      state.cashierServed = 0;
+      state.cashierSessionStars = 0;
+      state.cashierTimeLeft = 120;
+      state.cashierEnded = false;
+      state.feedback = null;
+      state.gameState = 'cashier';
+      generateCashierMission();
+      manageAudioLoops();
+      renderApp();
+
+      if (mode === 'timed') {
+        cashierTimerInterval = setInterval(() => {
+          if (state.gameState !== 'cashier' || state.cashierEnded) {
+            stopCashierTimer();
+            return;
+          }
+          state.cashierTimeLeft -= 1;
+          const timerEl = document.getElementById('cashier-timer');
+          if (timerEl) {
+            const mins = Math.floor(state.cashierTimeLeft / 60);
+            const secs = state.cashierTimeLeft % 60;
+            timerEl.textContent = `⏱️ ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+          }
+          if (state.cashierTimeLeft <= 0) {
+            stopCashierTimer();
+            state.cashierEnded = true;
+            state.feedback = null;
+            if (state.cashierServed > state.cashierHighScore) {
+              state.cashierHighScore = state.cashierServed;
+            }
+            if (state.cashierServed >= 5) {
+              state.bonusStars += 3;
+              state.cashierSessionStars += 3;
+              playTing();
+            }
+            saveProgress();
+            renderApp();
+          }
+        }, 1000);
+      }
+    };
+
+    const generateCashierMission = () => {
+      state.tray = [];
+      state.wobbleTray = false;
+      const isSenMode = Math.random() < 0.4;
+
+      if (isSenMode) {
+        const senPool = [
+          { id: 'Gula-gula', name: 'Gula-gula', price: 0.50 },
+          { id: 'Lollipop', name: 'Lollipop', price: 0.30 },
+          { id: 'Coklat Kecil', name: 'Coklat Kecil', price: 0.20 },
+          { id: 'Beg Plastik', name: 'Beg Plastik', price: 0.20 },
+          { id: 'Gula-gula', name: 'Gula-gula', price: 0.40 },
+          { id: 'Lollipop', name: 'Lollipop', price: 0.10 }
+        ];
+        let i1, i2, total;
+        do {
+          i1 = senPool[Math.floor(Math.random() * senPool.length)];
+          i2 = senPool[Math.floor(Math.random() * senPool.length)];
+          total = Math.round((i1.price + i2.price) * 100) / 100;
+        } while (total >= 1.00 || total < 0.20);
+
+        const pay = 1.00;
+        const change = Math.round((pay - total) * 100) / 100;
+        state.cashierMission = { isSen: true, items: [i1, i2], total, pay, change };
+      } else {
+        const wholePool = CATALOG.filter(i => Number.isInteger(i.price) && i.price >= 1 && i.price <= 5);
+        let i1, i2, total;
+        do {
+          i1 = wholePool[Math.floor(Math.random() * wholePool.length)];
+          i2 = wholePool[Math.floor(Math.random() * wholePool.length)];
+          total = i1.price + i2.price;
+        } while (total < 2 || total > 9 || total === 5);
+
+        const pay = total < 5 ? 5 : 10;
+        const change = pay - total;
+        state.cashierMission = { isSen: false, items: [i1, i2], total, pay, change };
+      }
+    };
+
+    window.cashierAddMoney = (val) => {
+      if (state.feedback !== null || state.cashierEnded) return;
+      const type = val >= 1 ? 'note' : 'coin';
+      if (type === 'coin') {
+        playTone(1350, 'sine', 0.08, 0.12);
+        setTimeout(() => playTone(1850, 'sine', 0.06, 0.08), 35);
+      } else {
+        playTone(720, 'triangle', 0.07, 0.12);
+      }
+      state.tray = [...state.tray, { id: `ct_${Date.now()}_${Math.random()}`, val, type }];
+      renderApp();
+    };
+
+    window.cashierRemoveMoney = (id) => {
+      if (state.feedback !== null || state.cashierEnded) return;
+      playTone(520, 'sine', 0.07, 0.1);
+      state.tray = state.tray.filter(m => m.id !== id);
+      renderApp();
+    };
+
+    window.handleCashierSubmit = () => {
+      if (state.feedback !== null || state.cashierEnded) return;
+      const m = state.cashierMission;
+      const sum = Math.round(state.tray.reduce((acc, item) => acc + item.val, 0) * 100) / 100;
+      if (Math.abs(sum - m.change) < 0.005) {
+        playTing();
+        state.cashierServed += 1;
+        let msg = `Baki tepat (${formatMoney(m.change)})! Pelanggan gembira!`;
+
+        if (state.cashierMode === 'relaxed' && state.cashierServed % 3 === 0) {
+          state.bonusStars += 1;
+          state.cashierSessionStars += 1;
+          msg = `Hebat! 3 pelanggan dilayan! +1 ⭐ Bintang Ganjaran!`;
+        }
+        if (state.cashierMode === 'timed' && state.cashierServed > state.cashierHighScore) {
+          state.cashierHighScore = state.cashierServed;
+        }
+        saveProgress();
+        successFeedback(msg);
+      } else {
+        playWrong();
+        state.wobbleTray = true;
+        wrongFeedback(`Baki belum tepat! Pelanggan bayar ${formatMoney(m.pay)} untuk ${formatMoney(m.total)}.`);
+        setTimeout(() => { state.wobbleTray = false; }, 500);
+      }
+    };
+
+    // ==========================================
+    // 5E. PARENTAL LOCK ENGINE
+    // ==========================================
     window.openParentGate = () => {
       const num1 = Math.floor(Math.random() * 10) + 1;
       const num2 = Math.floor(Math.random() * 10) + 1;
       state.parentMath = { q: `${num1} + ${num2} = ?`, a: num1 + num2 };
       state.parentInput = '';
-      state.gameState = 'parentGate';
-      renderApp(); manageAudioLoops();
+      state.showParentError = false;
+      setGameState('parentGate');
     };
 
     window.verifyParentLock = () => {
-      if (parseInt(state.parentInput) === state.parentMath.a) {
-          state.gameState = 'parents';
+      if (parseInt(state.parentInput, 10) === state.parentMath.a) {
+        setGameState('parents');
       } else {
-          state.showParentError = true;
+        state.showParentError = true;
+        renderApp();
       }
-      renderApp(); manageAudioLoops();
     };
 
     // ==========================================
-    // 6. RENDER FUNCTIONS
+    // 6. VIEW RENDERERS
     // ==========================================
     const renderMenu = () => `
       <div class="flex flex-col items-center justify-between pt-8 pb-16 sm:pt-10 sm:pb-16 h-full text-center px-4 space-y-2 relative z-10 bg-gradient-to-b from-sky-200 via-sky-100 to-slate-300">
+        <!-- Awning Kedai -->
         <div class="absolute top-0 left-0 w-full flex h-8 z-0 shadow-md shrink-0">
-           ${Array.from({length: 12}).map((_, i) => `<div class="flex-1 h-full rounded-b-lg ${i % 2 === 0 ? 'bg-red-500' : 'bg-white'}"></div>`).join('')}
-        </div>
-        
-        <div class="absolute top-2 left-2 sm:top-3 z-50 flex items-center bg-white/95 backdrop-blur-md px-2 py-1 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.15)] border-2 border-sky-300 focus-within:border-sky-500 transition-colors animate-bounce-slight">
-           <div class="bg-gradient-to-br from-sky-400 to-blue-500 p-1.5 rounded-full mr-2 shadow-inner">
-             <svg class="w-3.5 h-3.5 text-white drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
-               <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-             </svg>
-           </div>
-             <input 
-             type="text"
-             maxlength="10"
-             placeholder="Nama..."
-             value="${state.playerName}"
-             oninput="this.value = this.value.toUpperCase(); setPlayerName(this.value);"
-             class="w-[85px] bg-transparent text-[11px] font-black text-slate-700 focus:outline-none placeholder-slate-400"
-           />
+          ${Array.from({length: 12}).map((_, i) => `<div class="flex-1 h-full rounded-b-lg ${i % 2 === 0 ? 'bg-red-500' : 'bg-white'}"></div>`).join('')}
         </div>
 
-        <div class="z-20 flex flex-col items-center w-full mt-32 sm:mt-36 shrink-0">
+        <!-- Kotak Profil Nama -->
+        <div class="absolute top-2 right-2 sm:top-3 z-50 flex items-center bg-white/95 backdrop-blur-md px-2 py-1 rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.15)] border-2 border-sky-300 focus-within:border-sky-500 transition-colors animate-bounce-slight">
+          <div class="bg-gradient-to-br from-sky-400 to-blue-500 p-1.5 rounded-full mr-2 shadow-inner">
+            <svg class="w-3.5 h-3.5 text-white drop-shadow-sm" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            maxlength="10"
+            placeholder="Nama..."
+            value="${state.playerName}"
+            oninput="setPlayerName(this.value)"
+            class="w-[85px] bg-transparent text-[11px] font-black text-slate-700 focus:outline-none placeholder-slate-400"
+          />
+        </div>
+
+        <!-- Papan Tanda PASAR MINI BIJAK (Flat Design Warna-Warni) -->
+        <div class="z-20 flex flex-col items-center w-full mt-10 sm:mt-14 shrink-0">
           <div class="relative z-30">
-             <div class="absolute -top-4 left-6 sm:left-8 w-1.5 h-6 bg-slate-400 rounded-full shadow-sm"></div>
-             <div class="absolute -top-4 right-6 sm:right-8 w-1.5 h-6 bg-slate-400 rounded-full shadow-sm"></div>
-             <div class="bg-gradient-to-br from-sky-400 via-pink-400 to-amber-400 p-1.5 sm:p-2 rounded-2xl shadow-lg border-4 border-white">
-                <div class="bg-white rounded-xl px-4 sm:px-6 py-2 relative overflow-hidden flex flex-col items-center">
-                  <h1 class="text-xl sm:text-3xl md:text-4xl mt-1 flex flex-col items-center relative z-10" style="font-family: 'Fredoka', sans-serif; letter-spacing: 1px;">
-                    <span class="text-pink-500 font-bold block pb-1 pt-1">PASAR MINI</span>
-                    <span class="text-sky-500 font-black text-3xl sm:text-5xl md:text-6xl mt-1 truncate max-w-[180px] sm:max-w-[260px] pb-1 pt-2" id="display-name">${state.playerName || 'BIJAK'}</span>
-                  </h1>
-                </div>
-             </div>
-          </div>
-        </div>
-        
-        <div class="relative z-10 flex justify-center w-full flex-1 items-end min-h-[220px] sm:min-h-[250px] pb-6 sm:pb-8 mt-2">
-          <div class="absolute bottom-6 w-[85%] max-w-[280px] h-[75%] border-x-[12px] border-t-[12px] border-slate-700 bg-sky-900/60 rounded-t-xl z-10 flex overflow-hidden shadow-[inset_0_0_40px_rgba(0,0,0,0.8)] backdrop-blur-md">
-             <div class="absolute inset-0 pointer-events-none opacity-95 z-0 overflow-hidden bg-slate-50">
-                <!-- Wall Background -->
-                <div class="absolute inset-0 bg-gradient-to-b from-amber-100/60 to-amber-50/60 z-0"></div>
-                
-                <!-- Mosaic Floor -->
-                <div class="absolute bottom-0 w-full h-[35%] z-0" style="background-color: #f8fafc; background-image: repeating-linear-gradient(45deg, #e2e8f0 25%, transparent 25%, transparent 75%, #e2e8f0 75%, #e2e8f0), repeating-linear-gradient(45deg, #e2e8f0 25%, #f1f5f9 25%, #f1f5f9 75%, #e2e8f0 75%, #e2e8f0); background-position: 0 0, 15px 15px; background-size: 30px 30px;"></div>
-
-                <!-- RAK DI BELAKANG KAUNTER -->
-                <div class="absolute top-[8%] left-[2%] w-[50%] h-[55%] flex flex-col justify-between py-1 z-0 border-2 border-slate-700/10 rounded bg-white/40 shadow-inner">
-                    <div class="flex flex-col justify-end h-[32%]">
-                        <div class="flex justify-around items-end px-0.5 z-10 pb-0.5">
-                           ${ItemSVG("Keropok", 18)}${ItemSVG("Biskut", 18)}${ItemSVG("Roti", 18)}${ItemSVG("Keropok", 18)}
-                        </div>
-                        <div class="w-full h-1.5 bg-amber-800/80 rounded-sm"></div>
-                    </div>
-                    <div class="flex flex-col justify-end h-[32%]">
-                        <div class="flex justify-around items-end px-0.5 z-10 pb-0.5">
-                           ${ItemSVG("Coklat", 18)}${ItemSVG("Keju", 18)}${ItemSVG("Mentega", 18)}${ItemSVG("Coklat Kecil", 18)}
-                        </div>
-                        <div class="w-full h-1.5 bg-amber-800/80 rounded-sm"></div>
-                    </div>
-                    <div class="flex flex-col justify-end h-[32%]">
-                        <div class="flex justify-around items-end px-0.5 z-10 pb-0.5">
-                           ${ItemSVG("Air Mineral", 18)}${ItemSVG("Air Kotak", 18)}${ItemSVG("Susu", 18)}${ItemSVG("Air Mineral", 18)}
-                        </div>
-                        <div class="w-full h-1.5 bg-amber-800/80 rounded-sm"></div>
-                    </div>
-                </div>
-
-                <!-- PEKERJA & KAUNTER -->
-                <div class="absolute top-[38%] left-[15%] z-10 flex flex-col items-center">
-                   <!-- Pekerja (Mata & Rambut) -->
-                   <div class="relative w-8 h-10 flex flex-col items-center">
-                      <div class="w-5 h-2.5 bg-slate-800 rounded-t-full z-20 translate-y-1"></div>
-                      <div class="w-4 h-4 bg-orange-200 rounded-full z-10 relative">
-                         <div class="absolute top-1 left-0.5 w-1 h-1 bg-white rounded-full flex items-center justify-center overflow-hidden"><div class="w-0.5 h-0.5 bg-black rounded-full"></div></div>
-                         <div class="absolute top-1 right-0.5 w-1 h-1 bg-white rounded-full flex items-center justify-center overflow-hidden"><div class="w-0.5 h-0.5 bg-black rounded-full"></div></div>
-                      </div>
-                      <div class="w-7 h-6 bg-red-500 rounded-t-xl mt-0.5 relative shadow-sm border border-red-600"></div>
-                   </div>
-                   <!-- Kaunter -->
-                   <div class="w-20 h-14 bg-gradient-to-b from-orange-200 to-orange-300 rounded-t border-t-2 border-orange-100 shadow-[0_5px_15px_rgba(0,0,0,0.2)] flex justify-center pt-1 z-20 relative border-x border-orange-400">
-                      <div class="bg-white/90 px-1.5 py-0.5 rounded shadow-sm h-min flex items-center justify-center border border-slate-200">
-                         <span class="text-[5px] font-black text-slate-700 tracking-widest leading-none">KAUNTER</span>
-                      </div>
-                      <!-- Mesin Wang -->
-                      <div class="absolute bottom-10 left-2 w-5 h-4 bg-slate-600 rounded-t-sm border border-slate-700">
-                         <div class="w-full h-2 bg-slate-800 rounded-t-sm"></div>
-                      </div>
-                   </div>
-                </div>
-
-                <!-- PEMBELI -->
-                <div class="absolute bottom-[10%] right-[35%] z-20 flex flex-col items-center">
-                   <!-- Pembeli (Mata & Rambut) -->
-                   <div class="relative w-9 h-14 flex flex-col items-center">
-                      <div class="w-6 h-3 bg-amber-900 rounded-t-full z-20 translate-y-1"></div>
-                      <div class="w-5 h-5 bg-orange-200 rounded-full z-10 relative">
-                         <div class="absolute top-1.5 left-0.5 w-1.5 h-1.5 bg-white rounded-full flex items-center justify-start pl-0.5 overflow-hidden"><div class="w-0.5 h-0.5 bg-black rounded-full"></div></div>
-                      </div>
-                      <div class="w-8 h-8 bg-blue-500 rounded-t-2xl mt-0.5 shadow-md border border-blue-600"></div>
-                      <div class="w-8 h-3 bg-slate-700 rounded-b-sm border border-slate-800"></div>
-                   </div>
-                </div>
-
-                <!-- RAK BUAH-BUAHAN KANAN -->
-                <div class="absolute bottom-[10%] right-[3%] w-[32%] h-[48%] z-10 flex flex-col justify-end">
-                   <!-- Papan Tanda Kecil -->
-                   <div class="bg-gradient-to-r from-green-500 to-green-600 text-white text-[7px] font-black text-center py-0.5 rounded-t-md shadow-sm border border-green-700/50">SEGAR & MURAH</div>
-                   <!-- Rak Bertingkat -->
-                   <div class="w-full flex-1 bg-gradient-to-b from-orange-100 to-orange-200 border-x-2 border-b-2 border-orange-300 rounded-b-md shadow-inner flex flex-col justify-between py-1 relative">
-                      <!-- Tingkat Atas -->
-                      <div class="flex justify-around items-end h-[30%] px-1 border-b-2 border-orange-300/60 pb-0.5 shadow-[0_2px_2px_rgba(0,0,0,0.05)]">
-                         ${ItemSVG("Epal", 20)}
-                         ${ItemSVG("Oren", 20)}
-                         ${ItemSVG("Pisang", 20)}
-                      </div>
-                      <!-- Tingkat Tengah -->
-                      <div class="flex justify-around items-end h-[30%] px-1 border-b-2 border-orange-300/60 pb-0.5 shadow-[0_2px_2px_rgba(0,0,0,0.05)]">
-                         ${ItemSVG("Lobak Merah", 22)}
-                         ${ItemSVG("Susu", 20)}
-                         ${ItemSVG("Susu", 20)}
-                      </div>
-                      <!-- Tingkat Bawah -->
-                      <div class="flex justify-around items-end h-[30%] px-1 pb-0.5">
-                         ${ItemSVG("Telur", 22)}
-                         ${ItemSVG("Jam", 20)}
-                         ${ItemSVG("Beras", 22)}
-                      </div>
-                   </div>
-                </div>
-             </div>
-             <div class="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none z-10"></div>
-             <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[2px] bg-white/30 z-10"></div>
-             <div class="w-1/2 h-full border-r-[4px] border-slate-500/80 relative flex items-center justify-end shadow-inner z-20 pointer-events-none"><div class="w-2.5 h-24 bg-gradient-to-r from-slate-300 to-slate-400 rounded-l shadow-md border-y border-l border-slate-500 mr-1"></div></div>
-             <div class="w-1/2 h-full border-l-[4px] border-slate-500/80 relative flex items-center justify-start shadow-inner z-20 pointer-events-none"><div class="w-2.5 h-24 bg-gradient-to-r from-slate-400 to-slate-500 rounded-r shadow-md border-y border-r border-slate-600 ml-1"></div></div>
-             <div class="absolute top-[38%] left-4 bg-gradient-to-b from-green-500 to-green-600 text-white font-black text-[10px] sm:text-xs tracking-wider px-3 py-1 rounded border border-green-300 shadow-md z-30">BUKA</div>
-          </div>
-          <div class="absolute bottom-0 w-full h-6 bg-slate-400 z-0 flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] border-t border-slate-500">
-             ${Array.from({length: 20}).map((_, i) => `<div class="flex-1 h-full border-r border-slate-500/30 ${i % 2 === 0 ? 'bg-slate-300' : 'bg-slate-400'}"></div>`).join('')}
-          </div>
-          <div class="relative inline-block z-20 flex justify-center mt-16 sm:mt-20 translate-y-6 sm:translate-y-8">
-            ${Shopkeeper(null, "w-40 h-40 sm:w-48 sm:h-48 drop-shadow-xl")}
-            <div class="absolute -top-6 sm:-top-4 left-[85%] sm:left-[90%] z-30 pointer-events-none">
-              ${SpeechBubble("Mari masuk!", "min-w-[80px] max-w-[100px] text-[11px] font-bold p-2", "left")}
+            <div class="absolute -top-3 left-6 sm:left-8 w-1.5 h-5 bg-slate-400 rounded-full"></div>
+            <div class="absolute -top-3 right-6 sm:right-8 w-1.5 h-5 bg-slate-400 rounded-full"></div>
+            <div class="bg-gradient-to-r from-rose-500 via-amber-400 to-sky-500 p-1.5 rounded-2xl shadow-md">
+              <div class="bg-gradient-to-r from-amber-50 via-white to-sky-50 rounded-xl px-5 sm:px-7 py-2 border-2 border-dashed border-amber-400">
+                <h1 style="font-family: 'Fredoka', sans-serif;" class="font-black flex flex-col items-center leading-none">
+                  <span class="text-xl sm:text-3xl tracking-wide bg-gradient-to-r from-rose-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">PASAR MINI</span>
+                  <span id="banner-player-name" class="text-3xl sm:text-5xl mt-1 tracking-wide truncate max-w-[200px] sm:max-w-[260px] bg-gradient-to-r from-purple-600 via-pink-500 to-sky-500 bg-clip-text text-transparent">${state.playerName || 'BIJAK'}</span>
+                </h1>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div class="z-20 w-full flex flex-col items-center shrink-0 mt-8 mb-4">
-          ${Button3D("MULA BERMAIN", "enableAudio(); playCorrect(); setGameState('levels');", "green", "w-[85%] max-w-sm text-xl py-3 rounded-full mb-3 shadow-[0_8px_20px_rgba(20,184,166,0.4)]")}
+
+        <!-- Bahagian Pintu Kedai & Watak Pekedai -->
+        <div class="relative z-10 flex justify-center w-full flex-1 items-end min-h-[220px] sm:min-h-[250px] pb-6 sm:pb-8 mt-1">
+          <div class="absolute bottom-6 w-[92%] max-w-[320px] h-[82%] border-x-[10px] border-t-[10px] border-slate-700 bg-gradient-to-b from-amber-50 via-orange-50 to-slate-200 rounded-t-xl z-10 flex overflow-hidden shadow-[inset_0_0_25px_rgba(0,0,0,0.3)]">
+            <!-- Lantai Tile Seramik Realistik -->
+            <div class="absolute bottom-0 left-0 w-full h-[32%] z-0 overflow-hidden border-t-2 border-slate-300" style="background-color: #f8fafc; background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;">
+              <div class="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-white/25 pointer-events-none"></div>
+            </div>
+
+            <!-- KIRI: Rak Belakang Diturunkan Mengikut Kaunter, Pekerja & Meja Kaunter Betul-Betul di Atas Lantai Tile -->
+            <div class="w-[44%] h-full relative z-10 flex flex-col justify-end p-1.5 pb-1.5">
+              <!-- Rak Barangan Belakang Kaunter (Diturunkan Ikut Paras Kaunter) -->
+              <div class="flex flex-col gap-0.5 w-full opacity-95 -mb-2 z-0">
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end px-0.5">
+                    ${ItemSVG('Keropok', 12)}${ItemSVG('Biskut', 12)}${ItemSVG('Roti', 12)}${ItemSVG('Jam', 12)}
+                  </div>
+                  <div class="w-full h-1 bg-amber-700 rounded-sm shadow-sm"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end px-0.5">
+                    ${ItemSVG('Coklat', 12)}${ItemSVG('Keju', 12)}${ItemSVG('Mentega', 12)}${ItemSVG('Biskut', 12)}
+                  </div>
+                  <div class="w-full h-1 bg-amber-700 rounded-sm shadow-sm"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end px-0.5">
+                    ${ItemSVG('Susu', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Beras', 12)}${ItemSVG('Telur', 12)}
+                  </div>
+                  <div class="w-full h-1 bg-amber-700 rounded-sm shadow-sm"></div>
+                </div>
+              </div>
+
+              <!-- Pekerja Realistik & Meja Kaunter Terletak Kemas di Atas Lantai Tile -->
+              <div class="relative w-full flex flex-col items-center justify-end z-10">
+                <!-- Imej Pekerja Juruwang Realistik (Kepala, Leher & Badan Bersambung Kemas) -->
+                <svg width="48" height="46" viewBox="0 0 64 62" class="-mb-2 z-10 drop-shadow-sm">
+                  <!-- Rambut Belakang -->
+                  <path d="M21 20 C20 30, 21 35, 24 36 L40 36 C43 35, 44 30, 43 20 Z" fill="#3b2314"/>
+                  <!-- Bahu & Badan Baju Uniform -->
+                  <path d="M12 62 C12 44, 19 38, 32 38 C45 38, 52 44, 52 62 Z" fill="#0284c7" stroke="#0369a1" stroke-width="1.2"/>
+                  <!-- Leher Bersambung Kemas ke Bahu & Kepala -->
+                  <path d="M27.5 32 L36.5 32 L37.5 41 Q32 44 26.5 41 Z" fill="#f5cfa0"/>
+                  <path d="M27.5 34 Q32 37 36.5 34" fill="none" stroke="#d4a373" stroke-width="1.2" opacity="0.7"/>
+                  <!-- Kolar Baju -->
+                  <path d="M25 38 L32 45 L39 38" fill="none" stroke="#e0f2fe" stroke-width="2" stroke-linejoin="round"/>
+                  <!-- Apron Juruwang Bertali -->
+                  <path d="M22 40 L25 40 L26 48 L38 48 L39 40 L42 40 L44 62 L20 62 Z" fill="#facc15" stroke="#ca8a04" stroke-width="1"/>
+                  <rect x="27" y="52" width="10" height="5" rx="1.5" fill="#fef08a" stroke="#ca8a04" stroke-width="0.8"/>
+                  <!-- Telinga -->
+                  <circle cx="21.5" cy="24.5" r="2.3" fill="#f5cfa0"/>
+                  <circle cx="42.5" cy="24.5" r="2.3" fill="#f5cfa0"/>
+                  <!-- Kepala / Wajah -->
+                  <ellipse cx="32" cy="23.5" rx="10.5" ry="11.5" fill="#fcd9b6" stroke="#d4a373" stroke-width="0.9"/>
+                  <!-- Rambut Depan & Topi Pekerja -->
+                  <path d="M21.5 21 C22 14, 42 14, 42.5 21 C38 17, 26 17, 21.5 21 Z" fill="#3b2314"/>
+                  <path d="M20 17 Q32 6 44 17 Z" fill="#ef4444" stroke="#991b1b" stroke-width="1.2"/>
+                  <path d="M18 17 Q32 14 47 17 Q32 20 18 17 Z" fill="#b91c1c"/>
+                  <!-- Kening, Mata, Hidung & Senyuman -->
+                  <path d="M26 20.5 Q28 19.5 30 20.5" fill="none" stroke="#451a03" stroke-width="1" stroke-linecap="round"/>
+                  <path d="M34 20.5 Q36 19.5 38 20.5" fill="none" stroke="#451a03" stroke-width="1" stroke-linecap="round"/>
+                  <circle cx="28" cy="23.5" r="1.4" fill="#1e293b"/>
+                  <circle cx="36" cy="23.5" r="1.4" fill="#1e293b"/>
+                  <circle cx="28.4" cy="23" r="0.4" fill="#ffffff"/>
+                  <circle cx="36.4" cy="23" r="0.4" fill="#ffffff"/>
+                  <path d="M32 24.5 L31.5 26.8 L32.8 26.8" fill="none" stroke="#c08457" stroke-width="0.9" stroke-linecap="round"/>
+                  <path d="M28.5 29 Q32 31.8 35.5 29" fill="none" stroke="#9a3412" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+
+                <!-- Mesin Kira Mini di atas Kaunter -->
+                <div class="w-full flex justify-end pr-1.5 -mb-0.5 z-20">
+                  <div class="w-6 h-4 bg-slate-700 rounded-t border border-slate-500 flex flex-col items-center justify-center shadow">
+                    <div class="w-4 h-1.5 bg-emerald-300 rounded-[1px] text-[4px] font-black text-slate-900 flex items-center justify-center leading-none">RM</div>
+                    <div class="w-4 h-1 bg-slate-400 mt-0.5 rounded-[1px]"></div>
+                  </div>
+                </div>
+
+                <!-- Meja Kaunter (Duduk Betul-Betul di Atas Lantai Tile) -->
+                <div class="w-[96%] h-10 bg-gradient-to-b from-amber-600 to-amber-800 rounded-t-md border-t-[3px] border-amber-300 border-b-[3px] border-amber-950 shadow-md z-20 flex flex-col items-center justify-center relative">
+                  <div class="w-[86%] h-5 border border-amber-400/50 rounded-sm bg-amber-700/60 flex items-center justify-center">
+                    <span class="text-[6.5px] font-black text-amber-100 tracking-widest">KAUNTER</span>
+                  </div>
+                </div>
+                <!-- Bayang Tapak Kaunter di Atas Lantai Tile -->
+                <div class="w-[98%] h-1.5 bg-slate-900/30 rounded-full blur-[1px] -mt-0.5 z-10"></div>
+              </div>
+            </div>
+
+            <!-- KANAN: Peti Ais Rapat Banyak Rak Minuman, Rak Barangan Runcit Padat & Pelanggan Lebih Tinggi -->
+            <div class="w-[56%] h-full relative z-10 flex items-end gap-1 p-1 pb-1.5">
+              <!-- Peti Ais (Chiller) 6 Tingkat Rapat Penuh Pelbagai Minuman -->
+              <div class="w-[56%] h-[94%] bg-gradient-to-b from-cyan-50/95 via-sky-100/90 to-cyan-200/90 border-[2.5px] border-slate-500 rounded-t-lg rounded-b-sm shadow-[inset_0_0_14px_rgba(6,182,212,0.45)] flex flex-col justify-between p-0.5 relative overflow-hidden">
+                <!-- Papan Lampu Atas Peti Ais -->
+                <div class="w-full h-2.5 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-t-sm flex items-center justify-center shadow-sm z-10 shrink-0">
+                  <span class="text-[5.5px] font-black text-white tracking-wider">MINUMAN SEJUK</span>
+                </div>
+                <!-- Pantulan Kaca & Pemegang Pintu Peti Ais -->
+                <div class="absolute top-0 right-0 w-[55%] h-full bg-gradient-to-l from-white/35 to-transparent transform -skew-x-12 pointer-events-none z-20"></div>
+                <div class="absolute right-0.5 top-1/2 -translate-y-1/2 w-1 h-9 bg-slate-600 rounded-full shadow z-30"></div>
+
+                <!-- 6 Tingkat Rak Peti Ais Dirapatkan & Dipenuhi Pelbagai Minuman -->
+                <div class="flex-1 flex flex-col justify-between py-0 z-10">
+                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
+                    ${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}
+                  </div>
+                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
+                    ${ItemSVG('Susu', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}
+                  </div>
+                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
+                    ${ItemSVG('Air Kotak', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}
+                  </div>
+                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
+                    ${ItemSVG('Susu', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}
+                  </div>
+                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
+                    ${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}
+                  </div>
+                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
+                    ${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}
+                  </div>
+                </div>
+                <!-- Tapak Bawah Peti Ais -->
+                <div class="w-full h-1.5 bg-slate-600 rounded-b-sm z-10 shrink-0"></div>
+              </div>
+
+              <!-- Rak Barangan Runcit 6 Tingkat Rapat & Padat di Sebelah Peti Ais -->
+              <div class="w-[44%] h-[92%] bg-gradient-to-b from-orange-100/95 to-orange-200/95 border-2 border-orange-400 rounded-md p-0.5 flex flex-col justify-between shadow-inner">
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end">
+                    ${ItemSVG('Keropok', 11)}${ItemSVG('Biskut', 11)}${ItemSVG('Roti', 11)}${ItemSVG('Keropok', 11)}
+                  </div>
+                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end">
+                    ${ItemSVG('Coklat', 11)}${ItemSVG('Jam', 11)}${ItemSVG('Keju', 11)}${ItemSVG('Coklat', 11)}
+                  </div>
+                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end">
+                    ${ItemSVG('Gula-gula', 11)}${ItemSVG('Lollipop', 11)}${ItemSVG('Biskut', 11)}${ItemSVG('Coklat Kecil', 11)}
+                  </div>
+                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end">
+                    ${ItemSVG('Telur', 11)}${ItemSVG('Beras', 11)}${ItemSVG('Mentega', 11)}${ItemSVG('Roti', 11)}
+                  </div>
+                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end bg-amber-200/75 rounded-t">
+                    ${ItemSVG('Lobak Merah', 11)}${ItemSVG('Oren', 11)}${ItemSVG('Lobak Merah', 11)}${ItemSVG('Oren', 11)}
+                  </div>
+                  <div class="w-full h-1 bg-amber-600 rounded-b-sm"></div>
+                </div>
+                <div class="flex flex-col">
+                  <div class="flex justify-around items-end bg-emerald-200/80 rounded-t">
+                    ${ItemSVG('Epal', 12)}${ItemSVG('Pisang', 12)}${ItemSVG('Oren', 12)}${ItemSVG('Epal', 12)}
+                  </div>
+                  <div class="w-full h-1 bg-emerald-700 rounded-b-sm"></div>
+                </div>
+              </div>
+
+              <!-- Imej Pelanggan Lebih Tinggi Membawa Bakul di atas Lantai Tile -->
+              <div class="absolute bottom-0 right-2 z-30 pointer-events-none drop-shadow-md">
+                <svg width="52" height="86" viewBox="0 0 64 106">
+                  <!-- Kaki & Seluar Lebih Tinggi -->
+                  <rect x="23" y="68" width="7" height="30" rx="3.5" fill="#334155"/>
+                  <rect x="34" y="68" width="7" height="30" rx="3.5" fill="#334155"/>
+                  <ellipse cx="26.5" cy="99" rx="5.5" ry="2.8" fill="#0f172a"/>
+                  <ellipse cx="37.5" cy="99" rx="5.5" ry="2.8" fill="#0f172a"/>
+                  <!-- Badan / Baju Pelanggan -->
+                  <path d="M18 39 C18 34, 46 34, 46 39 L47 71 L17 71 Z" fill="#ec4899" stroke="#be185d" stroke-width="1.4"/>
+                  <!-- Leher Bersambung Kemas -->
+                  <rect x="28" y="28" width="8" height="9" rx="3" fill="#fcd9b6"/>
+                  <!-- Rambut & Kepala -->
+                  <path d="M21 19 C19 29, 21 34, 24 35 L40 35 C43 34, 45 29, 43 19 Z" fill="#451a03"/>
+                  <circle cx="32" cy="19" r="11" fill="#fcd9b6" stroke="#d4a373" stroke-width="0.9"/>
+                  <path d="M21 17 Q22 6 32 6 Q42 6 43 17 Q37 11 32 12 Q27 11 21 17 Z" fill="#451a03"/>
+                  <!-- Muka Ceria -->
+                  <circle cx="28" cy="19.5" r="1.4" fill="#1e293b"/>
+                  <circle cx="36" cy="19.5" r="1.4" fill="#1e293b"/>
+                  <path d="M29 24 Q32 26.8 35 24" fill="none" stroke="#9a3412" stroke-width="1.3" stroke-linecap="round"/>
+                  <!-- Lengan & Bakul Belian Merah -->
+                  <path d="M19 44 L11 58" stroke="#fcd9b6" stroke-width="4.2" stroke-linecap="round"/>
+                  <path d="M45 44 L49 59" stroke="#fcd9b6" stroke-width="4.2" stroke-linecap="round"/>
+                  <path d="M3 58 L23 58 L20.5 74 L5.5 74 Z" fill="#ef4444" stroke="#991b1b" stroke-width="1.5"/>
+                  <path d="M6.5 58 Q13 49 19.5 58" fill="none" stroke="#7f1d1d" stroke-width="1.5"/>
+                  <circle cx="10.5" cy="56" r="3" fill="#22c55e"/>
+                  <circle cx="16" cy="56" r="3" fill="#facc15"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Bingkai Pintu Kaca -->
+            <div class="absolute inset-0 bg-gradient-to-tr from-white/15 to-transparent pointer-events-none z-20"></div>
+            <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1.5 bg-slate-500/70 z-20 pointer-events-none"></div>
+            <!-- Tanda BUKA Digantung -->
+            <div class="absolute top-[33%] left-3 z-30 flex flex-col items-center pointer-events-none drop-shadow-md">
+              <svg width="38" height="15" viewBox="0 0 38 15" class="-mb-0.5">
+                <circle cx="19" cy="3" r="2.5" fill="#e2e8f0" stroke="#475569" stroke-width="1"/>
+                <line x1="19" y1="4" x2="6" y2="15" stroke="#f8fafc" stroke-width="1.4"/>
+                <line x1="19" y1="4" x2="32" y2="15" stroke="#f8fafc" stroke-width="1.4"/>
+              </svg>
+              <div class="bg-gradient-to-b from-green-500 to-green-600 text-white font-black text-[10px] tracking-wider px-2.5 py-0.5 rounded border-2 border-green-200 shadow-md">BUKA</div>
+            </div>
+          </div>
+
+          <!-- Laluan Kaki Lima Depan Pintu -->
+          <div class="absolute bottom-0 w-full h-6 bg-slate-400 z-0 flex shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] border-t border-slate-500">
+            ${Array.from({length: 20}).map((_, i) => `<div class="flex-1 h-full border-r border-slate-500/30 ${i % 2 === 0 ? 'bg-slate-300' : 'bg-slate-400'}"></div>`).join('')}
+          </div>
+
+          <!-- Watak Pekedai di Hadapan Pintu -->
+          <div class="relative inline-block z-20 flex justify-center mt-16 sm:mt-20 translate-y-6 sm:translate-y-8">
+            ${Shopkeeper(null, 'w-40 h-40 sm:w-48 sm:h-48 drop-shadow-xl')}
+            <div class="absolute -top-2 sm:top-0 left-[75%] sm:left-[80%] z-30 pointer-events-none">
+              ${SpeechBubble('Mari masuk!', 'min-w-[85px] max-w-[105px] text-[11px] font-bold p-2', 'left')}
+            </div>
+          </div>
         </div>
-        
+
+        <!-- Butang Mula Bermain -->
+        <div class="z-20 w-full flex flex-col items-center shrink-0 mt-6 mb-4">
+          ${Button3D('MULA BERMAIN', "enableAudio(); playCorrect(); setGameState('levels');", 'green', 'w-[85%] max-w-sm text-xl py-3 rounded-full mb-2 shadow-[0_8px_20px_rgba(20,184,166,0.4)]')}
+        </div>
+
+        <!-- Footer Hak Cipta & Logo CelikPlay -->
         <div class="absolute bottom-2 left-0 w-full flex items-center justify-center gap-3 px-4 z-50">
           <div class="w-10 h-10 bg-white rounded-full overflow-hidden flex-shrink-0 shadow-sm border border-slate-200">
-            <img src="CP1.jpg" alt="CelikPlay Logo" class="w-full h-full object-cover"/>
+            <img src="https://i.ibb.co/5gktnMyB/CP1.jpg" alt="CelikPlay Logo" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/40x40/0ea5e9/ffffff?text=CP'" />
           </div>
           <div class="text-[10px] font-bold text-slate-700 leading-tight text-left">
-            © 2026 CelikPlay. Hak Cipta Terpelihara.<br/>Dikendalikan oleh Nurwan Trading.<br/>
+            © 2026 CelikPlay. Hak Cipta Terpelihara.<br/>
+            Dikendalikan oleh Nurwan Trading.<br/>
             <span class="text-[9px] font-medium italic text-slate-500">Untuk kegunaan keluarga pembeli sahaja. Dilarang mengedar atau menjual semula tanpa kebenaran.</span>
           </div>
         </div>
       </div>`;
 
     const renderLevels = () => {
-      const isAllUnlocked = Object.values(state.levelStars).some(stars => stars === 3);
-      
-      const renderStars = (level) => `
-        <div class="flex gap-0.5 mt-1">
-           ${[1,2,3].map(s => `<span class="text-[10px] ${state.levelStars[level] >= s ? 'text-yellow-500' : 'text-slate-300 grayscale opacity-50'}">⭐</span>`).join('')}
-        </div>`;
+      const isAllUnlocked = state.unlockAll || Object.values(state.levelStars).some(stars => stars === 3);
+      const availStars = getAvailableStars();
+      const totalStars = getTotalStarsEarned();
+
+      const levelBtn = (code, emoji, title, unlocked, theme) => {
+        const colors = {
+          pink: 'from-pink-50 to-pink-100 border-pink-200 hover:border-pink-300 shadow-[0_6px_0_theme(colors.pink.300)] text-pink-600 bg-pink-200/50 text-pink-800',
+          sky: 'from-sky-50 to-sky-100 border-sky-200 hover:border-sky-300 shadow-[0_6px_0_theme(colors.sky.300)] text-sky-600 bg-sky-200/50 text-sky-800',
+          orange: 'from-orange-50 to-orange-100 border-orange-200 hover:border-orange-300 shadow-[0_6px_0_theme(colors.orange.300)] text-orange-600 bg-orange-200/50 text-orange-800'
+        }[theme];
+        const parts = colors.split(' ');
+        const textTitle = parts[5];
+        const badgeBg = parts[6];
+        const badgeText = parts[7];
+        const stars = state.levelStars[code] || 0;
+
+        if (!unlocked) {
+          return `
+            <button class="group relative border-[3px] rounded-2xl py-4 flex flex-col items-center bg-slate-100 border-slate-200 opacity-70 grayscale cursor-not-allowed">
+              <span class="text-3xl mb-1">🔒</span>
+              <span class="font-black text-slate-400 text-sm tracking-wide">TERKUNCI</span>
+              <span class="text-[10px] font-bold text-slate-400 mt-1">${code}: ${title}</span>
+            </button>`;
+        }
+        return `
+          <button onclick="startLevel('${code}')" class="group relative border-[3px] rounded-2xl py-4 px-2 flex flex-col items-center bg-gradient-to-b ${parts[0]} ${parts[1]} ${parts[2]} ${parts[3]} ${parts[4]} active:shadow-none active:translate-y-1.5 transition-all overflow-hidden">
+            <span class="text-3xl mb-1 group-hover:scale-110 transition-transform">${emoji}</span>
+            <span class="font-black ${textTitle} text-xl tracking-wide">${code}</span>
+            <div class="flex gap-0.5 mt-0.5">
+              ${[1,2,3].map(s => `<span class="text-[10px] ${stars >= s ? 'text-yellow-500' : 'text-slate-300 grayscale opacity-50'}">⭐</span>`).join('')}
+            </div>
+            <span class="text-[10px] font-bold ${badgeText} mt-1 text-center leading-tight ${badgeBg} px-2.5 py-0.5 rounded-full">${title}</span>
+          </button>`;
+      };
+
+      const p4Unlocked = state.levelProgress['3C'] > 0 || isAllUnlocked;
 
       return `
-        <div class="flex flex-col items-center justify-start pt-8 pb-10 h-full px-4 space-y-4 relative z-10 w-full overflow-y-auto overflow-x-hidden bg-gradient-to-br from-yellow-200 via-pink-200 to-sky-300" style="background-image: linear-gradient(rgba(255,255,255,0.6), rgba(253,230,138,0.9)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed;">
-          <div class="flex items-center w-full max-w-sm shrink-0 mt-2">
-            <button onclick="setGameState('menu')" class="flex flex-col items-center justify-center w-14 h-14 bg-white rounded-2xl shadow-md text-sky-600 hover:bg-sky-50 active:scale-95 transition-all border-2 border-sky-200 shrink-0">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
-              <span class="text-[9px] font-black uppercase tracking-wider mt-0.5">Utama</span>
+        <div class="flex flex-col items-center justify-start pt-6 pb-10 h-full px-4 space-y-3 relative z-10 w-full overflow-y-auto overflow-x-hidden bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-200">
+          <!-- Header dengan Butang UTAMA Jelas -->
+          <div class="flex items-center w-full max-w-sm shrink-0 mt-1 gap-2">
+            <button onclick="setGameState('menu')" class="px-3 py-2 bg-white rounded-2xl shadow-md text-sky-600 hover:bg-sky-50 active:scale-95 transition-all flex items-center gap-1.5 border-2 border-sky-200 shrink-0">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+              <span class="font-black text-xs tracking-wide">UTAMA</span>
             </button>
-            <h2 class="flex-1 text-center text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-sky-500 pr-14 tracking-tight drop-shadow-sm uppercase">Pilih Tahap Pangkat</h2>
+            <h2 class="flex-1 text-center text-xl sm:text-2xl font-black bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 bg-clip-text text-transparent tracking-tight pr-2">PILIH TAHAP PANGKAT</h2>
           </div>
 
-          <div class="bg-white/80 backdrop-blur-sm rounded-xl p-3 text-center border-2 border-dashed border-sky-300 mx-4 w-full max-w-sm shrink-0 shadow-sm mt-1">
-              <p class="text-[11px] font-bold text-slate-700">Sila main <span class="text-pink-600 font-black">Tahap 1A</span> dahulu. Kumpul 3 Bintang ⭐⭐⭐ penuh di 1A atau 1B untuk membuka kunci Pangkat 2 & 3!</p>
+          <!-- Bar Bintang & Kedai Ganjaran -->
+          <div class="flex items-center justify-between w-full max-w-sm bg-white/90 backdrop-blur rounded-2xl px-3 py-2 shadow-sm border-2 border-amber-200">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">⭐</span>
+              <div class="text-left leading-tight">
+                <div class="text-[10px] font-bold text-slate-500 uppercase">Bintang Anda</div>
+                <div class="text-base font-black text-amber-600">${availStars} <span class="text-[10px] font-bold text-slate-400">(Jumlah: ${totalStars})</span></div>
+              </div>
+            </div>
+            ${Button3D('Kedai Ganjaran 🎁', "setGameState('rewards')", 'pink', 'px-3 py-1.5 text-xs !shadow-[0_4px_0_theme(colors.pink.300)]')}
           </div>
 
-          <div class="flex gap-2 w-full max-w-sm shrink-0 mt-2">
-              ${Button3D("Buku Sticker 🏆", "setGameState('stickers')", "orange", "flex-1 py-2 text-sm !shadow-[0_4px_0_theme(colors.orange.300)]")}
-              ${Button3D("Menu Ibu Bapa ⚙️", "openParentGate()", "blue", "flex-1 py-2 text-sm !shadow-[0_4px_0_theme(colors.sky.300)]")}
+          <!-- Butang Buku Sticker & Menu Ibu Bapa -->
+          <div class="flex gap-2 w-full max-w-sm shrink-0">
+            ${Button3D('Buku Sticker 🏆', "setGameState('stickers')", 'orange', 'flex-1 py-2 text-xs !shadow-[0_4px_0_theme(colors.orange.300)]')}
+            ${Button3D('Menu Ibu Bapa ⚙️', "openParentGate()", 'blue', 'flex-1 py-2 text-xs !shadow-[0_4px_0_theme(colors.sky.300)]')}
           </div>
 
-          <div class="w-full max-w-sm flex flex-col gap-6 pb-12 mt-2">
-            <!-- TAHAP 1 -->
-            <div class="bg-white/95 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_10px_40px_rgba(236,72,153,0.15)] relative border-4 border-white/80 ring-1 ring-pink-100 overflow-hidden">
-              <div class="absolute top-0 right-0 w-32 h-32 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
-              <h3 class="font-black text-pink-600 text-xl mb-4 flex items-center gap-3 drop-shadow-sm z-10 relative">
-                 <span class="bg-gradient-to-br from-pink-100 to-pink-200 text-pink-600 rounded-xl w-10 h-10 flex items-center justify-center text-xl border border-pink-100">⭐</span>
-                 Pangkat: Kadet Wang
+          <!-- Panduan Peraturan Permainan -->
+          <div class="w-full max-w-sm bg-amber-50/95 border-2 border-amber-300 rounded-2xl px-3 py-2 text-center shadow-sm">
+            <p class="text-[11px] font-bold text-amber-900 leading-snug">
+              💡 Mula dengan <span class="font-black text-pink-600">Tahap 1A</span>, kemudian lengkapkan <span class="font-black text-amber-600">3 Bintang Penuh (⭐⭐⭐)</span> di 1A atau 1B untuk membuka kunci Pangkat 2, 3 & 4!
+            </p>
+          </div>
+
+          <!-- Senarai Pangkat -->
+          <div class="w-full max-w-sm flex flex-col gap-5 pb-12">
+            <!-- Pangkat 1 -->
+            <div class="bg-white/95 rounded-[2rem] p-5 shadow-lg border-4 border-white ring-1 ring-pink-100">
+              <h3 class="font-black text-pink-600 text-lg mb-3 flex items-center gap-2">
+                <span class="bg-pink-100 rounded-xl w-9 h-9 flex items-center justify-center">⭐</span>
+                Pangkat: Kadet Wang
               </h3>
-              <div class="grid grid-cols-2 gap-4 relative z-10">
-                 <button onclick="startLevel('1A')" class="group relative bg-gradient-to-b from-pink-50 to-pink-100 border-[3px] border-pink-200 hover:border-pink-300 rounded-2xl py-5 flex flex-col items-center shadow-[0_8px_0_theme(colors.pink.300),_0_15px_20px_rgba(236,72,153,0.2)] active:shadow-[0_0px_0_theme(colors.pink.300)] active:translate-y-2 transition-all overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <span class="text-4xl mb-2 group-hover:scale-110 transition-transform origin-bottom drop-shadow-md">🪙</span>
-                    <span class="font-black text-pink-600 text-2xl tracking-wide drop-shadow-sm">1A</span>
-                    ${renderStars('1A')}
-                    <span class="text-[11px] font-bold text-pink-800 mt-1 text-center leading-tight bg-pink-200/50 px-3 py-1 rounded-full border border-pink-200">Kenal Wang</span>
-                 </button>
-                 
-                 <button onclick="${(state.levelProgress['1A'] > 0 || isAllUnlocked) ? "startLevel('1B')" : ""}" class="group relative border-[3px] rounded-2xl py-5 flex flex-col items-center transition-all overflow-hidden ${(state.levelProgress['1A'] > 0 || isAllUnlocked) ? 'bg-gradient-to-b from-pink-50 to-pink-100 border-pink-200 hover:border-pink-300 shadow-[0_8px_0_theme(colors.pink.300),_0_15px_20px_rgba(236,72,153,0.2)] active:shadow-[0_0px_0_theme(colors.pink.300)] active:translate-y-2' : 'bg-slate-100 border-slate-200 opacity-70 grayscale'}">
-                    ${(state.levelProgress['1A'] > 0 || isAllUnlocked) ? `
-                      <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <span class="text-4xl mb-2 group-hover:scale-110 transition-transform origin-bottom drop-shadow-md">🔍</span>
-                      <span class="font-black text-pink-600 text-2xl tracking-wide drop-shadow-sm">1B</span>
-                      ${renderStars('1B')}
-                      <span class="text-[11px] font-bold text-pink-800 mt-1 text-center leading-tight bg-pink-200/50 px-3 py-1 rounded-full border border-pink-200">Padan Nilai</span>
-                    ` : `
-                      <span class="text-4xl mb-2">🔒</span><span class="font-black text-slate-400 text-lg tracking-wide">TERKUNCI</span>
-                    `}
-                 </button>
+              <div class="grid grid-cols-2 gap-3">
+                ${levelBtn('1A', '🪙', 'Kenal Wang', true, 'pink')}
+                ${levelBtn('1B', '🔍', 'Padan Nilai', state.levelProgress['1A'] > 0 || isAllUnlocked, 'pink')}
               </div>
             </div>
 
-            <!-- TAHAP 2 -->
-            <div class="bg-white/95 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_10px_40px_rgba(14,165,233,0.15)] relative border-4 border-white/80 ring-1 ring-sky-100 overflow-hidden">
-              <div class="absolute top-0 right-0 w-32 h-32 bg-sky-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
-              <h3 class="font-black text-sky-600 text-xl mb-4 flex items-center gap-3 drop-shadow-sm z-10 relative">
-                 <span class="bg-gradient-to-br from-sky-100 to-sky-200 text-sky-600 rounded-xl w-10 h-10 flex items-center justify-center text-xl border border-sky-100">🚀</span>
-                 Pangkat: Wira Belanja
+            <!-- Pangkat 2 -->
+            <div class="bg-white/95 rounded-[2rem] p-5 shadow-lg border-4 border-white ring-1 ring-sky-100">
+              <h3 class="font-black text-sky-600 text-lg mb-3 flex items-center gap-2">
+                <span class="bg-sky-100 rounded-xl w-9 h-9 flex items-center justify-center">🚀</span>
+                Pangkat: Wira Belanja
               </h3>
-              <div class="grid grid-cols-2 gap-4 relative z-10">
-                 <button onclick="${(state.levelProgress['1B'] > 0 || isAllUnlocked) ? "startLevel('2A')" : ""}" class="group relative border-[3px] rounded-2xl py-5 flex flex-col items-center transition-all overflow-hidden ${(state.levelProgress['1B'] > 0 || isAllUnlocked) ? 'bg-gradient-to-b from-sky-50 to-sky-100 border-sky-200 hover:border-sky-300 shadow-[0_8px_0_theme(colors.sky.300),_0_15px_20px_rgba(14,165,233,0.2)] active:shadow-[0_0px_0_theme(colors.sky.300)] active:translate-y-2' : 'bg-slate-100 border-slate-200 opacity-70 grayscale'}">
-                    ${(state.levelProgress['1B'] > 0 || isAllUnlocked) ? `
-                      <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <span class="text-4xl mb-2 group-hover:scale-110 transition-transform origin-bottom drop-shadow-md">🛒</span>
-                      <span class="font-black text-sky-600 text-2xl tracking-wide drop-shadow-sm">2A</span>
-                      ${renderStars('2A')}
-                      <span class="text-[11px] font-bold text-sky-800 mt-1 text-center leading-tight bg-sky-200/50 px-3 py-1 rounded-full border border-sky-200">Beli 2 Barang</span>
-                    ` : `<span class="text-4xl mb-2">🔒</span><span class="font-black text-slate-400 text-lg tracking-wide">TERKUNCI</span>`}
-                 </button>
-                 <button onclick="${(state.levelProgress['2A'] > 0 || isAllUnlocked) ? "startLevel('2B')" : ""}" class="group relative border-[3px] rounded-2xl py-5 flex flex-col items-center transition-all overflow-hidden ${(state.levelProgress['2A'] > 0 || isAllUnlocked) ? 'bg-gradient-to-b from-sky-50 to-sky-100 border-sky-200 hover:border-sky-300 shadow-[0_8px_0_theme(colors.sky.300),_0_15px_20px_rgba(14,165,233,0.2)] active:shadow-[0_0px_0_theme(colors.sky.300)] active:translate-y-2' : 'bg-slate-100 border-slate-200 opacity-70 grayscale'}">
-                    ${(state.levelProgress['2A'] > 0 || isAllUnlocked) ? `
-                      <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <span class="text-4xl mb-2 group-hover:scale-110 transition-transform origin-bottom drop-shadow-md">🧮</span>
-                      <span class="font-black text-sky-600 text-2xl tracking-wide drop-shadow-sm">2B</span>
-                      ${renderStars('2B')}
-                      <span class="text-[11px] font-bold text-sky-800 mt-1 text-center leading-tight bg-sky-200/50 px-3 py-1 rounded-full border border-sky-200">Kira Baki</span>
-                    ` : `<span class="text-4xl mb-2">🔒</span><span class="font-black text-slate-400 text-lg tracking-wide">TERKUNCI</span>`}
-                 </button>
+              <div class="grid grid-cols-2 gap-3">
+                ${levelBtn('2A', '🛒', 'Beli 2 Barang', state.levelProgress['1B'] > 0 || isAllUnlocked, 'sky')}
+                ${levelBtn('2B', '🧮', 'Kira Baki', state.levelProgress['2A'] > 0 || isAllUnlocked, 'sky')}
               </div>
             </div>
 
-            <!-- TAHAP 3 -->
-            <div class="bg-white/95 backdrop-blur-xl rounded-[2rem] p-6 shadow-[0_10px_40px_rgba(249,115,22,0.15)] relative border-4 border-white/80 ring-1 ring-orange-100 overflow-hidden">
-              <div class="absolute top-0 right-0 w-32 h-32 bg-orange-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 pointer-events-none"></div>
-              <h3 class="font-black text-orange-500 text-xl mb-4 flex items-center gap-3 drop-shadow-sm z-10 relative">
-                 <span class="bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600 rounded-xl w-10 h-10 flex items-center justify-center text-xl border border-orange-100">🏆</span>
-                 Pangkat: Pengurus Bijak
+            <!-- Pangkat 3 -->
+            <div class="bg-white/95 rounded-[2rem] p-5 shadow-lg border-4 border-white ring-1 ring-orange-100">
+              <h3 class="font-black text-orange-500 text-lg mb-3 flex items-center gap-2">
+                <span class="bg-orange-100 rounded-xl w-9 h-9 flex items-center justify-center">🏆</span>
+                Pangkat: Pengurus Bijak
               </h3>
-              <div class="grid grid-cols-2 gap-4 relative z-10">
-                 <button onclick="${(state.levelProgress['2B'] > 0 || isAllUnlocked) ? "startLevel('3A')" : ""}" class="group relative border-[3px] rounded-2xl py-5 flex flex-col items-center transition-all overflow-hidden ${(state.levelProgress['2B'] > 0 || isAllUnlocked) ? 'bg-gradient-to-b from-orange-50 to-orange-100 border-orange-200 hover:border-orange-300 shadow-[0_8px_0_theme(colors.orange.300),_0_15px_20px_rgba(249,115,22,0.2)] active:shadow-[0_0px_0_theme(colors.orange.300)] active:translate-y-2' : 'bg-slate-100 border-slate-200 opacity-70 grayscale'}">
-                    ${(state.levelProgress['2B'] > 0 || isAllUnlocked) ? `
-                      <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <span class="text-4xl mb-2 group-hover:scale-110 transition-transform origin-bottom drop-shadow-md">🛍️</span>
-                      <span class="font-black text-orange-600 text-2xl tracking-wide drop-shadow-sm">3A</span>
-                      ${renderStars('3A')}
-                      <span class="text-[11px] font-bold text-orange-800 mt-1 text-center leading-tight bg-orange-200/50 px-3 py-1 rounded-full border border-orange-200">Beli 3 Barang</span>
-                    ` : `<span class="text-4xl mb-2">🔒</span><span class="font-black text-slate-400 text-lg tracking-wide">TERKUNCI</span>`}
-                 </button>
-                 <button onclick="${(state.levelProgress['3A'] > 0 || isAllUnlocked) ? "startLevel('3B')" : ""}" class="group relative border-[3px] rounded-2xl py-5 flex flex-col items-center transition-all overflow-hidden ${(state.levelProgress['3A'] > 0 || isAllUnlocked) ? 'bg-gradient-to-b from-orange-50 to-orange-100 border-orange-200 hover:border-orange-300 shadow-[0_8px_0_theme(colors.orange.300),_0_15px_20px_rgba(249,115,22,0.2)] active:shadow-[0_0px_0_theme(colors.orange.300)] active:translate-y-2' : 'bg-slate-100 border-slate-200 opacity-70 grayscale'}">
-                    ${(state.levelProgress['3A'] > 0 || isAllUnlocked) ? `
-                      <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                      <span class="text-4xl mb-2 group-hover:scale-110 transition-transform origin-bottom drop-shadow-md">💰</span>
-                      <span class="font-black text-orange-600 text-2xl tracking-wide drop-shadow-sm">3B</span>
-                      ${renderStars('3B')}
-                      <span class="text-[11px] font-bold text-orange-800 mt-1 text-center leading-tight bg-orange-200/50 px-3 py-1 rounded-full border border-orange-200">Cabaran Bajet</span>
-                    ` : `<span class="text-4xl mb-2">🔒</span><span class="font-black text-slate-400 text-lg tracking-wide">TERKUNCI</span>`}
-                 </button>
+              <div class="grid grid-cols-2 gap-3">
+                ${levelBtn('3A', '🛍️', 'Beli 3 Barang', state.levelProgress['2B'] > 0 || isAllUnlocked, 'orange')}
+                ${levelBtn('3B', '💰', 'Cabaran Bajet', state.levelProgress['3A'] > 0 || isAllUnlocked, 'orange')}
+              </div>
+              <div class="mt-3 grid grid-cols-1">
+                ${levelBtn('3C', '🏷️', 'Bijak Belanja', state.levelProgress['3B'] > 0 || isAllUnlocked, 'orange')}
               </div>
             </div>
+
+            <!-- Pangkat 4: Tauke Kedai -->
+            <div class="bg-white/95 rounded-[2rem] p-5 shadow-lg border-4 border-white ring-1 ring-emerald-200">
+              <h3 class="font-black text-emerald-600 text-lg mb-1 flex items-center gap-2">
+                <span class="bg-emerald-100 rounded-xl w-9 h-9 flex items-center justify-center">👑</span>
+                Pangkat: Tauke Kedai
+              </h3>
+              <p class="text-[11px] font-bold text-slate-500 mb-3">Jadi juruwang & pulangkan baki pelanggan!</p>
+              <div class="grid grid-cols-2 gap-3">
+                ${p4Unlocked ? `
+                  <button onclick="startCashierMode('relaxed')" class="group relative border-[3px] rounded-2xl py-4 px-2 flex flex-col items-center bg-gradient-to-b from-emerald-50 to-emerald-100 border-emerald-200 hover:border-emerald-300 shadow-[0_6px_0_theme(colors.emerald.300)] active:shadow-none active:translate-y-1.5 transition-all">
+                    <span class="text-3xl mb-1">🏪</span>
+                    <span class="font-black text-emerald-700 text-sm text-center leading-tight">Mod Santai</span>
+                    <span class="text-[10px] font-bold text-emerald-800 bg-emerald-200/60 px-2 py-0.5 rounded-full mt-1">Tanpa Had</span>
+                    <span class="text-[9px] font-bold text-amber-600 mt-1">3 Pelanggan = +1 ⭐</span>
+                  </button>
+                  <button onclick="startCashierMode('timed')" class="group relative border-[3px] rounded-2xl py-4 px-2 flex flex-col items-center bg-gradient-to-b from-purple-50 to-purple-100 border-purple-200 hover:border-purple-300 shadow-[0_6px_0_theme(colors.purple.300)] active:shadow-none active:translate-y-1.5 transition-all">
+                    <span class="text-3xl mb-1">⏱️</span>
+                    <span class="font-black text-purple-700 text-sm text-center leading-tight">Cabaran Masa</span>
+                    <span class="text-[10px] font-bold text-purple-800 bg-purple-200/60 px-2 py-0.5 rounded-full mt-1">2 Minit</span>
+                    <span class="text-[9px] font-bold text-amber-600 mt-1">Rekod: ${state.cashierHighScore} Pelanggan</span>
+                  </button>
+                ` : `
+                  <button class="border-[3px] rounded-2xl py-4 px-2 flex flex-col items-center bg-slate-100 border-slate-200 opacity-70 grayscale cursor-not-allowed">
+                    <span class="text-3xl mb-1">🔒</span>
+                    <span class="font-black text-slate-400 text-xs">TERKUNCI</span>
+                    <span class="text-[10px] font-bold text-slate-400 mt-1">Mod Santai</span>
+                  </button>
+                  <button class="border-[3px] rounded-2xl py-4 px-2 flex flex-col items-center bg-slate-100 border-slate-200 opacity-70 grayscale cursor-not-allowed">
+                    <span class="text-3xl mb-1">🔒</span>
+                    <span class="font-black text-slate-400 text-xs">TERKUNCI</span>
+                    <span class="text-[10px] font-bold text-slate-400 mt-1">Cabaran Masa</span>
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    };
+
+    const renderRewardsShop = () => {
+      const availStars = getAvailableStars();
+      return `
+        <div class="flex flex-col items-center justify-start pt-6 pb-10 h-full px-4 bg-gradient-to-b from-pink-50 via-amber-50 to-white z-10 w-full overflow-y-auto">
+          <div class="flex items-center w-full max-w-sm shrink-0 mt-1 mb-4">
+            <button onclick="setGameState('levels')" class="w-11 h-11 bg-white rounded-full shadow-md text-slate-600 hover:text-pink-600 active:scale-95 transition-all flex items-center justify-center border border-slate-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <h2 class="flex-1 text-center text-2xl font-black text-pink-600 pr-11">Kedai Ganjaran 🎁</h2>
+          </div>
+
+          <div class="w-full max-w-sm bg-white rounded-3xl p-4 shadow-md border-2 border-amber-200 mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              ${Shopkeeper(72)}
+              <div>
+                <div class="text-xs font-bold text-slate-500">Bintang Tersedia:</div>
+                <div class="text-2xl font-black text-amber-500">⭐ ${availStars}</div>
+                <div class="text-[10px] font-bold text-slate-400">Klik item untuk buka & pakai!</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full max-w-sm flex flex-col gap-3 pb-8">
+            ${REWARD_ITEMS.map(item => {
+              const isUnlocked = state.unlockedRewards.includes(item.id);
+              const isEquipped = state.equippedRewards.includes(item.id);
+              const canAfford = availStars >= item.cost;
+              return `
+                <div class="bg-white rounded-2xl p-3.5 shadow-sm border-2 ${isEquipped ? 'border-emerald-400 bg-emerald-50/40' : 'border-slate-200'} flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center text-3xl shadow-inner">${item.icon}</div>
+                    <div>
+                      <div class="font-black text-slate-800 text-sm">${item.name}</div>
+                      <div class="text-[11px] font-bold text-slate-500">${item.desc}</div>
+                    </div>
+                  </div>
+                  <button onclick="buyOrToggleReward('${item.id}')" class="px-3 py-2 rounded-xl font-black text-xs transition-all active:scale-95 shrink-0 ${
+                    isUnlocked
+                      ? (isEquipped ? 'bg-emerald-500 text-white shadow-sm' : 'bg-sky-500 text-white shadow-sm')
+                      : (canAfford ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-slate-200 text-slate-400 cursor-not-allowed')
+                  }">
+                    ${isUnlocked ? (isEquipped ? 'DIPAKAI ✓' : 'PAKAI') : `⭐ ${item.cost}`}
+                  </button>
+                </div>`;
+            }).join('')}
           </div>
         </div>`;
     };
@@ -1133,28 +1854,26 @@
       if (state.activeAlbum) {
         const album = ALBUMS.find(a => a.id === state.activeAlbum);
         return `
-          <div class="flex flex-col items-center justify-start pt-8 pb-10 h-full px-4 ${album.theme} z-10 w-full overflow-y-auto">
-            <div class="flex items-center w-full max-w-sm shrink-0 mt-2 mb-6">
-              <button onclick="state.activeAlbum=null; state.activeHint=null; renderApp();" class="w-12 h-12 bg-white rounded-full shadow-md text-slate-600 hover:text-amber-600 hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center border border-slate-100">
-                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+          <div class="flex flex-col items-center justify-start pt-6 pb-10 h-full px-4 ${album.theme} z-10 w-full overflow-y-auto">
+            <div class="flex items-center w-full max-w-sm shrink-0 mt-1 mb-5">
+              <button onclick="state.activeAlbum = null; state.activeHint = null; renderApp();" class="w-11 h-11 bg-white rounded-full shadow-md text-slate-600 hover:text-amber-600 active:scale-95 transition-all flex items-center justify-center border border-slate-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <h2 class="flex-1 text-center text-2xl font-black text-slate-800 pr-12 drop-shadow-sm">${album.title}</h2>
+              <h2 class="flex-1 text-center text-2xl font-black text-slate-800 pr-11 drop-shadow-sm">${album.title}</h2>
             </div>
-            
+
             <div class="w-full max-w-sm grid grid-cols-2 gap-4">
-              ${album.stickerIds.map((id) => {
+              ${album.stickerIds.map(id => {
                 const s = STICKERS.find(st => st.id === id);
                 const isUnlocked = state.unlockedStickers.includes(s.id);
                 const showHint = state.activeHint === s.id;
-                
                 return `
-                  <div onclick="${!isUnlocked ? `state.activeHint = '${showHint ? '' : s.id}'; renderApp();` : ''}" class="relative flex flex-col items-center justify-center p-4 rounded-3xl border-2 shadow-md h-40 cursor-pointer transition-all ${isUnlocked ? 'bg-white border-amber-300' : 'bg-slate-50 border-slate-200'}">
-                    ${(showHint && !isUnlocked) ? `
+                  <div onclick="${!isUnlocked ? `state.activeHint = state.activeHint === '${s.id}' ? null : '${s.id}'; renderApp();` : ''}" class="relative flex flex-col items-center justify-center p-4 rounded-3xl border-2 shadow-md h-40 cursor-pointer transition-all ${isUnlocked ? 'bg-white border-amber-300' : 'bg-slate-50 border-slate-200'}">
+                    ${showHint && !isUnlocked ? `
                       <div class="absolute inset-0 bg-slate-800/90 rounded-3xl p-3 flex flex-col items-center justify-center text-center animate-fade-in z-20">
                         <p class="text-white text-xs font-bold mb-3">${s.hint}</p>
-                        <button onclick="event.stopPropagation(); setGameState('levels');" class="bg-green-500 text-white text-xs font-black py-1.5 px-3 rounded-full shadow-md">JOM MAIN! 🚀</button>
-                      </div>
-                    ` : ''}
+                        <button onclick="event.stopPropagation(); state.activeAlbum = null; setGameState('levels');" class="bg-green-500 text-white text-xs font-black py-1.5 px-3 rounded-full shadow-md">JOM MAIN! 🚀</button>
+                      </div>` : ''}
                     <div class="mb-2 drop-shadow-md ${isUnlocked ? 'animate-bounce-slight' : 'grayscale brightness-0 opacity-20'}">
                       ${ItemSVG(s.icon, 65)}
                     </div>
@@ -1166,31 +1885,30 @@
       }
 
       return `
-        <div class="flex flex-col items-center justify-start pt-8 pb-10 h-full px-4 bg-gradient-to-b from-amber-50 to-white z-10 w-full overflow-y-auto">
-          <div class="flex items-center w-full max-w-sm shrink-0 mt-2 mb-6">
-            <button onclick="setGameState('levels')" class="w-12 h-12 bg-white rounded-full shadow-md text-slate-600 hover:text-amber-600 hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center border border-slate-100">
-              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+        <div class="flex flex-col items-center justify-start pt-6 pb-10 h-full px-4 bg-gradient-to-b from-amber-50 to-white z-10 w-full overflow-y-auto">
+          <div class="flex items-center w-full max-w-sm shrink-0 mt-1 mb-5">
+            <button onclick="setGameState('levels')" class="w-11 h-11 bg-white rounded-full shadow-md text-slate-600 hover:text-amber-600 active:scale-95 transition-all flex items-center justify-center border border-slate-100">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <h2 class="flex-1 text-center text-3xl font-black text-amber-600 pr-12 drop-shadow-sm">Koleksi Album 🏆</h2>
+            <h2 class="flex-1 text-center text-2xl font-black text-amber-600 pr-11 drop-shadow-sm">Koleksi Album 🏆</h2>
           </div>
-          
+
           <div class="w-full max-w-sm flex flex-col gap-4">
             ${ALBUMS.map(album => {
               const unlockedInAlbum = album.stickerIds.filter(id => state.unlockedStickers.includes(id)).length;
               const totalInAlbum = album.stickerIds.length;
               const isCompleted = unlockedInAlbum === totalInAlbum;
-              
               return `
-                <div onclick="state.activeAlbum='${album.id}'; renderApp();" class="relative flex items-center p-4 rounded-3xl border-2 shadow-sm cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${album.theme} border-white/50">
-                   <div class="text-4xl mr-4">${isCompleted ? '🌟' : '📁'}</div>
-                   <div class="flex-1">
-                     <h3 class="font-black text-slate-800 text-lg">${album.title}</h3>
-                     <div class="w-full bg-white/50 rounded-full h-2.5 mt-2">
-                       <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${(unlockedInAlbum / totalInAlbum) * 100}%"></div>
-                     </div>
-                     <p class="text-xs font-bold text-slate-600 mt-1">${unlockedInAlbum} / ${totalInAlbum} Dikumpul</p>
-                     ${album.id === 'a4' && !isCompleted ? '<p class="text-[9px] font-black text-amber-600 mt-0.5 leading-tight italic">*Raih 3 bintang ⭐⭐⭐ pada semua tahap untuk buka!</p>' : ''}
-                   </div>
+                <div onclick="state.activeAlbum = '${album.id}'; renderApp();" class="relative flex items-center p-4 rounded-3xl border-2 shadow-sm cursor-pointer transition-all hover:scale-[1.02] active:scale-95 ${album.theme} border-white/50">
+                  <div class="text-4xl mr-4">${isCompleted ? '🌟' : '📁'}</div>
+                  <div class="flex-1">
+                    <h3 class="font-black text-slate-800 text-lg">${album.title}</h3>
+                    ${album.id === 'a4' ? `<p class="text-[10px] font-extrabold text-orange-600 mt-0.5">(Raih 3 bintang ⭐⭐⭐ pada semua tahap untuk buka!)</p>` : ''}
+                    <div class="w-full bg-white/50 rounded-full h-2.5 mt-2">
+                      <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${(unlockedInAlbum / totalInAlbum) * 100}%"></div>
+                    </div>
+                    <p class="text-xs font-bold text-slate-600 mt-1">${unlockedInAlbum} / ${totalInAlbum} Dikumpul</p>
+                  </div>
                 </div>`;
             }).join('')}
           </div>
@@ -1198,286 +1916,293 @@
     };
 
     const renderParentGate = () => `
-      <div class="flex flex-col items-center justify-center h-full px-6 bg-slate-100 z-10 w-full">
+      <div class="flex flex-col items-center justify-center h-full px-6 bg-slate-100 z-10 w-full relative">
         <div class="bg-white rounded-3xl p-8 shadow-xl border-2 border-slate-200 max-w-sm w-full text-center">
-           <span class="text-5xl mb-4 block">⚙️</span>
-           <h2 class="text-2xl font-black text-slate-700 mb-2">Menu Ibu Bapa</h2>
-           <p class="text-sm text-slate-500 font-bold mb-6">Sila jawab soalan matematik di bawah untuk masuk:</p>
-           
-           <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
-               <span class="text-3xl font-black text-sky-600">${state.parentMath.q}</span>
-           </div>
-           
-           <input 
-              type="number" 
-              value="${state.parentInput}" 
-              oninput="setParentInput(this.value)"
-              class="w-full text-center text-2xl font-bold p-3 border-2 border-slate-300 rounded-xl mb-6 focus:border-sky-500 focus:outline-none"
-              placeholder="Jawapan"
-           />
-           
-           <div class="flex gap-3">
-               ${Button3D("Batal", "setGameState('levels')", "red", "flex-1")}
-               ${Button3D("Sahkan", "verifyParentLock()", "blue", "flex-1")}
-           </div>
-           
-           ${state.showParentError ? `
-              <div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
-                 <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-2 border-slate-200 animate-fade-in">
-                    <div class="text-5xl mb-4">❌</div>
-                    <h3 class="text-xl font-black text-slate-800 mb-2">Jawapan Salah</h3>
-                    <p class="text-sm text-slate-500 font-bold mb-6">Hanya ibu bapa dibenarkan masuk.</p>
-                    ${Button3D("Kembali", "state.showParentError=false; setGameState('levels');", "red", "w-full py-2 text-sm")}
-                 </div>
-              </div>
-           ` : ''}
+          <span class="text-5xl mb-4 block">⚙️</span>
+          <h2 class="text-2xl font-black text-slate-700 mb-2">Menu Ibu Bapa</h2>
+          <p class="text-sm text-slate-500 font-bold mb-6">Sila jawab soalan matematik di bawah untuk masuk:</p>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6">
+            <span class="text-3xl font-black text-sky-600">${state.parentMath.q}</span>
+          </div>
+          <input
+            type="number"
+            value="${state.parentInput}"
+            oninput="setParentInput(this.value)"
+            class="w-full text-center text-2xl font-bold p-3 border-2 border-slate-300 rounded-xl mb-6 focus:border-sky-500 focus:outline-none"
+            placeholder="Jawapan"
+          />
+          <div class="flex gap-3">
+            ${Button3D('Batal', "setGameState('levels')", 'red', 'flex-1')}
+            ${Button3D('Sahkan', "verifyParentLock()", 'blue', 'flex-1')}
+          </div>
         </div>
+
+        ${state.showParentError ? `
+          <div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+            <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-2 border-slate-200 animate-fade-in">
+              <div class="text-5xl mb-4">❌</div>
+              <h3 class="text-xl font-black text-slate-800 mb-2">Jawapan Salah</h3>
+              <p class="text-sm text-slate-500 font-bold mb-6">Hanya ibu bapa dibenarkan masuk.</p>
+              ${Button3D('Kembali', "state.showParentError = false; setGameState('levels');", 'red', 'w-full py-2 text-sm')}
+            </div>
+          </div>` : ''}
       </div>`;
 
     const renderParentsDashboard = () => {
-      const starsP1 = state.levelStars['1A'] + state.levelStars['1B'];
-      const starsP2 = state.levelStars['2A'] + state.levelStars['2B'];
-      const starsP3 = state.levelStars['3A'] + state.levelStars['3B'];
-      
-      const accP1 = Math.round((starsP1 / 6) * 100) || 0;
-      const accP2 = Math.round((starsP2 / 6) * 100) || 0;
-      const accP3 = Math.round((starsP3 / 6) * 100) || 0;
-      
-      const stickersP1 = ['s1', 's2', 's3', 's4', 's5'].filter(id => state.unlockedStickers.includes(id)).length;
-      const stickersP2 = ['s6', 's7', 's8', 's9', 's10'].filter(id => state.unlockedStickers.includes(id)).length;
-      const stickersP3 = ['s11', 's12', 's13', 's14'].filter(id => state.unlockedStickers.includes(id)).length;
-      const stickersBonus = ['s15', 's16'].filter(id => state.unlockedStickers.includes(id)).length;
-      
+      const rankStats = [
+        { title: 'Pangkat 1: Kadet Wang', color: 'pink', levels: ['1A', '1B'], stickerIds: ['s1', 's2', 's3', 's4', 's5'] },
+        { title: 'Pangkat 2: Wira Belanja', color: 'sky', levels: ['2A', '2B'], stickerIds: ['s6', 's7', 's8', 's9', 's10'] },
+        { title: 'Pangkat 3: Pengurus Bijak', color: 'orange', levels: ['3A', '3B', '3C'], stickerIds: ['s11', 's12', 's13', 's14'] }
+      ];
+
       return `
-      <div class="flex flex-col items-center justify-start pt-8 pb-10 h-full px-4 bg-gradient-to-b from-slate-50 to-slate-100 z-10 w-full overflow-y-auto relative">
-        <div class="flex items-center w-full max-w-sm shrink-0 mt-2 mb-6">
-          <button onclick="setGameState('levels')" class="w-12 h-12 bg-white rounded-full shadow-md text-slate-600 hover:text-sky-600 hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center border border-slate-100">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-          </button>
-          <h2 class="flex-1 text-center text-3xl font-black text-slate-700 pr-12 drop-shadow-sm">Kemajuan 📊</h2>
-        </div>
-        
-        <div class="w-full max-w-sm flex flex-col gap-5 mb-6">
-           
-           <!-- KAD PANGKAT 1 -->
-           <div class="bg-white rounded-3xl p-5 shadow-lg border border-pink-100 relative overflow-hidden">
-              <div class="absolute -right-4 -top-4 text-7xl opacity-5 pointer-events-none">⭐</div>
-              <h3 class="font-black text-pink-600 mb-3 text-lg border-b-2 border-pink-50 pb-2">Pangkat 1: Kadet</h3>
-              <div class="space-y-2">
-                 <div class="flex justify-between items-center bg-pink-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Selesai Main</span>
-                    <span class="font-black text-slate-800 text-sm">${state.levelProgress['1A'] + state.levelProgress['1B']} Kali</span>
-                 </div>
-                 <div class="flex justify-between items-center bg-pink-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Ketepatan & Bintang</span>
-                    <span class="font-black text-amber-500 text-sm">${accP1}% <span class="text-xs text-slate-400 font-bold ml-1">(${starsP1}/6)</span></span>
-                 </div>
-                 <div class="flex justify-between items-center bg-pink-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Sticker Terkumpul</span>
-                    <span class="font-black text-pink-600 text-sm">${stickersP1} / 5</span>
-                 </div>
-              </div>
-           </div>
+        <div class="flex flex-col items-center justify-start pt-6 pb-10 h-full px-4 bg-gradient-to-b from-slate-50 to-slate-100 z-10 w-full overflow-y-auto relative">
+          <div class="flex items-center w-full max-w-sm shrink-0 mt-1 mb-5">
+            <button onclick="setGameState('levels')" class="w-11 h-11 bg-white rounded-full shadow-md text-slate-600 hover:text-sky-600 active:scale-95 transition-all flex items-center justify-center border border-slate-100">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <h2 class="flex-1 text-center text-2xl font-black text-slate-700 pr-11 drop-shadow-sm">Laporan Ibu Bapa 📊</h2>
+          </div>
 
-           <!-- KAD PANGKAT 2 -->
-           <div class="bg-white rounded-3xl p-5 shadow-lg border border-sky-100 relative overflow-hidden">
-              <div class="absolute -right-4 -top-4 text-7xl opacity-5 pointer-events-none">🚀</div>
-              <h3 class="font-black text-sky-600 mb-3 text-lg border-b-2 border-sky-50 pb-2">Pangkat 2: Wira</h3>
-              <div class="space-y-2">
-                 <div class="flex justify-between items-center bg-sky-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Selesai Main</span>
-                    <span class="font-black text-slate-800 text-sm">${state.levelProgress['2A'] + state.levelProgress['2B']} Kali</span>
-                 </div>
-                 <div class="flex justify-between items-center bg-sky-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Ketepatan & Bintang</span>
-                    <span class="font-black text-amber-500 text-sm">${accP2}% <span class="text-xs text-slate-400 font-bold ml-1">(${starsP2}/6)</span></span>
-                 </div>
-                 <div class="flex justify-between items-center bg-sky-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Sticker Terkumpul</span>
-                    <span class="font-black text-sky-600 text-sm">${stickersP2} / 5</span>
-                 </div>
-              </div>
-           </div>
+          <div class="w-full max-w-sm flex flex-col gap-4 mb-5">
+            ${rankStats.map(r => {
+              const plays = r.levels.reduce((acc, lv) => acc + (state.levelProgress[lv] || 0), 0);
+              const stars = r.levels.reduce((acc, lv) => acc + (state.levelStars[lv] || 0), 0);
+              const maxStars = r.levels.length * 3;
+              const pct = Math.round((stars / maxStars) * 100);
+              const stCount = r.stickerIds.filter(id => state.unlockedStickers.includes(id)).length;
+              const colorClass = r.color === 'pink' ? 'text-pink-600 bg-pink-500 border-pink-200' : r.color === 'sky' ? 'text-sky-600 bg-sky-500 border-sky-200' : 'text-orange-600 bg-orange-500 border-orange-200';
+              const [textC, bgC, borderC] = colorClass.split(' ');
+              return `
+                <div class="bg-white rounded-3xl p-4 shadow-md border-2 ${borderC}">
+                  <h3 class="font-black ${textC} text-base mb-2">${r.title}</h3>
+                  <div class="grid grid-cols-3 gap-2 text-center mb-2">
+                    <div class="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                      <div class="text-[10px] font-bold text-slate-400">Selesai Main</div>
+                      <div class="text-base font-black text-slate-700">${plays}x</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                      <div class="text-[10px] font-bold text-slate-400">Ketepatan</div>
+                      <div class="text-base font-black ${textC}">${pct}%</div>
+                      <div class="text-[10px] font-bold text-amber-500">⭐ ${stars}/${maxStars}</div>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-2 border border-slate-100">
+                      <div class="text-[10px] font-bold text-slate-400">Sticker</div>
+                      <div class="text-base font-black text-amber-600">${stCount}/${r.stickerIds.length}</div>
+                    </div>
+                  </div>
+                  <div class="w-full bg-slate-200 rounded-full h-2.5">
+                    <div class="${bgC} h-2.5 rounded-full transition-all" style="width: ${pct}%"></div>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
 
-           <!-- KAD PANGKAT 3 -->
-           <div class="bg-white rounded-3xl p-5 shadow-lg border border-orange-100 relative overflow-hidden">
-              <div class="absolute -right-4 -top-4 text-7xl opacity-5 pointer-events-none">🏆</div>
-              <h3 class="font-black text-orange-500 mb-3 text-lg border-b-2 border-orange-50 pb-2">Pangkat 3: Pengurus</h3>
-              <div class="space-y-2">
-                 <div class="flex justify-between items-center bg-orange-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Selesai Main</span>
-                    <span class="font-black text-slate-800 text-sm">${state.levelProgress['3A'] + state.levelProgress['3B']} Kali</span>
-                 </div>
-                 <div class="flex justify-between items-center bg-orange-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Ketepatan & Bintang</span>
-                    <span class="font-black text-amber-500 text-sm">${accP3}% <span class="text-xs text-slate-400 font-bold ml-1">(${starsP3}/6)</span></span>
-                 </div>
-                 <div class="flex justify-between items-center bg-orange-50/70 px-3 py-2 rounded-xl">
-                    <span class="font-bold text-slate-600 text-[11px] uppercase tracking-wide">Sticker Terkumpul</span>
-                    <span class="font-black text-orange-500 text-sm">${stickersP3} / 4</span>
-                 </div>
-              </div>
-           </div>
-           
-           <!-- KAD BONUS -->
-           ${stickersBonus > 0 ? `
-           <div class="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-2xl p-4 shadow-md border border-yellow-300 flex justify-between items-center">
-              <span class="font-bold text-amber-800 text-xs uppercase tracking-wide">Sticker Bonus (Juara)</span>
-              <span class="font-black text-amber-600 text-base">${stickersBonus} / 2</span>
-           </div>
-           ` : ''}
+          <div class="w-full max-w-sm flex flex-col gap-3 pb-8">
+            ${Button3D('Buka Semua Tahap (Unlock All)', "unlockAllLevels()", 'green', 'w-full py-3 text-sm')}
+            ${Button3D('Reset Data Pemain', "state.showResetConfirm = true; renderApp();", 'red', 'w-full py-3 text-sm')}
+          </div>
 
-        </div>
-
-        ${Button3D("Reset Data Pemain", "state.showResetConfirm=true; renderApp();", "red", "w-[85%] max-w-sm mb-6")}
-
-        ${state.showResetConfirm ? `
-           <div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+          ${state.showUnlockSuccess ? `
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
               <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-2 border-slate-200 animate-fade-in">
-                 <div class="text-5xl mb-4">⚠️</div>
-                 <h3 class="text-xl font-black text-slate-800 mb-2">Adakah anda pasti?</h3>
-                 <p class="text-sm text-slate-500 font-bold mb-6">Semua rekod tahap dan koleksi sticker akan dipadam sepenuhnya.</p>
-                 <div class="flex gap-3">
-                    ${Button3D("Batal", "state.showResetConfirm=false; renderApp();", "blue", "flex-1 py-2 text-sm")}
-                    ${Button3D("Padam", "state.levelProgress={'1A':0,'1B':0,'2A':0,'2B':0,'3A':0,'3B':0}; state.levelStars={'1A':0,'1B':0,'2A':0,'2B':0,'3A':0,'3B':0}; state.unlockedStickers=[]; state.showResetConfirm=false; state.showResetSuccess=true; renderApp();", "red", "flex-1 py-2 text-sm")}
-                 </div>
+                <div class="text-5xl mb-4">🔓</div>
+                <h3 class="text-xl font-black text-slate-800 mb-2">Semua Tahap Dibuka!</h3>
+                <p class="text-sm text-slate-500 font-bold mb-6">Semua tahap (1A–3C) dan Pangkat 4 kini boleh dimainkan.</p>
+                ${Button3D('Tutup', "state.showUnlockSuccess = false; renderApp();", 'green', 'w-full py-2 text-sm')}
               </div>
-           </div>
-        ` : ''}
+            </div>` : ''}
 
-        ${state.showResetSuccess ? `
-           <div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+          ${state.showResetConfirm ? `
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
               <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-2 border-slate-200 animate-fade-in">
-                 <div class="text-5xl mb-4 text-green-500">✅</div>
-                 <h3 class="text-xl font-black text-slate-800 mb-2">Berjaya Dipadam</h3>
-                 <p class="text-sm text-slate-500 font-bold mb-6">Semua data pemain telah dikosongkan.</p>
-                 ${Button3D("Tutup", "state.showResetSuccess=false; renderApp();", "green", "w-full py-2 text-sm")}
+                <div class="text-5xl mb-4">⚠️</div>
+                <h3 class="text-xl font-black text-slate-800 mb-2">Adakah anda pasti?</h3>
+                <p class="text-sm text-slate-500 font-bold mb-6">Semua rekod tahap, bintang, ganjaran, dan koleksi sticker akan dipadam sepenuhnya.</p>
+                <div class="flex gap-3">
+                  ${Button3D('Batal', "state.showResetConfirm = false; renderApp();", 'blue', 'flex-1 py-2 text-sm')}
+                  ${Button3D('Padam', "resetAllPlayerData()", 'red', 'flex-1 py-2 text-sm')}
+                </div>
               </div>
-           </div>
-        ` : ''}
-      </div>`;
+            </div>` : ''}
+
+          ${state.showResetSuccess ? `
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+              <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-2 border-slate-200 animate-fade-in">
+                <div class="text-5xl mb-4 text-green-500">✅</div>
+                <h3 class="text-xl font-black text-slate-800 mb-2">Berjaya Dipadam</h3>
+                <p class="text-sm text-slate-500 font-bold mb-6">Semua data pemain telah dikosongkan.</p>
+                ${Button3D('Tutup', "state.showResetSuccess = false; renderApp();", 'green', 'w-full py-2 text-sm')}
+              </div>
+            </div>` : ''}
+        </div>`;
     };
 
     const renderShop = () => {
       const mission = getMissionData();
       const uniqueItemsToBuy = (mission.level === '2A' || mission.level === '3A') ? Array.from(new Set(mission.itemsToBuy.map(i => i.id))) : [];
-      const bgStyleStr = (mission.level === '2A' || mission.level === '3A' || mission.level === '3B') 
-        ? `background-image: linear-gradient(rgba(255,255,255,0.6), rgba(220,240,255,0.85)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center;`
-        : `background-color: #fff7ed;`;
+      const bgStyle = (mission.level === '2A' || mission.level === '3A' || mission.level === '3B' || mission.level === '3C')
+        ? 'background: linear-gradient(180deg, #fff7ed 0%, #e0f2fe 100%);'
+        : 'background-color: #fff7ed;';
+
+      // Paparan Khas Modul 3C (Bijak Belanja) menggunakan templat Rak Pasar Mini
+      if (mission.level === '3C') {
+        return `
+          <div class="flex flex-col h-full w-full relative overflow-hidden" style="${bgStyle}">
+            ${renderShelfDecor()}
+            <div class="bg-gradient-to-r from-orange-400 to-orange-500 shadow-md p-4 flex justify-between items-center z-20 rounded-b-3xl">
+              <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
+              <div class="bg-white px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner">Soalan ${state.currentMissionIndex + 1} / 5</div>
+            </div>
+
+            <div class="mx-auto mt-3 w-[90%] max-w-sm bg-white/95 rounded-2xl shadow-md border-2 border-orange-200 p-3 z-30 text-center">
+              <h3 class="font-black text-orange-500 text-xs uppercase tracking-wider mb-1">3C: Bijak Belanja</h3>
+              <p class="font-extrabold text-slate-800 text-sm">${mission.question}</p>
+            </div>
+
+            <div class="flex-1 flex flex-col justify-center items-center px-4 z-10 pb-24">
+              ${mission.subType === 'compare' ? `
+                <div class="w-full max-w-sm relative">
+                  <div class="flex justify-around items-end pb-3 relative z-10">
+                    ${mission.options.map(opt => `
+                      <div onclick="handleShelfClick('${opt.uid}')" class="flex flex-col items-center cursor-pointer bg-white/90 hover:bg-amber-50 p-4 rounded-3xl border-4 border-orange-200 shadow-xl active:scale-95 transition-all">
+                        ${ItemSVG(opt.id, 85)}
+                        <span class="font-bold text-slate-700 text-xs mt-1">${opt.name}</span>
+                        <span class="mt-2 bg-rose-500 text-white font-black text-base px-4 py-1 rounded-full shadow">${formatMoney(opt.price)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                  <div class="w-full h-7 shelf-3d shadow-lg"></div>
+                </div>
+              ` : `
+                <div class="w-full max-w-sm flex flex-col items-center">
+                  <div class="relative bg-white p-5 rounded-3xl border-4 border-orange-300 shadow-xl flex flex-col items-center mb-2">
+                    <div class="absolute -top-3 -right-3 bg-red-500 text-white font-black text-xs px-3 py-1 rounded-full shadow-md border-2 border-white animate-bounce-slight">
+                      Potongan ${formatMoney(mission.discount)}!
+                    </div>
+                    ${ItemSVG(mission.item.id, 85)}
+                    <span class="font-black text-slate-700 text-sm mt-1">${mission.item.name}</span>
+                    <span class="text-xs font-bold text-slate-500 mt-1">Harga Asal: <span class="text-slate-800 font-black">${formatMoney(mission.origPrice)}</span></span>
+                  </div>
+                  <div class="w-full h-5 shelf-3d mb-5"></div>
+                  <div class="flex gap-3 justify-center w-full">
+                    ${mission.priceChoices.map(ch => `
+                      <button onclick="handleShelfClick('${ch.uid}')" class="flex-1 bg-gradient-to-b from-sky-400 to-sky-500 text-white font-black text-lg py-3 rounded-2xl border-b-4 border-sky-700 active:border-0 active:translate-y-1 shadow-lg">
+                        ${formatMoney(ch.val)}
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              `}
+            </div>
+
+            <div class="absolute bottom-2 left-2 z-30 pointer-events-none flex flex-row items-end gap-1">
+              ${Shopkeeper(95)}
+              ${SpeechBubble(state.tinaMsg, "mb-4 pointer-events-auto max-w-[175px]", "left")}
+            </div>
+          </div>`;
+      }
 
       const renderShelfRow = (speed, isTop = false) => {
-          const multipliedItems = [...state.shelfItems, ...state.shelfItems, ...state.shelfItems, ...state.shelfItems].sort(() => Math.random() - 0.5);
-          return `
-             <div class="w-full overflow-hidden relative ${isTop ? 'h-28' : 'h-36'} flex items-end mb-4">
-                <div class="absolute bottom-0 w-full h-8 shelf-3d -z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.1)]"></div>
-                <div class="animate-conveyor flex items-end pb-3" style="animation-duration: ${speed}">
-                   ${multipliedItems.map((item, idx) => {
-                      const isTaken = (mission.level === '2A' || mission.level === '3A') && (state.basket.filter(b => b.id === item.id).length >= (mission.itemsToBuy.filter(i => i.id === item.id).length || 0) && mission.itemsToBuy.filter(i => i.id === item.id).length > 0);
-                      return `
-                       <div class="relative flex flex-col items-center justify-end ${isTop ? 'h-24 min-w-[120px]' : 'h-32 min-w-[140px]'} mx-2">
-                          ${!isTaken ? `
-                            <div class="cursor-pointer mb-2 animate-premium-float hover:scale-110 transition-transform" onclick="handleShelfClick('${item.uid}')">
-                              ${item.type === 'note' ? NoteSVG(item.val, isTop ? 110 : 130, isTop ? 55 : 65) 
-                               : item.type === 'coin' ? CoinSVG(item.val, isTop ? 45 : 55)
-                               : ItemSVG(item.id, isTop ? 70 : 85)}
-                            </div>
-                          ` : ''}
-                          ${(item.price && !isTaken) ? `
-                            <div class="absolute -bottom-4 bg-white border-2 border-slate-300 font-bold px-2 py-0.5 rounded shadow-sm text-xs z-20">
-                              ${formatMoney(item.price)}
-                            </div>
-                          ` : ''}
-                        </div>`;
-                   }).join('')}
-                </div>
-             </div>`;
+        const multipliedItems = [...state.shelfItems, ...state.shelfItems, ...state.shelfItems, ...state.shelfItems];
+        return `
+          <div class="w-full overflow-hidden relative ${isTop ? 'h-28' : 'h-36'} flex items-end mb-4">
+            <div class="absolute bottom-0 w-full h-8 shelf-3d -z-10 shadow-[0_-5px_15px_rgba(0,0,0,0.1)]"></div>
+            <div class="animate-conveyor flex items-end pb-3" style="animation-duration: ${speed}">
+              ${multipliedItems.map(item => {
+                const isTaken = (mission.level === '2A' || mission.level === '3A') &&
+                  (state.basket.filter(b => b.id === item.id).length >= (mission.itemsToBuy.filter(i => i.id === item.id).length || 0) &&
+                  mission.itemsToBuy.filter(i => i.id === item.id).length > 0);
+                return `
+                  <div class="relative flex flex-col items-center justify-end ${isTop ? 'h-24 min-w-[120px]' : 'h-32 min-w-[140px]'} mx-2">
+                    ${!isTaken ? `
+                      <div class="cursor-pointer mb-2 animate-premium-float hover:scale-110 transition-transform" onclick="handleShelfClick('${item.uid}')">
+                        ${item.type === 'note' ? NoteSVG(item.val, isTop ? 110 : 130, isTop ? 55 : 65)
+                          : item.type === 'coin' ? CoinSVG(item.val, isTop ? 45 : 55)
+                          : ItemSVG(item.id, isTop ? 70 : 85)}
+                      </div>` : ''}
+                    ${item.price && !isTaken ? `
+                      <div class="absolute -bottom-4 bg-white border-2 border-slate-300 font-bold px-2 py-0.5 rounded shadow-sm text-xs z-20">
+                        ${formatMoney(item.price)}
+                      </div>` : ''}
+                  </div>`;
+              }).join('')}
+            </div>
+          </div>`;
       };
 
+      const handle3BDone = `
+        (() => {
+          const m = getMissionData();
+          const sum = state.basket.reduce((acc, b) => acc + (b.price || 0), 0);
+          if (state.basket.length < 2) {
+            playWrong(); wrongFeedback("Sila pilih sekurang-kurangnya 2 barang!");
+          } else if (Math.abs(sum - m.budget) < 0.01) {
+            playCorrect(); successFeedback("Tepat sekali! Jumlah belian kamu tepat " + formatMoney(m.budget) + "!");
+          } else {
+            playWrong(); state.basket = []; wrongFeedback("Jumlah " + formatMoney(sum) + " tidak tepat dengan " + formatMoney(m.budget) + ". Cuba lagi!");
+          }
+        })()
+      `;
+
       return `
-        <div class="flex flex-col h-full w-full relative overflow-hidden" style="${bgStyleStr}">
+        <div class="flex flex-col h-full w-full relative overflow-hidden" style="${bgStyle}">
+          ${renderShelfDecor()}
           <div class="bg-gradient-to-r from-orange-400 to-orange-500 shadow-md p-4 flex justify-between items-center z-20 rounded-b-3xl">
-             <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
-             <div class="bg-white px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner">Soalan ${state.currentMissionIndex + 1} / 5</div>
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
+            <div class="bg-white px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner">Soalan ${state.currentMissionIndex + 1} / 5</div>
           </div>
 
           <div class="absolute top-16 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_5px_15px_rgba(0,0,0,0.1)] border-2 border-orange-200 p-3 z-30 pointer-events-none flex flex-col items-center">
-             <h3 class="font-black text-orange-500 text-sm mb-1 uppercase tracking-wider">Senarai Belian</h3>
-             ${(mission.level === '1A' || mission.level === '2B' || mission.level === '3B') ? `
-                 <div class="font-bold text-slate-700 text-sm text-center">${mission.question}</div>
-             ` : ''}
-             ${mission.level === '1B' ? `
-                 <div class="flex flex-col items-center gap-1">
-                   <span class="font-bold text-slate-700 text-xs">${mission.question}</span>
-                   <div class="bg-sky-50 p-2 rounded-xl shadow-sm border border-sky-100 flex items-center gap-2">
-                      ${ItemSVG(mission.item.id, 30)}
-                      <span class="font-black text-sky-700">${formatMoney(mission.item.price)}</span>
-                   </div>
-                 </div>
-             ` : ''}
-             ${(mission.level === '2A' || mission.level === '3A') ? `
-                 <div class="flex justify-center gap-4 w-full mt-1">
-                    ${uniqueItemsToBuy.map(id => {
-                        const target = mission.itemsToBuy.filter(i => i.id === id).length;
-                        const current = state.basket.filter(b => b.id === id).length;
-                        const isDone = current >= target;
-                        return `
-                            <div class="flex flex-col items-center transition-all duration-300 ${isDone ? 'opacity-60 scale-95' : 'scale-100'}">
-                                <div class="relative bg-orange-50 p-2 rounded-xl shadow-sm border border-orange-100">
-                                    ${ItemSVG(id, 40)}
-                                    ${isDone ? `<div class="absolute -right-2 -bottom-2 bg-green-500 text-white rounded-full p-0.5 shadow-md w-7 h-7 flex items-center justify-center font-black text-sm border-2 border-white animate-bounce-slight">✓</div>` : ''}
-                                </div>
-                                <span class="text-[11px] mt-1 font-bold text-center ${isDone ? 'line-through text-slate-400' : 'text-slate-700'}">${target > 1 ? `${target}x ` : ''}${id}</span>
-                            </div>`
-                    }).join('')}
-                 </div>
-             ` : ''}
+            <h3 class="font-black text-orange-500 text-sm mb-1 uppercase tracking-wider">Senarai Belian</h3>
+            ${(mission.level === '2B' || mission.level === '3B') ? `<div class="font-bold text-slate-700 text-sm text-center">${mission.question}</div>` : ''}
+            ${(mission.level === '2A' || mission.level === '3A') ? `
+              <div class="flex justify-center gap-4 w-full mt-1">
+                ${uniqueItemsToBuy.map(id => {
+                  const target = mission.itemsToBuy.filter(i => i.id === id).length;
+                  const current = state.basket.filter(b => b.id === id).length;
+                  const isDone = current >= target;
+                  return `
+                    <div class="flex flex-col items-center transition-all duration-300 ${isDone ? 'opacity-60 scale-95' : 'scale-100'}">
+                      <div class="relative bg-orange-50 p-2 rounded-xl shadow-sm border border-orange-100">
+                        ${ItemSVG(id, 40)}
+                        ${isDone ? `<div class="absolute -right-2 -bottom-2 bg-green-500 text-white rounded-full p-0.5 shadow-md w-7 h-7 flex items-center justify-center font-black text-sm border-2 border-white animate-bounce-slight">✓</div>` : ''}
+                      </div>
+                      <span class="text-[11px] mt-1 font-bold text-center ${isDone ? 'line-through text-slate-400' : 'text-slate-700'}">${target > 1 ? `${target}x ` : ''}${id}</span>
+                    </div>`;
+                }).join('')}
+              </div>` : ''}
           </div>
 
           <div class="flex-1 w-full flex flex-col justify-center relative z-10 mt-16 pb-12">
-             ${renderShelfRow('35s', true)}
-             ${renderShelfRow('28s', false)}
+            ${renderShelfRow('35s', true)}
+            ${renderShelfRow('28s', false)}
           </div>
 
           ${mission.level === '3B' ? `
-             <div class="absolute bottom-[90px] right-4 z-40 flex flex-col items-end">
-               <div class="bg-sky-100 text-sky-800 text-[10px] font-bold px-2 py-1 rounded shadow-sm border border-sky-300 mb-1 animate-pulse text-center max-w-[120px] leading-tight">
-                 Sila tekan SELESAI bila jawapan betul
-               </div>
-               ${Button3D(`<span>SELESAI</span><span class="text-[10px] font-normal">Misi: ${formatMoney(mission.budget)}</span>`, 
-               `
-                  const sum = state.basket.reduce((acc, b) => acc + (b.price || 0), 0);
-                  if (state.basket.length < 2) {
-                     playWrong(); wrongFeedback('Sila pilih 2 atau lebih barang!');
-                  } else if (Math.abs(sum - ${mission.budget}) < 0.01) {
-                     playCorrect();
-                     successFeedback('Hebat! Jumlah pembelian tepat RM ' + sum.toFixed(2));
-                  } else if (sum < ${mission.budget}) {
-                     playWrong(); wrongFeedback('Jumlah belum cukup! Sekarang RM ' + sum.toFixed(2)); state.basket = []; renderApp();
-                  } else {
-                     playWrong(); wrongFeedback('Terlebih bajet! Jumlah RM ' + sum.toFixed(2)); state.basket = []; renderApp();
-                  }
-               `, "blue", "px-4 py-2 text-sm flex flex-col items-center shadow-lg animate-bounce-slight")}
-             </div>
-          ` : ''}
+            <div class="absolute bottom-[95px] right-3 z-40 flex flex-col items-end gap-1">
+              <div class="bg-amber-100 text-amber-900 border-2 border-amber-400 rounded-xl px-2.5 py-1 text-[10px] font-black shadow animate-pulse max-w-[140px] text-center leading-tight">
+                Sila tekan SELESAI bila jawapan betul
+              </div>
+              ${Button3D(`<span>SELESAI</span><span class="text-[10px] font-normal">Sasaran: ${formatMoney(mission.budget)}</span>`, handle3BDone.replace(/"/g, '&quot;'), 'blue', 'px-4 py-2 text-sm shadow-lg')}
+            </div>` : ''}
 
           ${(mission.level === '2A' || mission.level === '3A' || mission.level === '3B' || mission.level === '2B') ? `
-             <div class="absolute bottom-1 right-4 z-30 flex flex-col items-center">
-                <div class="relative pointer-events-none">
-                   ${BasketSVG(85)}
-                   <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-0">
-                      ${state.basket.map((b, i) => `
-                         <div class="-ml-5 drop-shadow-md z-10">
-                            ${b.type ? (b.type === 'note' ? NoteSVG(b.val, 40, 20) : CoinSVG(b.val, 25)) : ItemSVG(b.id, 30)}
-                         </div>
-                      `).join('')}
-                   </div>
+            <div class="absolute bottom-1 right-4 z-30 flex flex-col items-center">
+              <div class="relative pointer-events-none">
+                ${BasketSVG(85)}
+                <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-0">
+                  ${state.basket.map(b => `
+                    <div class="-ml-5 drop-shadow-md z-10">
+                      ${b.type ? (b.type === 'note' ? NoteSVG(b.val, 40, 20) : CoinSVG(b.val, 25)) : ItemSVG(b.id, 30)}
+                    </div>`).join('')}
                 </div>
-             </div>
-          ` : ''}
+              </div>
+            </div>` : ''}
 
           <div class="absolute bottom-2 left-2 z-30 pointer-events-none flex flex-row items-end gap-1">
-             ${Shopkeeper(100)}
-             ${SpeechBubble(state.tinaMsg, "mb-4 pointer-events-auto max-w-[160px]", "left")}
+            ${Shopkeeper(100)}
+            ${SpeechBubble(state.tinaMsg, "mb-4 pointer-events-auto max-w-[160px]", "left")}
           </div>
         </div>`;
     };
@@ -1486,55 +2211,46 @@
       const mission = getMissionData();
       return `
         <div class="flex flex-col h-full w-full relative overflow-hidden bg-gradient-to-b from-cyan-100 via-sky-300 to-blue-500">
-          <div class="absolute inset-0 z-0 bg-[url('https://www.transparenttextures.com/patterns/clouds.png')] opacity-30 pointer-events-none mix-blend-overlay"></div>
-
           <div class="bg-white/40 backdrop-blur-md p-4 flex justify-between items-center z-20 rounded-b-3xl border-b border-white/50 shadow-sm">
-             <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-600/90 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
-             <div class="bg-white/90 px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-sm border border-sky-100 text-sm">Soalan ${state.currentMissionIndex + 1} / 5</div>
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-600/90 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
+            <div class="bg-white/90 px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-sm border border-sky-100 text-sm">Soalan ${state.currentMissionIndex + 1} / 5</div>
           </div>
 
           <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_8px_20px_rgba(0,0,0,0.15)] border-4 border-white/80 p-4 z-30 pointer-events-none flex flex-col items-center">
-             <h3 class="font-black text-sky-500 text-sm mb-1 uppercase tracking-wider drop-shadow-sm">Pecahkan Buih Yang Betul!</h3>
-             ${mission.level === '1A' ? `
-                 <div class="font-bold text-slate-700 text-center leading-snug">${mission.question}</div>
-             ` : ''}
-             ${mission.level === '1B' ? `
-                 <div class="flex flex-col items-center gap-1">
-                   <span class="font-bold text-slate-700 text-xs text-center">${mission.question}</span>
-                   <div class="bg-sky-50 px-3 py-1 rounded-2xl shadow-inner border border-sky-200 flex items-center gap-2 mt-1">
-                      ${ItemSVG(mission.item.id, 35)}
-                      <span class="font-black text-sky-700">${formatMoney(mission.item.price)}</span>
-                   </div>
-                 </div>
-             ` : ''}
+            <h3 class="font-black text-sky-500 text-sm mb-1 uppercase tracking-wider">Pecahkan Buih Yang Betul!</h3>
+            ${mission.level === '1A' ? `<div class="font-bold text-slate-700 text-center leading-snug">${mission.question}</div>` : ''}
+            ${mission.level === '1B' ? `
+              <div class="flex flex-col items-center gap-1">
+                <span class="font-bold text-slate-700 text-xs text-center">${mission.question}</span>
+                <div class="bg-sky-50 px-3 py-1 rounded-2xl shadow-inner border border-sky-200 flex items-center gap-2 mt-1">
+                  ${ItemSVG(mission.item.id, 35)}
+                  <span class="font-black text-sky-700">${formatMoney(mission.item.price)}</span>
+                </div>
+              </div>` : ''}
           </div>
 
           <div class="flex-1 w-full relative z-10 overflow-hidden pointer-events-none mt-10">
-             ${state.shelfItems.map((item, idx) => {
-                const isPopping = state.poppingBubble === item.bubbleId;
-                return `
-                <div 
-                   class="absolute bottom-[-150px] pointer-events-auto cursor-pointer flex justify-center ${isPopping ? 'animate-bubble-pop z-50' : 'animate-float-up'}"
-                   style="left: ${item.left}; animation-delay: ${isPopping ? '0s' : item.delay}; animation-duration: ${isPopping ? '0.3s' : item.duration}"
-                   onclick="playTone(900, 'sine', 0.05, 0.1); handleShelfClick('${item.uid}');"
+            ${state.shelfItems.map(item => {
+              const isPopping = state.poppingBubble === item.bubbleId;
+              return `
+                <div
+                  class="absolute bottom-[-150px] pointer-events-auto cursor-pointer flex justify-center ${isPopping ? 'animate-bubble-pop z-50' : 'animate-float-up'}"
+                  style="left: ${item.left}; animation-delay: ${isPopping ? '0s' : item.delay}; animation-duration: ${isPopping ? '0.3s' : item.duration};"
+                  onclick="playTone(900, 'sine', 0.05, 0.1); handleShelfClick('${item.uid}');"
                 >
-                   <div class="relative w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-white/30 via-pink-100/10 to-cyan-100/20 backdrop-blur-[2px] rounded-full border-[1px] border-white/60 shadow-[inset_0_0_20px_rgba(255,255,255,0.8),_0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center transition-transform hover:scale-110 active:scale-95 group ${isPopping ? 'opacity-0 transition-opacity duration-75' : ''}">
-                      <div class="absolute top-2 right-4 w-5 h-2 bg-white rounded-full opacity-80 transform rotate-45 blur-[1px]"></div>
-                      <div class="absolute top-4 right-3 w-2 h-2 bg-white rounded-full opacity-70"></div>
-                      <div class="absolute bottom-2 left-4 w-6 h-1 bg-pink-300 rounded-full opacity-40 transform -rotate-12 blur-[2px]"></div>
-                      <div class="absolute bottom-4 right-4 w-4 h-1 bg-cyan-300 rounded-full opacity-40 transform rotate-45 blur-[2px]"></div>
-                      
-                      <div class="scale-75 group-hover:scale-90 transition-transform drop-shadow-md pointer-events-none flex justify-center items-center">
-                          ${item.type === 'note' ? NoteSVG(item.val, 90, 45) : CoinSVG(item.val, 50)}
-                      </div>
-                   </div>
+                  <div class="relative w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-white/40 via-pink-100/20 to-cyan-100/30 backdrop-blur-[2px] rounded-full border border-white/70 shadow-[inset_0_0_20px_rgba(255,255,255,0.8),_0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center transition-transform hover:scale-110 active:scale-95 ${isPopping ? 'opacity-0' : ''}">
+                    <div class="absolute top-2 right-4 w-5 h-2 bg-white rounded-full opacity-80 transform rotate-45 blur-[1px]"></div>
+                    <div class="scale-75 pointer-events-none flex justify-center items-center">
+                      ${item.type === 'note' ? NoteSVG(item.val, 90, 45) : CoinSVG(item.val, 50)}
+                    </div>
+                  </div>
                 </div>`;
-             }).join('')}
+            }).join('')}
           </div>
 
           <div class="absolute bottom-2 left-2 z-30 pointer-events-none flex flex-row items-end gap-1">
-             ${Shopkeeper(110)}
-             ${SpeechBubble(state.tinaMsg, "mb-4 pointer-events-auto max-w-[150px]", "left")}
+            ${Shopkeeper(110)}
+            ${SpeechBubble(state.tinaMsg, "mb-4 pointer-events-auto max-w-[150px]", "left")}
           </div>
         </div>`;
     };
@@ -1545,161 +2261,291 @@
 
       return `
         <div class="flex flex-col h-full w-full bg-slate-50 relative overflow-hidden">
+          ${renderShelfDecor()}
           <div class="bg-gradient-to-r from-sky-500 to-sky-600 shadow-md p-4 flex justify-between items-center z-20 rounded-b-3xl gap-2">
-             <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-700 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm shrink-0">Tutup</button>
-             <div class="bg-white px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-inner text-sm whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-700 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm shrink-0">Tutup</button>
+            <div class="bg-white px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-inner text-sm whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
           </div>
 
-          <div class="flex-1 flex flex-col items-center pt-2 pb-2 relative z-10 w-full px-4">
-             <div class="flex gap-4 mb-2 bg-white/60 px-6 py-3 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto max-w-full">
-               ${mission.itemsToBuy.map((item, idx) => `
-                  <div class="flex flex-col items-center shrink-0">
-                    ${ItemSVG(item.id, 50)}
-                    <span class="text-[10px] font-bold mt-1 text-slate-500">${formatMoney(item.price)}</span>
+          <div class="flex-1 flex flex-col items-center pt-2 pb-2 relative z-10 w-full px-4 overflow-y-auto">
+            <div class="flex gap-4 mb-2 bg-white/80 px-5 py-2.5 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto max-w-full">
+              ${mission.itemsToBuy.map(item => `
+                <div class="flex flex-col items-center shrink-0">
+                  ${ItemSVG(item.id, 46)}
+                  <span class="text-[10px] font-bold mt-0.5 text-slate-600">${formatMoney(item.price)}</span>
+                </div>`).join('')}
+            </div>
+
+            ${SpeechBubble(`Sila bayar ${formatMoney(mission.totalPrice)}`, "mb-2")}
+            <div class="text-center px-2 mb-2 w-full">
+              <p class="text-[11px] font-bold text-sky-800 bg-sky-100 px-3 py-1.5 rounded-xl shadow-sm border border-sky-300 leading-snug">
+                💡 Klik wang di kotak bawah untuk pembetulan & pulangkan ke dompet
+              </p>
+            </div>
+
+            <!-- Dulang Jumlah Bayaran -->
+            <div class="w-full max-w-sm bg-gradient-to-b from-slate-200 to-slate-300 rounded-2xl p-3.5 shadow-inner border-4 ${state.wobbleTray ? 'border-red-400 animate-wobble' : 'border-slate-300'} min-h-[125px] flex flex-col">
+              <div class="flex justify-between items-center mb-2 border-b-2 border-slate-400 pb-1.5">
+                <span class="font-bold text-slate-600 uppercase text-xs">Jumlah Bayaran</span>
+                <span class="font-black text-lg text-teal-600 bg-white px-3 py-0.5 rounded-md shadow-sm">${formatMoney(currentTotal)}</span>
+              </div>
+              <div class="flex-1 flex flex-wrap gap-2 justify-center items-center">
+                ${state.tray.length === 0 ? `<span class="text-slate-400 font-bold text-xs italic">Tekan wang di dalam dompet untuk bayar</span>` : ''}
+                ${state.tray.map(item => `
+                  <div onclick="moveMoneyToWallet('${item.id}')" class="cursor-pointer hover:scale-105 transition-transform" title="Klik untuk pulangkan ke dompet">
+                    ${item.type === 'note' ? NoteSVG(item.val, 85, 42) : CoinSVG(item.val, 38)}
+                  </div>`).join('')}
+              </div>
+            </div>
+
+            <!-- Dompet Anda (Visual Dompet Kulit Berjahit) -->
+            <div class="w-full max-w-sm mt-auto pt-3">
+              <div class="relative bg-gradient-to-b from-amber-800 via-amber-900 to-amber-950 rounded-t-3xl rounded-b-2xl p-3.5 shadow-[0_-6px_20px_rgba(0,0,0,0.2)] border-2 border-amber-700">
+                <!-- Kancing Emas Dompet -->
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-b from-amber-600 to-amber-800 border-2 border-amber-400 px-5 py-1 rounded-full shadow-md flex items-center gap-1.5">
+                  <span class="w-2.5 h-2.5 rounded-full bg-yellow-300 border border-amber-700 shadow-inner"></span>
+                  <span class="text-[10px] font-black text-amber-100 tracking-wider uppercase">👛 Dompet Anda</span>
+                </div>
+
+                <!-- Jahitan Putus-putus & Butang Bayar -->
+                <div class="border-2 border-dashed border-amber-500/60 rounded-2xl p-2.5 pt-3">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-[11px] font-bold text-amber-200">Klik wang untuk bayar:</span>
+                    ${Button3D('BAYAR ✓', "handlePayment()", 'green', 'py-1.5 px-5 text-xs !shadow-[0_4px_0_theme(colors.teal.300)]')}
                   </div>
-               `).join('')}
-             </div>
-             
-             ${SpeechBubble(`Sila bayar ${formatMoney(mission.totalPrice)}`, "mb-2")}
-             <div class="text-center px-4 mb-2 w-full">
-                <p class="text-[11px] sm:text-[12px] font-bold text-sky-800 bg-sky-100 px-3 py-2 rounded-xl shadow-sm border border-sky-300 animate-pulse leading-snug">
-                  💡 klik wang untuk pembetulan & bayaran wang yang betul
-                </p>
-             </div>
-             
-             <div class="w-full max-w-sm bg-gradient-to-b from-slate-200 to-slate-300 rounded-2xl p-4 shadow-inner border-4 ${state.wobbleTray ? 'border-red-400 animate-wobble' : 'border-slate-300'} min-h-[140px] flex flex-col">
-               <div class="flex justify-between items-center mb-2 border-b-2 border-slate-400 pb-2">
-                 <span class="font-bold text-slate-600 uppercase text-sm">Jumlah Bayaran</span>
-                 <span class="font-black text-xl text-teal-600 bg-white px-3 rounded-md shadow-sm">${formatMoney(currentTotal)}</span>
-               </div>
-               
-               <div class="flex-1 flex flex-wrap gap-2 justify-center items-center">
-                  ${state.tray.length === 0 ? `<span class="text-slate-400 font-bold text-sm italic">Tekan wang di bawah untuk masukkan</span>` : ''}
-                  ${state.tray.map(item => `
-                    <div onclick="moveMoneyToWallet('${item.id}')">
-                       ${item.type === 'note' ? NoteSVG(item.val, 90, 45) : CoinSVG(item.val, 40)}
+                  <div class="bg-amber-950/60 rounded-xl p-2.5 shadow-inner border border-amber-800/80 flex flex-wrap gap-2.5 justify-center max-h-36 overflow-y-auto">
+                    ${state.wallet.length === 0 ? `<span class="text-amber-300/70 text-xs font-bold py-2">Dompet kosong</span>` : ''}
+                    ${state.wallet.map(item => `
+                      <div onclick="moveMoneyToTray('${item.id}')" class="cursor-pointer hover:scale-105 active:scale-95 transition-transform">
+                        ${item.type === 'note' ? NoteSVG(item.val, 92, 46) : CoinSVG(item.val, 42)}
+                      </div>`).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    };
+
+    const renderCashier = () => {
+      const m = state.cashierMission;
+      const currentChange = Math.round(state.tray.reduce((sum, item) => sum + item.val, 0) * 100) / 100;
+      const mins = Math.floor(state.cashierTimeLeft / 60);
+      const secs = state.cashierTimeLeft % 60;
+      const drawerDenoms = m.isSen ? [0.50, 0.20, 0.10, 0.05] : [10, 5, 1];
+
+      return `
+        <div class="flex flex-col h-full w-full bg-emerald-50 relative overflow-hidden">
+          ${renderShelfDecor()}
+          <!-- Header Juruwang -->
+          <div class="bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md p-3 flex justify-between items-center z-20 rounded-b-3xl gap-2">
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-emerald-800 px-3.5 py-1.5 rounded-full border-b-4 border-emerald-950 active:border-0 active:translate-y-1 text-xs shrink-0">Tutup</button>
+            <div class="bg-white/95 px-3 py-1 rounded-full font-black text-emerald-700 text-xs shadow-inner">
+              👥 Dilayan: ${state.cashierServed}
+            </div>
+            ${state.cashierMode === 'timed'
+              ? `<div id="cashier-timer" class="bg-amber-300 text-slate-900 px-3 py-1 rounded-full font-black text-xs shadow">⏱️ ${mins}:${secs < 10 ? '0' : ''}${secs}</div>`
+              : `<div class="bg-amber-300 text-slate-900 px-3 py-1 rounded-full font-black text-xs shadow">⭐ +${state.cashierSessionStars}</div>`
+            }
+          </div>
+
+          <!-- Paparan Pesanan Pelanggan -->
+          <div class="flex-1 flex flex-col items-center pt-2 px-3 z-10 w-full overflow-y-auto">
+            <div class="w-full max-w-sm bg-white rounded-2xl p-3 shadow-sm border-2 border-emerald-200 mb-2">
+              <div class="flex justify-center gap-4 mb-2 pb-2 border-b border-slate-100">
+                ${m.items.map(item => `
+                  <div class="flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100">
+                    ${ItemSVG(item.id, 34)}
+                    <div class="text-left leading-tight">
+                      <div class="text-[10px] font-bold text-slate-600">${item.name}</div>
+                      <div class="text-xs font-black text-emerald-700">${formatMoney(item.price)}</div>
+                    </div>
+                  </div>`).join('')}
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-center">
+                <div class="bg-sky-50 rounded-xl p-1.5 border border-sky-200">
+                  <div class="text-[10px] font-bold text-sky-600 uppercase">Jumlah Harga</div>
+                  <div class="text-base font-black text-sky-800">${formatMoney(m.total)}</div>
+                </div>
+                <div class="bg-amber-50 rounded-xl p-1.5 border border-amber-200">
+                  <div class="text-[10px] font-bold text-amber-700 uppercase">Pelanggan Bayar</div>
+                  <div class="text-base font-black text-amber-800">${formatMoney(m.pay)}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kotak Tengah: BAKI PELANGGAN -->
+            <div class="w-full max-w-sm bg-gradient-to-b from-slate-200 to-slate-300 rounded-2xl p-3 shadow-inner border-4 ${state.wobbleTray ? 'border-red-400 animate-wobble' : 'border-slate-300'} min-h-[108px] flex flex-col mb-2">
+              <div class="flex justify-between items-center mb-1.5 border-b-2 border-slate-400 pb-1">
+                <span class="font-black text-slate-700 uppercase text-xs">BAKI PELANGGAN</span>
+                <span class="font-black text-lg text-emerald-700 bg-white px-2.5 rounded-md shadow-sm">${formatMoney(currentChange)}</span>
+              </div>
+              <div class="flex-1 flex flex-wrap gap-1.5 justify-center items-center">
+                ${state.tray.length === 0 ? `<span class="text-slate-500 font-bold text-[11px] italic">Klik wang dalam laci di bawah untuk beri baki</span>` : ''}
+                ${state.tray.map(item => `
+                  <div onclick="cashierRemoveMoney('${item.id}')" class="cursor-pointer hover:scale-105 transition-transform" title="Klik untuk keluarkan">
+                    ${item.type === 'note' ? NoteSVG(item.val, 76, 38) : CoinSVG(item.val, 36)}
+                  </div>`).join('')}
+              </div>
+            </div>
+
+            <!-- LACI DUIT KEDAI (Reka Bentuk Laci Mesin Kira Sebenar) -->
+            <div class="w-full max-w-sm mt-auto pb-2">
+              <div class="bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 rounded-t-2xl rounded-b-xl p-3 shadow-[0_-6px_20px_rgba(0,0,0,0.35)] border-2 border-slate-600">
+                <!-- Bar Atas Laci: Lubang Kunci & Butang Pulang Baki -->
+                <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-slate-600/80">
+                  <div class="flex items-center gap-2">
+                    <!-- Lubang Kunci Logam -->
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-slate-300 to-slate-500 border-2 border-slate-400 shadow-inner flex items-center justify-center">
+                      <div class="w-1 h-3 bg-slate-900 rounded-full"></div>
+                    </div>
+                    <div>
+                      <div class="text-[11px] font-black text-amber-300 tracking-wider uppercase leading-none">LACI DUIT KEDAI</div>
+                      <div class="text-[9px] font-bold text-slate-400 mt-0.5">${m.isSen ? 'Petak Syiling Sen' : 'Petak Wang Kertas'}</div>
+                    </div>
+                  </div>
+                  ${Button3D('PULANG BAKI ✓', "handleCashierSubmit()", 'green', 'py-1.5 px-4 text-xs !shadow-[0_4px_0_theme(colors.teal.300)]')}
+                </div>
+
+                <!-- Petak Bersekat Mesin Kira -->
+                <div class="grid ${m.isSen ? 'grid-cols-4' : 'grid-cols-3'} gap-2 bg-slate-950/80 p-2 rounded-xl border border-slate-700 shadow-inner">
+                  ${drawerDenoms.map(val => `
+                    <div onclick="cashierAddMoney(${val})" class="relative cursor-pointer bg-gradient-to-b from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 active:scale-95 transition-all rounded-lg p-1.5 pt-3 flex flex-col items-center justify-between border border-slate-600 shadow-inner min-h-[82px]">
+                      ${!m.isSen
+                        ? `<div class="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-1.5 bg-gradient-to-b from-slate-300 to-slate-500 rounded-full shadow"></div>`
+                        : `<div class="absolute top-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-slate-500/70 rounded-full"></div>`
+                      }
+                      <div class="my-auto flex items-center justify-center pointer-events-none">
+                        ${val >= 1 ? NoteSVG(val, 78, 39) : CoinSVG(val, 40)}
+                      </div>
+                      <span class="mt-1 bg-slate-900/90 text-amber-300 font-black text-[10px] px-2 py-0.5 rounded border border-slate-600">${formatMoney(val)}</span>
                     </div>
                   `).join('')}
-               </div>
-             </div>
+                </div>
 
-             <div class="w-full mt-auto pt-4 border-t-2 border-slate-200 bg-white shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)] rounded-t-3xl p-4 pb-6">
-                <div class="flex justify-between items-center mb-3">
-                   <span class="font-bold text-slate-700 text-sm">Dompet Anda</span>
-                   ${Button3D("BAYAR", "handlePayment()", "green", "py-2 px-6 text-sm")}
+                <!-- Pemegang Laci Logam -->
+                <div class="mt-2.5 flex justify-center">
+                  <div class="w-24 h-2.5 bg-gradient-to-b from-slate-300 via-slate-400 to-slate-500 rounded-full border border-slate-600 shadow"></div>
                 </div>
-                <div class="flex flex-wrap gap-3 justify-center max-h-40 overflow-y-auto pt-2 pb-2">
-                   ${state.wallet.map(item => `
-                     <div onclick="moveMoneyToTray('${item.id}')">
-                        ${item.type === 'note' ? NoteSVG(item.val, 100, 50) : CoinSVG(item.val, 45)}
-                     </div>
-                   `).join('')}
-                </div>
-             </div>
+              </div>
+            </div>
           </div>
+
+          <!-- Modal Tamat Masa 2 Minit -->
+          ${state.cashierEnded ? `
+            <div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
+              <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-4 border-emerald-300 animate-fade-in">
+                <div class="text-5xl mb-2">⏱️</div>
+                <h3 class="text-2xl font-black text-emerald-600 mb-1">Masa Tamat!</h3>
+                <p class="text-sm font-bold text-slate-600 mb-4">Anda berjaya melayan <span class="text-emerald-600 font-black text-lg">${state.cashierServed}</span> pelanggan!</p>
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-4 space-y-1">
+                  <div class="text-xs font-bold text-slate-600">Rekod Terbaik (High Score): <span class="font-black text-purple-600">${state.cashierHighScore} Pelanggan</span></div>
+                  ${state.cashierServed >= 5
+                    ? `<div class="text-sm font-black text-amber-600">🎉 Bonus Cabaran: +3 ⭐ Bintang!</div>`
+                    : `<div class="text-xs font-bold text-slate-500">Layan 5+ pelanggan dalam 2 minit untuk bonus +3 ⭐!</div>`
+                  }
+                </div>
+                <div class="flex gap-2">
+                  ${Button3D('Main Lagi', "startCashierMode('timed')", 'green', 'flex-1 py-2 text-sm')}
+                  ${Button3D('Menu Tahap', "setGameState('levels')", 'blue', 'flex-1 py-2 text-sm')}
+                </div>
+              </div>
+            </div>` : ''}
         </div>`;
     };
 
     const renderResult = () => `
       <div class="flex flex-col items-center justify-center h-full text-center px-4 space-y-4 bg-gradient-to-br from-mint-50 to-sky-100 z-10 w-full relative overflow-hidden">
-        <div class="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-teal-200 rounded-full mix-blend-multiply blur-3xl opacity-60 pointer-events-none"></div>
-        
         ${state.lastEarnedStars === 3 ? `
-             ${Firework(0, '20%', '15%', 0.8)}
-             ${Firework(0.5, '80%', '25%', 1.2)}
-             ${Firework(1.2, '50%', '10%', 0.9)}
-             ${Firework(0.8, '15%', '50%', 0.6)}
-             ${Firework(1.5, '85%', '60%', 1)}
+          ${Firework(0, '20%', '15%', 0.8)}
+          ${Firework(0.5, '80%', '25%', 1.2)}
+          ${Firework(1.2, '50%', '10%', 0.9)}
+          ${Firework(0.8, '15%', '50%', 0.6)}
+          ${Firework(1.5, '85%', '60%', 1)}
         ` : ''}
 
         <div class="flex gap-2 sm:gap-4 z-20 mt-4">
-           ${[1, 2, 3].map((s) => `
-             <svg class="w-16 h-16 sm:w-20 sm:h-20 ${state.lastEarnedStars >= s ? 'text-yellow-400 animate-bounce-slight drop-shadow-[0_4px_8px_rgba(250,204,21,0.6)]' : 'text-slate-300 grayscale opacity-50'}" style="animation-delay: ${s*0.2}s" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-             </svg>
-           `).join('')}
+          ${[1, 2, 3].map(s => `
+            <svg class="w-16 h-16 sm:w-20 sm:h-20 ${state.lastEarnedStars >= s ? 'text-yellow-400 animate-bounce-slight drop-shadow-[0_4px_8px_rgba(250,204,21,0.6)]' : 'text-slate-300 grayscale opacity-50'}" style="animation-delay: ${s * 0.2}s" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+            </svg>`).join('')}
         </div>
 
         <h1 class="text-3xl font-black text-green-600 drop-shadow-sm z-20 uppercase leading-snug">Tahniah! 🎉<br/>Anda Telah Tamat<br/>Tahap Ini!</h1>
-        
+
         ${state.showVictory && state.newStickerWon ? `
-           <div class="bg-white px-6 py-4 rounded-3xl shadow-xl border-4 border-amber-300 z-20 animate-fade-in flex flex-col items-center">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sticker Baharu Dibuka!</span>
-              <div class="mb-2 animate-bounce-slight">
-                 ${ItemSVG(state.newStickerWon.icon, 80)}
-              </div>
-              <span class="text-sm font-black text-amber-600 mt-2">${state.newStickerWon.name}</span>
-           </div>
-        ` : state.showVictory && !state.newStickerWon ? `
-           <div class="bg-white px-6 py-4 rounded-3xl shadow-xl border-4 border-amber-300 z-20 animate-fade-in flex flex-col items-center">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hebat!</span>
-              <span class="text-sm font-black text-amber-600 mt-2 text-center leading-tight">Semua sticker telah<br/>berjaya dikumpul! 🏆</span>
-           </div>
-        ` : `
-           <div class="flex flex-col items-center z-20 mt-2 cursor-pointer" onclick="${state.lastEarnedStars === 3 ? 'state.showVictory=true; renderApp();' : ''}">
-               ${state.lastEarnedStars === 3 ? `
-                  <div class="relative animate-bounce-slight hover:scale-110 transition-transform">
-                     <div class="text-8xl drop-shadow-2xl">🎁</div>
-                     <div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black px-2 py-1 rounded-full animate-pulse border-2 border-white shadow-md">BUKA!</div>
-                  </div>
-               ` : `
-                  <div class="bg-slate-100 px-6 py-4 rounded-3xl border-2 border-slate-300 flex flex-col items-center shadow-inner">
-                     <div class="text-5xl drop-shadow-md mb-2">🪙</div>
-                     <span class="text-xs font-bold text-slate-500 px-4">Dapatkan 3 Bintang ⭐⭐⭐ penuh untuk membuka kotak hadiah misteri!</span>
-                  </div>
-               `}
-           </div>
-        `}
+          <div class="bg-white px-6 py-4 rounded-3xl shadow-xl border-4 border-amber-300 z-20 animate-fade-in flex flex-col items-center">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sticker Baharu Dibuka!</span>
+            <div class="mb-2 animate-bounce-slight">${ItemSVG(state.newStickerWon.icon, 80)}</div>
+            <span class="text-sm font-black text-amber-600 mt-2">${state.newStickerWon.name}</span>
+          </div>`
+        : state.showVictory && !state.newStickerWon ? `
+          <div class="bg-white px-6 py-4 rounded-3xl shadow-xl border-4 border-amber-300 z-20 animate-fade-in flex flex-col items-center">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hebat!</span>
+            <span class="text-sm font-black text-amber-600 mt-2 text-center leading-tight">Semua sticker telah<br/>berjaya dikumpul! 🏆</span>
+          </div>`
+        : `
+          <div class="flex flex-col items-center z-20 mt-2 cursor-pointer" onclick="${state.lastEarnedStars === 3 ? 'state.showVictory = true; playTing(); renderApp();' : ''}">
+            ${state.lastEarnedStars === 3 ? `
+              <div class="relative animate-bounce-slight hover:scale-110 transition-transform">
+                <div class="text-8xl drop-shadow-2xl">🎁</div>
+                <div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-black px-2 py-1 rounded-full animate-pulse border-2 border-white shadow-md">BUKA!</div>
+              </div>`
+            : `
+              <div class="bg-slate-100 px-6 py-4 rounded-3xl border-2 border-slate-300 flex flex-col items-center shadow-inner">
+                <div class="text-5xl drop-shadow-md mb-2">🪙</div>
+                <span class="text-xs font-bold text-slate-500 px-4">Dapatkan 3 Bintang ⭐⭐⭐ penuh untuk membuka kotak hadiah misteri!</span>
+              </div>`}
+          </div>`}
 
         <div class="mt-4 z-20 w-full max-w-[280px]">
-          ${Button3D("Menu Tahap", "enableAudio(); setGameState('levels'); state.showVictory = false;", "blue", "w-full text-lg py-3")}
+          ${Button3D('Menu Tahap', "enableAudio(); state.showVictory = false; setGameState('levels');", 'blue', 'w-full text-lg py-3')}
         </div>
       </div>`;
 
-    // ==========================================
-    // 7. CORE RENDER CYCLE
-    // ==========================================
-    const renderApp = () => {
-      const container = document.getElementById('app');
-      let html = '';
+    const renderFeedbackOverlay = () => {
+      if (!state.feedback) return '';
+      return `
+        <div class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm animate-fade-in px-6 ${state.feedback === 'correct' ? 'text-green-500' : 'text-red-500'}">
+          ${state.feedback === 'correct' ? `
+            <div class="flex flex-col items-center text-center">
+              <svg class="w-36 h-36 text-yellow-400 animate-bounce drop-shadow-xl" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
+              <h2 class="text-4xl font-black mt-4 drop-shadow-sm text-green-500 tracking-wider">BETUL! 🎉</h2>
+              <p class="text-sm font-bold text-slate-600 mt-2 max-w-xs">${state.tinaMsg}</p>
+              ${Button3D('Seterusnya &rarr;', "nextMission()", 'green', 'mt-6 px-8 py-3 text-xl font-bold')}
+            </div>`
+          : `
+            <div class="flex flex-col items-center text-center">
+              ${Shopkeeper(140, 'mb-4 drop-shadow-xl')}
+              <h2 class="text-xl font-black mt-2 drop-shadow-sm text-amber-600 tracking-wide bg-white px-5 py-3 rounded-3xl border-4 border-amber-300 text-center whitespace-pre-line leading-snug">
+                ${state.tinaMsg}
+              </h2>
+            </div>`}
+        </div>`;
+    };
 
+    const renderApp = () => {
+      const appEl = document.getElementById('app');
+      if (!appEl) return;
+      let html = '';
       if (state.gameState === 'menu') html = renderMenu();
       else if (state.gameState === 'levels') html = renderLevels();
       else if (state.gameState === 'shop') html = renderShop();
       else if (state.gameState === 'bubbleGame') html = renderBubbleGame();
       else if (state.gameState === 'checkout') html = renderCheckout();
+      else if (state.gameState === 'cashier') html = renderCashier();
+      else if (state.gameState === 'rewards') html = renderRewardsShop();
       else if (state.gameState === 'result') html = renderResult();
       else if (state.gameState === 'stickers') html = renderStickers();
       else if (state.gameState === 'parentGate') html = renderParentGate();
       else if (state.gameState === 'parents') html = renderParentsDashboard();
 
-      if (state.feedback) {
-        html += `
-          <div class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm animate-fade-in ${state.feedback === 'correct' ? 'text-green-500' : 'text-red-500'}">
-             ${state.feedback === 'correct' ? `
-               <div class="flex flex-col items-center">
-                 <svg class="w-40 h-40 text-yellow-400 animate-bounce drop-shadow-xl" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
-                 <h2 class="text-5xl font-black mt-6 drop-shadow-sm text-green-500 tracking-wider">BETUL! 🎉</h2>
-                 ${Button3D("Seterusnya &rarr;", "nextMission()", "green", "mt-8 px-8 py-3 text-2xl font-bold")}
-               </div>
-             ` : `
-               <div class="flex flex-col items-center">
-                 ${Shopkeeper(150, "mb-4 drop-shadow-xl")}
-                 <h2 class="text-2xl font-black mt-2 drop-shadow-sm text-amber-600 tracking-wide bg-white px-6 py-3 rounded-full border-4 border-amber-300 text-center whitespace-pre-line leading-tight">
-                    ${state.tinaMsg}
-                 </h2>
-               </div>
-             `}
-          </div>`;
-      }
-
-      container.innerHTML = html;
+      appEl.innerHTML = html + renderFeedbackOverlay();
     };
 
-    // Initialize application
-    window.onload = () => {
-      renderApp();
-    };
+    // Muatkan data simpanan kekal & paparkan aplikasi
+    loadProgress();
+    renderApp();
   </script>
 </body>
 </html>
