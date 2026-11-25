@@ -632,14 +632,21 @@
     let activeAudio = null;
     let audioQueue = [];
     let isPlayingQueue = false;
+    let onQueueCompleteCallback = null;
+    let nextQuestionTimeoutId = null;
 
     function stopSpeech() {
       if (speechTimeoutId) {
         clearTimeout(speechTimeoutId);
         speechTimeoutId = null;
       }
+      if (nextQuestionTimeoutId) {
+        clearTimeout(nextQuestionTimeoutId);
+        nextQuestionTimeoutId = null;
+      }
       audioQueue = [];
       isPlayingQueue = false;
+      onQueueCompleteCallback = null;
       if (activeAudio) {
         try {
           activeAudio.pause();
@@ -649,11 +656,15 @@
       }
     }
 
-    function playAudioQueue(files) {
+    function playAudioQueue(files, onComplete = null) {
       stopSpeech();
-      if (!files || files.length === 0) return;
+      if (!files || files.length === 0) {
+        if (typeof onComplete === 'function') onComplete();
+        return;
+      }
       audioQueue = [...files];
       isPlayingQueue = true;
+      onQueueCompleteCallback = onComplete;
       playNextInQueue();
     }
 
@@ -661,6 +672,11 @@
       if (!isPlayingQueue || audioQueue.length === 0) {
         isPlayingQueue = false;
         activeAudio = null;
+        const cb = onQueueCompleteCallback;
+        onQueueCompleteCallback = null;
+        if (typeof cb === 'function') {
+          cb();
+        }
         return;
       }
 
@@ -872,9 +888,9 @@
           document.getElementById('equationDisplay').innerHTML = `<span class="text-6xl sm:text-7xl text-amber-800 font-extrabold px-6 py-2 bg-amber-50 rounded-3xl border-4 border-amber-300 shadow-inner">${targetNum}</span>`;
           document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-lg font-bold text-amber-700">Kenali angka di atas! 🥐</div>`;
         } else if (currentEarlyActivityType === 2) {
-          document.getElementById('questionPrompt').textContent = `Cari nombor ${targetNum} !`;
-          document.getElementById('equationDisplay').innerHTML = `<span class="text-3xl text-slate-700 font-bold">Cari angka yang tepat</span>`;
-          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-4xl">🔍✨</div>`;
+          document.getElementById('questionPrompt').textContent = `Cari nombor... !`;
+          document.getElementById('equationDisplay').innerHTML = `<span class="text-3xl text-slate-700 font-bold">Dengar & cari angka yang tepat</span>`;
+          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-4xl">🔊🔍✨</div>`;
         } else if (currentEarlyActivityType === 3) {
           document.getElementById('questionPrompt').textContent = "Berapakah bilangan pastri ini?";
           document.getElementById('equationDisplay').innerHTML = `<span class="text-xl font-bold text-amber-800">Kira dan padankan angka</span>`;
@@ -1101,6 +1117,13 @@
       isAnswered = true;
       stopSpeech();
 
+      // Kunci sementara (disabled) semua butang jawapan supaya pemain tidak tertekan butang lain
+      const allAnswerBtns = document.querySelectorAll('#answersGrid button');
+      allAnswerBtns.forEach(b => {
+        b.disabled = true;
+        b.classList.add('cursor-not-allowed');
+      });
+
       const feedbackArea = document.getElementById('feedbackArea');
       feedbackArea.classList.remove('hidden');
 
@@ -1141,18 +1164,20 @@
             <p class="text-xs text-slate-600 font-medium">Tahniah! Jawapan kamu betul dan tepat.</p>
           </div>
         `;
+
+        const advanceAfterAudio = () => {
+          nextQuestionTimeoutId = setTimeout(() => {
+            if (!document.getElementById('gameScreenView').classList.contains('hidden')) {
+              generateNextQuestion();
+            }
+          }, 500);
+        };
+
         if (currentOperation === 'kenali') {
-          playAudioQueue([`audio/${selected}.mp3`, 'audio/bagus.mp3']);
+          playAudioQueue([`audio/${selected}.mp3`, 'audio/bagus.mp3'], advanceAfterAudio);
         } else {
-          playAudioQueue(['audio/bagus.mp3']);
+          playAudioQueue(['audio/bagus.mp3'], advanceAfterAudio);
         }
-        
-        // Auto proceed after brief pause
-        setTimeout(() => {
-          if (!document.getElementById('gameScreenView').classList.contains('hidden')) {
-            generateNextQuestion();
-          }
-        }, 1600);
       } else {
         btnElement.classList.remove('bg-white', 'hover:bg-amber-50');
         btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
