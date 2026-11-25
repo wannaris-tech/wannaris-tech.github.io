@@ -85,9 +85,9 @@
   <button 
     onclick="toggleAudio()"
     id="audio-btn"
-    class="absolute top-4 right-4 z-50 bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg border-2 border-slate-300 font-bold text-slate-700 hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center text-sm"
+    class="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-50 bg-white/90 backdrop-blur px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full shadow-lg border-2 border-slate-300 font-bold text-slate-700 hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center text-xs sm:text-sm"
   >
-    🔇 Muzik: OFF
+    🔇 OFF
   </button>
 
   <!-- Main Application Container -->
@@ -161,7 +161,7 @@
     window.toggleAudio = () => {
       globalAudioEnabled = !globalAudioEnabled;
       state.audioOn = globalAudioEnabled;
-      document.getElementById('audio-btn').innerText = globalAudioEnabled ? '🎵 Muzik: ON' : '🔇 Muzik: OFF';
+      document.getElementById('audio-btn').innerText = globalAudioEnabled ? '🎵 ON' : '🔇 OFF';
       if (globalAudioEnabled) initAudio();
       manageAudioLoops();
     };
@@ -170,7 +170,7 @@
       if (!globalAudioEnabled) {
         globalAudioEnabled = true;
         state.audioOn = true;
-        document.getElementById('audio-btn').innerText = '🎵 Muzik: ON';
+        document.getElementById('audio-btn').innerText = '🎵 ON';
         initAudio();
         manageAudioLoops();
       }
@@ -1495,76 +1495,58 @@
 
             <!-- KANAN: Peti Ais Rapat Banyak Rak Minuman, Rak Barangan Runcit Padat & Pelanggan Lebih Tinggi -->
             <div class="w-[56%] h-full relative z-10 flex items-end gap-1 p-1 pb-1.5">
-              <!-- Peti Ais (Chiller) 6 Tingkat Rapat Penuh Pelbagai Minuman -->
-              <div class="w-[56%] h-[94%] bg-gradient-to-b from-cyan-50/95 via-sky-100/90 to-cyan-200/90 border-[2.5px] border-slate-500 rounded-t-lg rounded-b-sm shadow-[inset_0_0_14px_rgba(6,182,212,0.45)] flex flex-col justify-between p-0.5 relative overflow-hidden">
+              <!-- Peti Ais (Chiller) Paras Rendah (Separuh Saiz Asal) Penuh Pelbagai Minuman -->
+              <div class="w-[56%] h-[48%] bg-gradient-to-b from-cyan-50/95 via-sky-100/90 to-cyan-200/90 border-[2px] border-slate-500 rounded-t-lg rounded-b-sm shadow-[inset_0_0_12px_rgba(6,182,212,0.45)] flex flex-col justify-between p-0.5 relative overflow-hidden">
                 <!-- Papan Lampu Atas Peti Ais -->
-                <div class="w-full h-2.5 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-t-sm flex items-center justify-center shadow-sm z-10 shrink-0">
-                  <span class="text-[5.5px] font-black text-white tracking-wider">MINUMAN SEJUK</span>
+                <div class="w-full h-2 bg-gradient-to-r from-sky-500 to-cyan-500 rounded-t-sm flex items-center justify-center shadow-sm z-10 shrink-0">
+                  <span class="text-[4.5px] font-black text-white tracking-wider leading-none">MINUMAN SEJUK</span>
                 </div>
                 <!-- Pantulan Kaca & Pemegang Pintu Peti Ais -->
                 <div class="absolute top-0 right-0 w-[55%] h-full bg-gradient-to-l from-white/35 to-transparent transform -skew-x-12 pointer-events-none z-20"></div>
-                <div class="absolute right-0.5 top-1/2 -translate-y-1/2 w-1 h-9 bg-slate-600 rounded-full shadow z-30"></div>
+                <div class="absolute right-0.5 top-1/2 -translate-y-1/2 w-1 h-5 bg-slate-600 rounded-full shadow z-30"></div>
 
-                <!-- 6 Tingkat Rak Peti Ais Dirapatkan & Dipenuhi Pelbagai Minuman -->
-                <div class="flex-1 flex flex-col justify-between py-0 z-10">
-                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
-                    ${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}
+                <!-- 4 Tingkat Rak Rapat Minuman -->
+                <div class="flex-1 flex flex-col justify-between py-0 z-10 overflow-hidden">
+                  <div class="flex justify-around items-end border-b border-cyan-500/80">
+                    ${ItemSVG('Air Mineral', 10)}${ItemSVG('Air Mineral', 10)}${ItemSVG('Air Kotak', 10)}${ItemSVG('Susu', 10)}${ItemSVG('Air Mineral', 10)}
                   </div>
-                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
-                    ${ItemSVG('Susu', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}
+                  <div class="flex justify-around items-end border-b border-cyan-500/80">
+                    ${ItemSVG('Susu', 10)}${ItemSVG('Air Kotak', 10)}${ItemSVG('Susu', 10)}${ItemSVG('Air Mineral', 10)}${ItemSVG('Air Kotak', 10)}
                   </div>
-                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
-                    ${ItemSVG('Air Kotak', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}
+                  <div class="flex justify-around items-end border-b border-cyan-500/80">
+                    ${ItemSVG('Air Kotak', 10)}${ItemSVG('Air Mineral', 10)}${ItemSVG('Air Kotak', 10)}${ItemSVG('Susu', 10)}${ItemSVG('Air Mineral', 10)}
                   </div>
-                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
-                    ${ItemSVG('Susu', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}
-                  </div>
-                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
-                    ${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Air Kotak', 12)}
-                  </div>
-                  <div class="flex justify-around items-end border-b-[1.5px] border-cyan-500/80">
-                    ${ItemSVG('Air Kotak', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}${ItemSVG('Susu', 12)}${ItemSVG('Air Mineral', 12)}
+                  <div class="flex justify-around items-end border-b border-cyan-500/80">
+                    ${ItemSVG('Susu', 10)}${ItemSVG('Air Mineral', 10)}${ItemSVG('Susu', 10)}${ItemSVG('Air Kotak', 10)}${ItemSVG('Susu', 10)}
                   </div>
                 </div>
                 <!-- Tapak Bawah Peti Ais -->
-                <div class="w-full h-1.5 bg-slate-600 rounded-b-sm z-10 shrink-0"></div>
+                <div class="w-full h-1 bg-slate-600 rounded-b-sm z-10 shrink-0"></div>
               </div>
 
-              <!-- Rak Barangan Runcit 6 Tingkat Rapat & Padat di Sebelah Peti Ais -->
-              <div class="w-[44%] h-[92%] bg-gradient-to-b from-orange-100/95 to-orange-200/95 border-2 border-orange-400 rounded-md p-0.5 flex flex-col justify-between shadow-inner">
+              <!-- Rak Barangan Runcit Paras Rendah (Separuh Saiz Asal) & Padat di Sebelah Peti Ais -->
+              <div class="w-[44%] h-[46%] bg-gradient-to-b from-orange-100/95 to-orange-200/95 border-[1.5px] border-orange-400 rounded-md p-0.5 flex flex-col justify-between shadow-inner overflow-hidden">
                 <div class="flex flex-col">
                   <div class="flex justify-around items-end">
-                    ${ItemSVG('Keropok', 11)}${ItemSVG('Biskut', 11)}${ItemSVG('Roti', 11)}${ItemSVG('Keropok', 11)}
+                    ${ItemSVG('Keropok', 10)}${ItemSVG('Biskut', 10)}${ItemSVG('Roti', 10)}${ItemSVG('Keropok', 10)}
                   </div>
-                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
+                  <div class="w-full h-[2px] bg-orange-600 rounded-full"></div>
                 </div>
                 <div class="flex flex-col">
                   <div class="flex justify-around items-end">
-                    ${ItemSVG('Coklat', 11)}${ItemSVG('Jam', 11)}${ItemSVG('Keju', 11)}${ItemSVG('Coklat', 11)}
+                    ${ItemSVG('Coklat', 10)}${ItemSVG('Jam', 10)}${ItemSVG('Keju', 10)}${ItemSVG('Coklat', 10)}
                   </div>
-                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
+                  <div class="w-full h-[2px] bg-orange-600 rounded-full"></div>
                 </div>
                 <div class="flex flex-col">
                   <div class="flex justify-around items-end">
-                    ${ItemSVG('Gula-gula', 11)}${ItemSVG('Lollipop', 11)}${ItemSVG('Biskut', 11)}${ItemSVG('Coklat Kecil', 11)}
+                    ${ItemSVG('Telur', 10)}${ItemSVG('Beras', 10)}${ItemSVG('Mentega', 10)}${ItemSVG('Gula-gula', 10)}
                   </div>
-                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
-                </div>
-                <div class="flex flex-col">
-                  <div class="flex justify-around items-end">
-                    ${ItemSVG('Telur', 11)}${ItemSVG('Beras', 11)}${ItemSVG('Mentega', 11)}${ItemSVG('Roti', 11)}
-                  </div>
-                  <div class="w-full h-[3px] bg-orange-600 rounded-full"></div>
-                </div>
-                <div class="flex flex-col">
-                  <div class="flex justify-around items-end bg-amber-200/75 rounded-t">
-                    ${ItemSVG('Lobak Merah', 11)}${ItemSVG('Oren', 11)}${ItemSVG('Lobak Merah', 11)}${ItemSVG('Oren', 11)}
-                  </div>
-                  <div class="w-full h-1 bg-amber-600 rounded-b-sm"></div>
+                  <div class="w-full h-[2px] bg-orange-600 rounded-full"></div>
                 </div>
                 <div class="flex flex-col">
                   <div class="flex justify-around items-end bg-emerald-200/80 rounded-t">
-                    ${ItemSVG('Epal', 12)}${ItemSVG('Pisang', 12)}${ItemSVG('Oren', 12)}${ItemSVG('Epal', 12)}
+                    ${ItemSVG('Epal', 10)}${ItemSVG('Pisang', 10)}${ItemSVG('Oren', 10)}${ItemSVG('Lobak Merah', 10)}
                   </div>
                   <div class="w-full h-1 bg-emerald-700 rounded-b-sm"></div>
                 </div>
@@ -1686,14 +1668,14 @@
       const p4Unlocked = state.levelProgress['3C'] > 0 || isAllUnlocked;
 
       return `
-        <div class="flex flex-col items-center justify-start pt-6 pb-10 h-full px-4 space-y-3 relative z-10 w-full overflow-y-auto overflow-x-hidden bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-200">
+        <div class="flex flex-col items-center justify-start pt-12 sm:pt-6 pb-10 h-full px-4 space-y-3 relative z-10 w-full overflow-y-auto overflow-x-hidden bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-200" style="background-image: linear-gradient(rgba(255,255,255,0.6), rgba(253,230,138,0.9)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed;">
           <!-- Header dengan Butang UTAMA Jelas -->
           <div class="flex items-center w-full max-w-sm shrink-0 mt-1 gap-2">
             <button onclick="setGameState('menu')" class="px-3 py-2 bg-white rounded-2xl shadow-md text-sky-600 hover:bg-sky-50 active:scale-95 transition-all flex items-center gap-1.5 border-2 border-sky-200 shrink-0">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
               <span class="font-black text-xs tracking-wide">UTAMA</span>
             </button>
-            <h2 class="flex-1 text-center text-xl sm:text-2xl font-black bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 bg-clip-text text-transparent tracking-tight pr-2">PILIH TAHAP PANGKAT</h2>
+            <h2 class="flex-1 text-center text-lg sm:text-2xl font-black bg-gradient-to-r from-rose-600 via-purple-600 to-sky-600 bg-clip-text text-transparent tracking-tight pr-2">PILIH TAHAP PANGKAT</h2>
           </div>
 
           <!-- Bar Bintang & Kedai Ganjaran -->
@@ -2041,9 +2023,9 @@
     const renderShop = () => {
       const mission = getMissionData();
       const uniqueItemsToBuy = (mission.level === '2A' || mission.level === '3A') ? Array.from(new Set(mission.itemsToBuy.map(i => i.id))) : [];
-      const bgStyle = (mission.level === '2A' || mission.level === '3A' || mission.level === '3B' || mission.level === '3C')
-        ? 'background: linear-gradient(180deg, #fff7ed 0%, #e0f2fe 100%);'
-        : 'background-color: #fff7ed;';
+      const bgStyle = ['2A', '2B', '3A', '3B'].includes(mission.level)
+        ? 'background-image: linear-gradient(rgba(255,255,255,0.6), rgba(220,240,255,0.85)), url(&quot;https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80&quot;); background-size: cover; background-position: center;'
+        : (mission.level === '3C' ? 'background: linear-gradient(180deg, #fff7ed 0%, #e0f2fe 100%);' : 'background-color: #fff7ed;');
 
       // Paparan Khas Modul 3C (Bijak Belanja) menggunakan templat Rak Pasar Mini
       if (mission.level === '3C') {
