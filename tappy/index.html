@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
- <script>if(!(localStorage.getItem("celikplay_games")||"").includes("tappy")){window.location.href="/";}</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kedai Roti Tappy - Matematik Kanak-Kanak</title>
@@ -100,7 +99,7 @@
       <!-- Official CelikPlay Logo Image with 3D Embossed Frame -->
       <div class="flex justify-center">
         <div class="clay-circle p-2 rounded-full inline-block shadow-lg">
-          <img src="CP1.jpg" alt="CelikPlay Logo" class="w-36 h-36 sm:w-44 sm:h-44 object-cover rounded-full shadow-inner border-4 border-amber-300" onerror="this.src='https://placehold.co/180x180/FFD100/007ACC?text=CelikPlay'">
+          <img src="https://i.ibb.co/xt8bFwv9/CP1.jpg" alt="CelikPlay Logo" class="w-36 h-36 sm:w-44 sm:h-44 object-cover rounded-full shadow-inner border-4 border-amber-300" onerror="this.src='https://placehold.co/180x180/FFD100/007ACC?text=CelikPlay'">
         </div>
       </div>
 
@@ -260,7 +259,7 @@
         <div class="max-w-4xl mx-auto flex flex-col items-center justify-center gap-2">
           <div class="flex items-center justify-center gap-3">
             <div class="clay-circle p-1.5 rounded-full inline-block shadow-md">
-              <img src="CP1.jpg" alt="CelikPlay Logo" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-inner border-2 border-amber-300" onerror="this.src='https://placehold.co/80x80/FFD100/007ACC?text=CP'">
+              <img src="https://i.ibb.co/xt8bFwv9/CP1.jpg" alt="CelikPlay Logo" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-full shadow-inner border-2 border-amber-300" onerror="this.src='https://placehold.co/80x80/FFD100/007ACC?text=CP'">
             </div>
             <span class="text-xs sm:text-sm font-bold text-slate-600 tracking-wide">Game Pendidikan CelikPlay Studio</span>
           </div>
@@ -516,6 +515,8 @@
     let isAnswered = false;
     let recentQuestionsHistory = [];
     let speechTimeoutId = null;
+    let currentNum1 = 0;
+    let currentNum2 = 0;
 
     const PASTRY_ICONS = ['🥐', '🍩', '🧁', '🥖', '🍪', '🍰', '🥧', '🧇', '🥞'];
 
@@ -627,62 +628,58 @@
       }
     }
 
-    /* MALAY NUMBER TO WORDS HELPER FOR CORRECT PRONUNCIATION */
-    function numberToMalayWords(num) {
-      if (num === 0) return 'kosong';
-      const units = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'lapan', 'sembilan'];
-      if (num < 10) return units[num];
-      if (num === 10) return 'sepuluh';
-      if (num === 11) return 'sebelas';
-      if (num < 20) return units[num % 10] + ' belas';
-      if (num < 100) {
-        let ten = Math.floor(num / 10);
-        let unit = num % 10;
-        if (unit === 0) {
-          return units[ten] + ' puluh';
-        } else {
-          return units[ten] + ' puluh ' + units[unit];
-        }
-      }
-      return num.toString();
-    }
+    /* LOCAL MP3 AUDIO QUEUE SYSTEM */
+    let activeAudio = null;
+    let audioQueue = [];
+    let isPlayingQueue = false;
 
-    /* AUDIO / SPEECH SYNTHESIS HELPER */
     function stopSpeech() {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
       if (speechTimeoutId) {
         clearTimeout(speechTimeoutId);
         speechTimeoutId = null;
       }
-    }
-
-    function speak(text, pitchVal = 1.1) {
-      if ('speechSynthesis' in window) {
-        stopSpeech();
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        const voices = window.speechSynthesis.getVoices();
-        const msVoice = voices.find(v => v.lang.startsWith('ms') || v.lang.startsWith('id'));
-        
-        if (msVoice) {
-          utterance.voice = msVoice;
-          utterance.lang = msVoice.lang;
-        } else {
-          utterance.lang = 'ms-MY';
-        }
-        
-        utterance.rate = 0.8;
-        utterance.pitch = pitchVal;
-        window.speechSynthesis.speak(utterance);
+      audioQueue = [];
+      isPlayingQueue = false;
+      if (activeAudio) {
+        try {
+          activeAudio.pause();
+          activeAudio.currentTime = 0;
+        } catch (e) {}
+        activeAudio = null;
       }
     }
 
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
+    function playAudioQueue(files) {
+      stopSpeech();
+      if (!files || files.length === 0) return;
+      audioQueue = [...files];
+      isPlayingQueue = true;
+      playNextInQueue();
+    }
+
+    function playNextInQueue() {
+      if (!isPlayingQueue || audioQueue.length === 0) {
+        isPlayingQueue = false;
+        activeAudio = null;
+        return;
+      }
+
+      const nextFile = audioQueue.shift();
+      activeAudio = new Audio(nextFile);
+
+      activeAudio.onended = () => {
+        playNextInQueue();
       };
+
+      activeAudio.onerror = (err) => {
+        console.warn("Gagal memainkan fail audio:", nextFile, err);
+        playNextInQueue();
+      };
+
+      activeAudio.play().catch((err) => {
+        console.warn("Main balik audio disekat atau fail tiada:", nextFile, err);
+        playNextInQueue();
+      });
     }
 
     window.onload = function() {
@@ -958,6 +955,9 @@
         recentQuestionsHistory.push(key);
         if (recentQuestionsHistory.length > 5) recentQuestionsHistory.shift();
 
+        currentNum1 = num1;
+        currentNum2 = num2;
+
         const promptText = currentOperation === 'tambah'
           ? "Berapakah jumlah pastri?"
           : "Berapakah baki pastri?";
@@ -1007,20 +1007,39 @@
     }
 
     function speakCurrentQuestion(n1, n2) {
-      if (currentOperation === 'tambah') {
-        speak(`Berapakah jumlah ${numberToMalayWords(n1)} ditambah ${numberToMalayWords(n2)}?`);
+      if (currentLevel === 1) {
+        if (currentOperation === 'tambah') {
+          playAudioQueue([
+            'audio/berapa_jumlah.mp3',
+            `audio/${n1}.mp3`,
+            'audio/ditambah.mp3',
+            `audio/${n2}.mp3`
+          ]);
+        } else {
+          playAudioQueue([
+            'audio/berapa_baki_apabila.mp3',
+            `audio/${n1}.mp3`,
+            'audio/ditolak.mp3',
+            `audio/${n2}.mp3`
+          ]);
+        }
       } else {
-        speak(`Berapakah baki pastri apabila ${numberToMalayWords(n1)} ditolak ${numberToMalayWords(n2)}?`);
+        // Tahap 2, 3, 4 & 5
+        if (currentOperation === 'tambah') {
+          playAudioQueue(['audio/jumlah_pastri.mp3']);
+        } else {
+          playAudioQueue(['audio/baki_pastri.mp3']);
+        }
       }
     }
 
     function speakEarlyQuestion(type, target) {
       if (type === 1 || type === 4) {
-        speak(`Ini nombor berapa? ${numberToMalayWords(target)}.`);
+        playAudioQueue(['audio/apakah_nombor.mp3']);
       } else if (type === 2) {
-        speak(`Cari nombor ${numberToMalayWords(target)}!`);
+        playAudioQueue(['audio/cari_nombor.mp3', `audio/${target}.mp3`]);
       } else {
-        speak(`Berapakah bilangan pastri ini?`);
+        playAudioQueue(['audio/berapa_bilangan.mp3']);
       }
     }
 
@@ -1028,9 +1047,7 @@
       if (currentOperation === 'kenali') {
         speakEarlyQuestion(currentEarlyActivityType, currentAnswer);
       } else {
-        // Parse equation
-        const eqText = document.getElementById('equationDisplay').textContent;
-        speak(eqText.replace('?', 'berapa'));
+        speakCurrentQuestion(currentNum1, currentNum2);
       }
     }
 
@@ -1124,14 +1141,18 @@
             <p class="text-xs text-slate-600 font-medium">Tahniah! Jawapan kamu betul dan tepat.</p>
           </div>
         `;
-        speak("Bagus!");
+        if (currentOperation === 'kenali') {
+          playAudioQueue([`audio/${selected}.mp3`, 'audio/bagus.mp3']);
+        } else {
+          playAudioQueue(['audio/bagus.mp3']);
+        }
         
         // Auto proceed after brief pause
         setTimeout(() => {
           if (!document.getElementById('gameScreenView').classList.contains('hidden')) {
             generateNextQuestion();
           }
-        }, 1200);
+        }, 1600);
       } else {
         btnElement.classList.remove('bg-white', 'hover:bg-amber-50');
         btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
@@ -1148,7 +1169,11 @@
             <p class="text-xs text-slate-600 font-medium text-center">Jangan putus asa, cuba semak semula jawapan kamu.</p>
           </div>
         `;
-        speak("sila kira semula ya!");
+        if (currentOperation === 'kenali') {
+          playAudioQueue([`audio/${selected}.mp3`, 'audio/sila_kira.mp3']);
+        } else {
+          playAudioQueue(['audio/sila_kira.mp3']);
+        }
       }
     }
 
@@ -1160,10 +1185,10 @@
       let endMessage = "";
       if (isLowScore) {
         endMessage = `Cuba lagi ${userProfile.name} !`;
-        speak(`Cuba lagi ${userProfile.name}`);
+        playAudioQueue(['audio/cuba_lagi.mp3']);
       } else {
         endMessage = `Tahniah ${userProfile.name} ! Cemerlang!`;
-        speak(`Tahniah ${userProfile.name}, kamu mendapat ${numberToMalayWords(currentScore)} bintang!`);
+        playAudioQueue([`audio/tahniah_${currentScore}.mp3`]);
       }
 
       document.getElementById('questionPrompt').textContent = "Sesi Latihan Selesai! 🎉";
