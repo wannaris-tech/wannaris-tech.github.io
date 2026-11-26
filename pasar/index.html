@@ -263,10 +263,10 @@
     ];
 
     const REWARD_ITEMS = [
-      { id: 'hat', name: 'Topi Juruwang', cost: 5, type: 'accessory', icon: '🧢', desc: 'Aksesori watak juruwang' },
-      { id: 'balloon', name: 'Belon Ceria', cost: 8, type: 'decor', icon: '🎈', desc: 'Hiasan rak & kaunter kedai' },
+      { id: 'hat', name: 'Lencana Tauke', cost: 5, type: 'accessory', icon: '🎖️', desc: 'Lencana emas pada apron juruwang' },
+      { id: 'balloon', name: 'Belon Ceria', cost: 8, type: 'decor', icon: '🎈', desc: 'Animasi belon di menu pilih tahap' },
       { id: 'apron', name: 'Apron Emas', cost: 10, type: 'accessory', icon: '🦺', desc: 'Aksesori watak juruwang' },
-      { id: 'plant', name: 'Pokok Hiasan', cost: 12, type: 'decor', icon: '🪴', desc: 'Hiasan rak & kaunter kedai' },
+      { id: 'plant', name: 'Pokok Hiasan', cost: 12, type: 'decor', icon: '🌻', desc: 'Pasu bunga matahari di depan kedai' },
       { id: 'glasses', name: 'Cermin Mata', cost: 15, type: 'accessory', icon: '🕶️', desc: 'Aksesori watak juruwang' },
     ];
 
@@ -294,15 +294,16 @@
     const Shopkeeper = (size = null, className = "") => {
       const inlineStyle = size ? `width: ${size}px; height: ${size}px;` : '';
       const eq = (typeof state !== 'undefined' && state.equippedRewards) ? state.equippedRewards : [];
-      const hatOverlay = eq.includes('hat') ? `
-        <svg viewBox="0 0 100 50" class="absolute -top-[14%] left-1/2 -translate-x-1/2 w-[56%] pointer-events-none z-20 drop-shadow-md">
-          <path d="M18 36 Q50 2 82 36 Z" fill="#ef4444" stroke="#991b1b" stroke-width="3"/>
-          <path d="M10 36 Q50 26 92 38 Q50 45 10 36 Z" fill="#b91c1c"/>
-          <circle cx="50" cy="22" r="7" fill="#fef08a"/>
-          <text x="50" y="25" font-size="9" font-weight="900" fill="#b91c1c" text-anchor="middle">★</text>
+      const badgeOverlay = eq.includes('hat') ? `
+        <svg viewBox="0 0 40 48" class="absolute top-[55%] left-[53%] w-[16%] pointer-events-none z-30 drop-shadow-md">
+          <polygon points="14,28 8,46 16,42 20,46 20,28" fill="#dc2626" stroke="#991b1b" stroke-width="1.5"/>
+          <polygon points="26,28 32,46 24,42 20,46 20,28" fill="#ef4444" stroke="#991b1b" stroke-width="1.5"/>
+          <circle cx="20" cy="18" r="14" fill="#facc15" stroke="#b45309" stroke-width="2.5"/>
+          <circle cx="20" cy="18" r="10" fill="#fef08a" stroke="#d97706" stroke-width="1.5"/>
+          <polygon points="20,10 22.3,14.8 27.6,15.5 23.8,19.2 24.7,24.4 20,21.9 15.3,24.4 16.2,19.2 12.4,15.5 17.7,14.8" fill="#d97706"/>
         </svg>` : '';
       const glassesOverlay = eq.includes('glasses') ? `
-        <svg viewBox="0 0 100 35" class="absolute top-[28%] left-1/2 -translate-x-1/2 w-[44%] pointer-events-none z-20 drop-shadow-sm">
+        <svg viewBox="0 0 100 35" style="margin-top: -18px;" class="absolute top-[34%] left-1/2 -translate-x-1/2 w-[35%] pointer-events-none z-20 drop-shadow-sm">
           <rect x="6" y="6" width="36" height="22" rx="8" fill="#0f172a" fill-opacity="0.82" stroke="#facc15" stroke-width="3.5"/>
           <rect x="58" y="6" width="36" height="22" rx="8" fill="#0f172a" fill-opacity="0.82" stroke="#facc15" stroke-width="3.5"/>
           <line x1="42" y1="15" x2="58" y2="15" stroke="#facc15" stroke-width="3.5"/>
@@ -310,7 +311,7 @@
           <line x1="65" y1="12" x2="75" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
         </svg>` : '';
       const apronOverlay = eq.includes('apron') ? `
-        <svg viewBox="0 0 100 70" class="absolute bottom-[4%] left-1/2 -translate-x-1/2 w-[52%] pointer-events-none z-20 drop-shadow-md">
+        <svg viewBox="0 0 100 70" style="margin-bottom: 28px;" class="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[39%] pointer-events-none z-20 drop-shadow-md">
           <defs>
             <linearGradient id="goldApron" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#fef08a"/>
@@ -326,52 +327,13 @@
       return `
         <div style="${inlineStyle}" class="relative inline-block animate-invite ${className}">
           <img src="https://i.ibb.co/k6Mh7Gnk/Whats-App-Image-2026-11-02-at-5-36-08-PM-removebg-preview.png" alt="Pekedai" class="w-full h-full object-contain" />
-          ${hatOverlay}
-          ${glassesOverlay}
           ${apronOverlay}
+          ${badgeOverlay}
+          ${glassesOverlay}
         </div>`;
     };
 
-    const renderShelfDecor = () => {
-      const eq = (typeof state !== 'undefined' && state.equippedRewards) ? state.equippedRewards : [];
-      let html = '';
-      if (eq.includes('balloon')) {
-        html += `
-          <div class="absolute top-20 left-2 z-20 pointer-events-none animate-bounce-slight">
-            <svg width="46" height="66" viewBox="0 0 50 70" class="drop-shadow-md">
-              <path d="M18 36 Q16 55 24 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-              <path d="M34 32 Q34 52 24 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-              <ellipse cx="18" cy="22" rx="13" ry="16" fill="#f43f5e"/>
-              <ellipse cx="14" cy="16" rx="3" ry="5" fill="white" opacity="0.5"/>
-              <ellipse cx="34" cy="18" rx="12" ry="15" fill="#38bdf8"/>
-              <ellipse cx="30" cy="12" rx="3" ry="5" fill="white" opacity="0.5"/>
-            </svg>
-          </div>
-          <div class="absolute top-20 right-2 z-20 pointer-events-none animate-bounce-slight" style="animation-delay: 0.6s">
-            <svg width="46" height="66" viewBox="0 0 50 70" class="drop-shadow-md">
-              <path d="M18 32 Q18 52 26 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-              <path d="M34 36 Q34 55 26 68" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-              <ellipse cx="18" cy="18" rx="12" ry="15" fill="#facc15"/>
-              <ellipse cx="14" cy="12" rx="3" ry="5" fill="white" opacity="0.5"/>
-              <ellipse cx="34" cy="22" rx="13" ry="16" fill="#a855f7"/>
-              <ellipse cx="30" cy="16" rx="3" ry="5" fill="white" opacity="0.5"/>
-            </svg>
-          </div>`;
-      }
-      if (eq.includes('plant')) {
-        html += `
-          <div class="absolute bottom-24 right-2 z-20 pointer-events-none">
-            <svg width="46" height="58" viewBox="0 0 50 60" class="drop-shadow-md">
-              <path d="M25 34 Q10 18 14 8 Q24 14 25 34 Z" fill="#22c55e"/>
-              <path d="M25 34 Q40 18 36 8 Q26 14 25 34 Z" fill="#16a34a"/>
-              <path d="M25 34 Q25 10 25 4 Q32 18 25 34 Z" fill="#4ade80"/>
-              <polygon points="14,34 36,34 32,56 18,56" fill="#d97706" stroke="#92400e" stroke-width="2"/>
-              <rect x="12" y="31" width="26" height="5" rx="2" fill="#f59e0b" stroke="#92400e" stroke-width="1.5"/>
-            </svg>
-          </div>`;
-      }
-      return html;
-    };
+    const renderShelfDecor = () => '';
 
     const SpeechBubble = (text, className = "", tailPos = "bottom") => `
       <div class="relative bg-gradient-to-br from-amber-100 to-yellow-300 rounded-3xl p-3 shadow-[0_4px_0_#d97706] border-2 border-amber-400 min-w-[160px] text-center animate-bounce-slight ${className}">
@@ -631,10 +593,102 @@
       cashierSessionStars: 0,
       cashierTimeLeft: 120,
       cashierEnded: false,
-      cashierHighScore: 0
+      cashierHighScore: 0,
+      cashierOldHighScore: 0,
+      cashierBrokeRecord: false,
+      cashierFinishStar: 0,
+      cashierRecordBonus: 0,
+      lastReviewBonus: false,
+      dailyQuest: { date: '', progress: 0, claimed: false }
     };
 
     let cashierTimerInterval = null;
+
+    /* 5A. MISI HARI INI (DAILY QUEST) */
+    const DAILY_QUEST_POOL = [
+      { id: 'q_1A', type: 'levelPerfect', level: '1A', target: 1, title: 'Main semula Tahap 1A dan dapat skor penuh' },
+      { id: 'q_1B', type: 'levelPerfect', level: '1B', target: 1, title: 'Main semula Tahap 1B dan dapat skor penuh' },
+      { id: 'q_2A', type: 'levelPerfect', level: '2A', target: 1, title: 'Main semula Tahap 2A dan dapat skor penuh' },
+      { id: 'q_2B', type: 'levelPerfect', level: '2B', target: 1, title: 'Main semula Tahap 2B dan dapat skor penuh' },
+      { id: 'q_relaxed', type: 'relaxedServe', target: 5, title: 'Layan 5 pelanggan dalam Mod Santai' },
+      { id: 'q_timed', type: 'timedPlay', target: 1, title: 'Main Cabaran Masa 2 Minit hingga tamat' }
+    ];
+
+    const getTodayKey = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    const isDailyQuestUnlocked = () => {
+      return !!state.unlockAll || ((state.levelStars['1A'] || 0) > 0 && (state.levelStars['1B'] || 0) > 0);
+    };
+
+    const getEligibleDailyQuests = () => {
+      const isAllUnlocked = state.unlockAll || Object.values(state.levelStars).some(stars => stars === 3);
+      const unlockedMap = {
+        '1A': true,
+        '1B': (state.levelProgress['1A'] || 0) > 0 || isAllUnlocked,
+        '2A': (state.levelProgress['1B'] || 0) > 0 || isAllUnlocked,
+        '2B': (state.levelProgress['2A'] || 0) > 0 || isAllUnlocked,
+        'p4': (state.levelProgress['3C'] || 0) > 0 || isAllUnlocked
+      };
+      const eligible = DAILY_QUEST_POOL.filter(q => {
+        if (q.type === 'levelPerfect') return !!unlockedMap[q.level];
+        return !!unlockedMap['p4'];
+      });
+      return eligible.length > 0 ? eligible : [DAILY_QUEST_POOL[0]];
+    };
+
+    const syncDailyQuestDate = () => {
+      const today = getTodayKey();
+      if (!state.dailyQuest || state.dailyQuest.date !== today) {
+        state.dailyQuest = { date: today, questId: null, progress: 0, claimed: false };
+      }
+      if (isDailyQuestUnlocked()) {
+        const eligible = getEligibleDailyQuests();
+        const currentValid = eligible.some(q => q.id === state.dailyQuest.questId);
+        if (!state.dailyQuest.questId || (!currentValid && !state.dailyQuest.claimed && (state.dailyQuest.progress || 0) === 0)) {
+          const picked = eligible[Math.floor(Math.random() * eligible.length)];
+          state.dailyQuest.questId = picked.id;
+          saveProgress();
+        }
+      }
+    };
+
+    const getTodayQuestDef = () => {
+      syncDailyQuestDate();
+      const found = DAILY_QUEST_POOL.find(q => q.id === state.dailyQuest.questId);
+      if (found) return found;
+      const eligible = getEligibleDailyQuests();
+      return eligible[0];
+    };
+
+    const updateDailyQuestProgress = (eventType, payload = null) => {
+      if (!isDailyQuestUnlocked()) return;
+      syncDailyQuestDate();
+      if (state.dailyQuest.claimed) return;
+      const q = getTodayQuestDef();
+      if (q.type === eventType) {
+        if (eventType === 'levelPerfect' && q.level !== payload) return;
+        if (state.dailyQuest.progress < q.target) {
+          state.dailyQuest.progress = Math.min(q.target, state.dailyQuest.progress + 1);
+          saveProgress();
+        }
+      }
+    };
+
+    window.claimDailyQuest = () => {
+      if (!isDailyQuestUnlocked()) return;
+      syncDailyQuestDate();
+      const q = getTodayQuestDef();
+      if (!state.dailyQuest.claimed && state.dailyQuest.progress >= q.target) {
+        state.dailyQuest.claimed = true;
+        state.bonusStars += 3;
+        playTing();
+        saveProgress();
+        renderApp();
+      }
+    };
 
     // ==========================================
     // 5B. STORAN KEKAL (localStorage) & GANJARAN
@@ -647,6 +701,7 @@
         localStorage.setItem(STORAGE_PREFIX + 'playerName', state.playerName || '');
         localStorage.setItem(STORAGE_PREFIX + 'unlockAll', JSON.stringify(!!state.unlockAll));
         localStorage.setItem(STORAGE_PREFIX + 'cashierHighScore', JSON.stringify(state.cashierHighScore || 0));
+        localStorage.setItem(STORAGE_PREFIX + 'dailyQuest', JSON.stringify(state.dailyQuest || { date: getTodayKey(), progress: 0, claimed: false }));
         localStorage.setItem(STORAGE_PREFIX + 'rewards', JSON.stringify({
           bonusStars: state.bonusStars || 0,
           spentStars: state.spentStars || 0,
@@ -687,6 +742,20 @@
           const parsedScore = parseInt(JSON.parse(savedHighScore), 10);
           if (!isNaN(parsedScore)) state.cashierHighScore = parsedScore;
         }
+
+        const savedDailyQuest = localStorage.getItem(STORAGE_PREFIX + 'dailyQuest');
+        if (savedDailyQuest) {
+          const dq = JSON.parse(savedDailyQuest);
+          if (dq && dq.date === getTodayKey()) {
+            state.dailyQuest = {
+              date: dq.date,
+              questId: dq.questId || null,
+              progress: dq.progress || 0,
+              claimed: !!dq.claimed
+            };
+          }
+        }
+        syncDailyQuestDate();
 
         const savedRewards = localStorage.getItem(STORAGE_PREFIX + 'rewards');
         if (savedRewards) {
@@ -768,6 +837,7 @@
       state.equippedRewards = [];
       state.unlockAll = false;
       state.cashierHighScore = 0;
+      state.dailyQuest = { date: getTodayKey(), questId: null, progress: 0, claimed: false };
       clearSavedProgress();
       state.showResetConfirm = false;
       state.showResetSuccess = true;
@@ -1181,9 +1251,22 @@
       if (state.mistakesCount === 0) earnedStars = 3;
       else if (state.mistakesCount <= 2) earnedStars = 2;
 
+      // Bonus Ulang Kaji: Jika tahap sudah ada 3 bintang penuh & dapat skor penuh lagi
+      const hadFullStars = (state.levelStars[state.currentLevel] || 0) === 3;
+      if (hadFullStars && earnedStars === 3) {
+        state.bonusStars += 1;
+        state.lastReviewBonus = true;
+      } else {
+        state.lastReviewBonus = false;
+      }
+
       state.levelStars[state.currentLevel] = Math.max(state.levelStars[state.currentLevel] || 0, earnedStars);
       state.lastEarnedStars = earnedStars;
       state.levelProgress[state.currentLevel] = (state.levelProgress[state.currentLevel] || 0) + 1;
+
+      if (earnedStars === 3) {
+        updateDailyQuestProgress('levelPerfect', state.currentLevel);
+      }
 
       let won = null;
       if (earnedStars === 3 && state.unlockedStickers.length < STICKERS.length) {
@@ -1218,6 +1301,10 @@
       state.cashierSessionStars = 0;
       state.cashierTimeLeft = 120;
       state.cashierEnded = false;
+      state.cashierOldHighScore = state.cashierHighScore || 0;
+      state.cashierBrokeRecord = false;
+      state.cashierFinishStar = 0;
+      state.cashierRecordBonus = 0;
       state.feedback = null;
       state.gameState = 'cashier';
       generateCashierMission();
@@ -1241,14 +1328,25 @@
             stopCashierTimer();
             state.cashierEnded = true;
             state.feedback = null;
-            if (state.cashierServed > state.cashierHighScore) {
+
+            const finishStar = state.cashierServed >= 3 ? 1 : 0;
+            const brokeRecord = state.cashierServed > 0 && state.cashierServed > state.cashierOldHighScore;
+            const recordBonus = brokeRecord ? 2 : 0;
+
+            state.cashierFinishStar = finishStar;
+            state.cashierBrokeRecord = brokeRecord;
+            state.cashierRecordBonus = recordBonus;
+
+            if (brokeRecord) {
               state.cashierHighScore = state.cashierServed;
             }
-            if (state.cashierServed >= 5) {
-              state.bonusStars += 3;
-              state.cashierSessionStars += 3;
+            const totalEarned = finishStar + recordBonus;
+            if (totalEarned > 0) {
+              state.bonusStars += totalEarned;
+              state.cashierSessionStars += totalEarned;
               playTing();
             }
+            updateDailyQuestProgress('timedPlay');
             saveProgress();
             renderApp();
           }
@@ -1324,13 +1422,13 @@
         state.cashierServed += 1;
         let msg = `Baki tepat (${formatMoney(m.change)})! Pelanggan gembira!`;
 
-        if (state.cashierMode === 'relaxed' && state.cashierServed % 3 === 0) {
-          state.bonusStars += 1;
-          state.cashierSessionStars += 1;
-          msg = `Hebat! 3 pelanggan dilayan! +1 ⭐ Bintang Ganjaran!`;
-        }
-        if (state.cashierMode === 'timed' && state.cashierServed > state.cashierHighScore) {
-          state.cashierHighScore = state.cashierServed;
+        if (state.cashierMode === 'relaxed') {
+          updateDailyQuestProgress('relaxedServe');
+          if (state.cashierServed % 3 === 0) {
+            state.bonusStars += 1;
+            state.cashierSessionStars += 1;
+            msg = `Hebat! 3 pelanggan dilayan! +1 ⭐ Bintang Ganjaran!`;
+          }
         }
         saveProgress();
         successFeedback(msg);
@@ -1602,6 +1700,32 @@
             ${Array.from({length: 20}).map((_, i) => `<div class="flex-1 h-full border-r border-slate-500/30 ${i % 2 === 0 ? 'bg-slate-300' : 'bg-slate-400'}"></div>`).join('')}
           </div>
 
+          ${state.equippedRewards.includes('plant') ? `
+          <!-- Pasu Bunga Matahari di Lantai Kelabu Kiri Pintu -->
+          <div class="absolute bottom-2 left-2 sm:left-4 z-30 pointer-events-none drop-shadow-lg">
+            <svg width="54" height="72" viewBox="0 0 54 72">
+              <path d="M27 46 L27 22" stroke="#16a34a" stroke-width="4" stroke-linecap="round"/>
+              <path d="M27 38 Q16 34 15 27 Q23 28 27 36 Z" fill="#22c55e"/>
+              <path d="M27 35 Q38 31 39 24 Q31 25 27 33 Z" fill="#16a34a"/>
+              <g transform="translate(27, 17)">
+                <ellipse cx="0" cy="-11" rx="3.5" ry="6" fill="#facc15" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="0" cy="11" rx="3.5" ry="6" fill="#facc15" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="-11" cy="0" rx="6" ry="3.5" fill="#facc15" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="11" cy="0" rx="6" ry="3.5" fill="#facc15" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="-7.8" cy="-7.8" rx="3.5" ry="6" transform="rotate(-45 -7.8 -7.8)" fill="#fde047" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="7.8" cy="-7.8" rx="3.5" ry="6" transform="rotate(45 7.8 -7.8)" fill="#fde047" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="-7.8" cy="7.8" rx="3.5" ry="6" transform="rotate(45 -7.8 7.8)" fill="#fde047" stroke="#eab308" stroke-width="0.8"/>
+                <ellipse cx="7.8" cy="7.8" rx="3.5" ry="6" transform="rotate(-45 7.8 7.8)" fill="#fde047" stroke="#eab308" stroke-width="0.8"/>
+                <circle cx="0" cy="0" r="6.8" fill="#78350f" stroke="#451a03" stroke-width="1.2"/>
+                <circle cx="-2" cy="-2" r="1" fill="#b45309"/>
+                <circle cx="2" cy="-1.5" r="1" fill="#b45309"/>
+                <circle cx="0" cy="2" r="1" fill="#b45309"/>
+              </g>
+              <polygon points="15,46 39,46 35,68 19,68" fill="#d97706" stroke="#92400e" stroke-width="2"/>
+              <rect x="13" y="43" width="28" height="5" rx="2" fill="#f59e0b" stroke="#92400e" stroke-width="1.5"/>
+            </svg>
+          </div>` : ''}
+
           <!-- Watak Pekedai di Hadapan Pintu -->
           <div class="relative inline-block z-20 flex justify-center mt-16 sm:mt-20 translate-y-6 sm:translate-y-8">
             ${Shopkeeper(null, 'w-40 h-40 sm:w-48 sm:h-48 drop-shadow-xl')}
@@ -1666,11 +1790,41 @@
       };
 
       const p4Unlocked = state.levelProgress['3C'] > 0 || isAllUnlocked;
+      const dqUnlocked = isDailyQuestUnlocked();
+      syncDailyQuestDate();
+      const todayQuest = dqUnlocked ? getTodayQuestDef() : null;
+      const dqProgress = todayQuest ? Math.min(todayQuest.target, state.dailyQuest.progress || 0) : 0;
+      const dqReady = dqUnlocked && !state.dailyQuest.claimed && dqProgress >= todayQuest.target;
 
       return `
         <div class="flex flex-col items-center justify-start pt-12 sm:pt-6 pb-10 h-full px-4 space-y-3 relative z-10 w-full overflow-y-auto overflow-x-hidden bg-gradient-to-br from-yellow-100 via-pink-100 to-sky-200" style="background-image: linear-gradient(rgba(255,255,255,0.6), rgba(253,230,138,0.9)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed;">
+          ${state.equippedRewards.includes('balloon') ? `
+            <!-- Belon Ceria Berterbangan Perlahan di Latar Belakang -->
+            <div class="pointer-events-none absolute inset-0 overflow-hidden z-0">
+              <div class="absolute bottom-[-80px] left-[8%] animate-float-up opacity-80" style="animation-duration: 13s; animation-delay: 0s;">
+                <svg width="44" height="68" viewBox="0 0 44 68" class="drop-shadow-md">
+                  <path d="M22 38 Q18 52 24 66" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                  <ellipse cx="22" cy="20" rx="16" ry="20" fill="#f43f5e"/>
+                  <ellipse cx="16" cy="14" rx="4" ry="6" fill="white" opacity="0.5"/>
+                </svg>
+              </div>
+              <div class="absolute bottom-[-80px] left-[46%] animate-float-up opacity-80" style="animation-duration: 16s; animation-delay: 4s;">
+                <svg width="42" height="66" viewBox="0 0 44 68" class="drop-shadow-md">
+                  <path d="M22 38 Q26 52 20 66" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                  <ellipse cx="22" cy="20" rx="15" ry="19" fill="#38bdf8"/>
+                  <ellipse cx="16" cy="14" rx="4" ry="6" fill="white" opacity="0.5"/>
+                </svg>
+              </div>
+              <div class="absolute bottom-[-80px] right-[10%] animate-float-up opacity-80" style="animation-duration: 14s; animation-delay: 2s;">
+                <svg width="44" height="68" viewBox="0 0 44 68" class="drop-shadow-md">
+                  <path d="M22 38 Q19 52 23 66" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+                  <ellipse cx="22" cy="20" rx="16" ry="20" fill="#facc15"/>
+                  <ellipse cx="16" cy="14" rx="4" ry="6" fill="white" opacity="0.5"/>
+                </svg>
+              </div>
+            </div>` : ''}
           <!-- Header dengan Butang UTAMA Jelas -->
-          <div class="flex items-center w-full max-w-sm shrink-0 mt-1 gap-2">
+          <div class="flex items-center w-full max-w-sm shrink-0 mt-1 gap-2 relative z-10">
             <button onclick="setGameState('menu')" class="px-3 py-2 bg-white rounded-2xl shadow-md text-sky-600 hover:bg-sky-50 active:scale-95 transition-all flex items-center gap-1.5 border-2 border-sky-200 shrink-0">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
               <span class="font-black text-xs tracking-wide">UTAMA</span>
@@ -1679,32 +1833,57 @@
           </div>
 
           <!-- Bar Bintang & Kedai Ganjaran -->
-          <div class="flex items-center justify-between w-full max-w-sm bg-white/90 backdrop-blur rounded-2xl px-3 py-2 shadow-sm border-2 border-amber-200">
+          <div class="flex items-center justify-between w-full max-w-sm bg-white/90 backdrop-blur rounded-2xl px-3 py-2 shadow-sm border-2 border-amber-200 relative z-10">
             <div class="flex items-center gap-2">
               <span class="text-2xl">⭐</span>
               <div class="text-left leading-tight">
                 <div class="text-[10px] font-bold text-slate-500 uppercase">Bintang Anda</div>
-                <div class="text-base font-black text-amber-600">${availStars} <span class="text-[10px] font-bold text-slate-400">(Jumlah: ${totalStars})</span></div>
+                <div class="text-base font-black text-amber-600">${availStars} Bintang</div>
               </div>
             </div>
             ${Button3D('Kedai Ganjaran 🎁', "setGameState('rewards')", 'pink', 'px-3 py-1.5 text-xs !shadow-[0_4px_0_theme(colors.pink.300)]')}
           </div>
 
           <!-- Butang Buku Sticker & Menu Ibu Bapa -->
-          <div class="flex gap-2 w-full max-w-sm shrink-0">
+          <div class="flex gap-2 w-full max-w-sm shrink-0 relative z-10">
             ${Button3D('Buku Sticker 🏆', "setGameState('stickers')", 'orange', 'flex-1 py-2 text-xs !shadow-[0_4px_0_theme(colors.orange.300)]')}
             ${Button3D('Menu Ibu Bapa ⚙️', "openParentGate()", 'blue', 'flex-1 py-2 text-xs !shadow-[0_4px_0_theme(colors.sky.300)]')}
           </div>
 
+          <!-- Kad Misi Hari Ini (Daily Quest) -->
+          ${!dqUnlocked ? `
+          <div class="w-full max-w-sm bg-slate-100/95 backdrop-blur border-2 border-slate-300 rounded-2xl px-3 py-2.5 shadow-sm relative z-10 flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-slate-200 flex items-center justify-center text-xl shrink-0">🔒</div>
+            <div class="text-left min-w-0">
+              <div class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Misi Hari Ini</div>
+              <div class="text-[11px] font-extrabold text-slate-600 leading-tight">🔒 Selesaikan Pangkat 1 (1A &amp; 1B) dahulu untuk buka Misi Harian!</div>
+            </div>
+          </div>` : `
+          <div class="w-full max-w-sm bg-white/95 backdrop-blur border-2 ${dqReady ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-purple-200'} rounded-2xl px-3 py-2.5 shadow-sm relative z-10 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 text-left min-w-0">
+              <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-xl shrink-0">🎯</div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-black text-purple-600 uppercase tracking-wider">Misi Hari Ini</div>
+                <div class="text-[11px] font-extrabold text-slate-700 leading-tight">${todayQuest.title}</div>
+              </div>
+            </div>
+            ${state.dailyQuest.claimed
+              ? `<span class="px-2.5 py-1.5 rounded-xl bg-emerald-100 text-emerald-700 font-black text-[10px] shrink-0">Selesai ✓</span>`
+              : dqReady
+                ? `<button onclick="claimDailyQuest()" class="px-3 py-1.5 rounded-xl bg-gradient-to-b from-amber-400 to-amber-500 text-slate-900 font-black text-xs shadow border-b-2 border-amber-700 active:translate-y-0.5 shrink-0 animate-bounce-slight">Tuntut +3 ⭐</button>`
+                : `<span class="px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-600 font-black text-[11px] border border-slate-200 shrink-0">${dqProgress}/${todayQuest.target}</span>`
+            }
+          </div>`}
+
           <!-- Panduan Peraturan Permainan -->
-          <div class="w-full max-w-sm bg-amber-50/95 border-2 border-amber-300 rounded-2xl px-3 py-2 text-center shadow-sm">
+          <div class="w-full max-w-sm bg-amber-50/95 border-2 border-amber-300 rounded-2xl px-3 py-1.5 text-center shadow-sm relative z-10">
             <p class="text-[11px] font-bold text-amber-900 leading-snug">
-              💡 Mula dengan <span class="font-black text-pink-600">Tahap 1A</span>, kemudian lengkapkan <span class="font-black text-amber-600">3 Bintang Penuh (⭐⭐⭐)</span> di 1A atau 1B untuk membuka kunci Pangkat 2, 3 & 4!
+              💡 Dapatkan 3 Bintang di 1A untuk buka tahap seterusnya!
             </p>
           </div>
 
           <!-- Senarai Pangkat -->
-          <div class="w-full max-w-sm flex flex-col gap-5 pb-12">
+          <div class="w-full max-w-sm flex flex-col gap-5 pb-12 relative z-10">
             <!-- Pangkat 1 -->
             <div class="bg-white/95 rounded-[2rem] p-5 shadow-lg border-4 border-white ring-1 ring-pink-100">
               <h3 class="font-black text-pink-600 text-lg mb-3 flex items-center gap-2">
@@ -1763,7 +1942,7 @@
                     <span class="text-3xl mb-1">⏱️</span>
                     <span class="font-black text-purple-700 text-sm text-center leading-tight">Cabaran Masa</span>
                     <span class="text-[10px] font-bold text-purple-800 bg-purple-200/60 px-2 py-0.5 rounded-full mt-1">2 Minit</span>
-                    <span class="text-[9px] font-bold text-amber-600 mt-1">Rekod: ${state.cashierHighScore} Pelanggan</span>
+                    <span class="text-[9px] font-bold text-amber-600 mt-1 text-center leading-tight">🏆 Rekod Terbaik: ${state.cashierHighScore} Pelanggan</span>
                   </button>
                 ` : `
                   <button class="border-[3px] rounded-2xl py-4 px-2 flex flex-col items-center bg-slate-100 border-slate-200 opacity-70 grayscale cursor-not-allowed">
@@ -2032,9 +2211,9 @@
         return `
           <div class="flex flex-col h-full w-full relative overflow-hidden" style="${bgStyle}">
             ${renderShelfDecor()}
-            <div class="bg-gradient-to-r from-orange-400 to-orange-500 shadow-md p-4 flex justify-between items-center z-20 rounded-b-3xl">
-              <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
-              <div class="bg-white px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner">Soalan ${state.currentMissionIndex + 1} / 5</div>
+            <div class="bg-gradient-to-r from-orange-400 to-orange-500 shadow-md p-4 pr-24 sm:pr-4 flex justify-between items-center z-20 rounded-b-3xl gap-2">
+              <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm shrink-0">Tutup</button>
+              <div class="bg-white px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner text-xs sm:text-base whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
             </div>
 
             <div class="mx-auto mt-3 w-[90%] max-w-sm bg-white/95 rounded-2xl shadow-md border-2 border-orange-200 p-3 z-30 text-center">
@@ -2130,9 +2309,9 @@
       return `
         <div class="flex flex-col h-full w-full relative overflow-hidden" style="${bgStyle}">
           ${renderShelfDecor()}
-          <div class="bg-gradient-to-r from-orange-400 to-orange-500 shadow-md p-4 flex justify-between items-center z-20 rounded-b-3xl">
-            <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
-            <div class="bg-white px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner">Soalan ${state.currentMissionIndex + 1} / 5</div>
+          <div class="bg-gradient-to-r from-orange-400 to-orange-500 shadow-md p-4 pr-24 sm:pr-4 flex justify-between items-center z-20 rounded-b-3xl gap-2">
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-orange-600 px-4 py-2 rounded-full border-b-4 border-orange-800 active:border-0 active:translate-y-1 text-sm shrink-0">Tutup</button>
+            <div class="bg-white px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-orange-600 shadow-inner text-xs sm:text-base whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
           </div>
 
           <div class="absolute top-16 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_5px_15px_rgba(0,0,0,0.1)] border-2 border-orange-200 p-3 z-30 pointer-events-none flex flex-col items-center">
@@ -2193,9 +2372,9 @@
       const mission = getMissionData();
       return `
         <div class="flex flex-col h-full w-full relative overflow-hidden bg-gradient-to-b from-cyan-100 via-sky-300 to-blue-500">
-          <div class="bg-white/40 backdrop-blur-md p-4 flex justify-between items-center z-20 rounded-b-3xl border-b border-white/50 shadow-sm">
-            <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-600/90 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm">Tutup</button>
-            <div class="bg-white/90 px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-sm border border-sky-100 text-sm">Soalan ${state.currentMissionIndex + 1} / 5</div>
+          <div class="bg-white/40 backdrop-blur-md p-4 pr-24 sm:pr-4 flex justify-between items-center z-20 rounded-b-3xl border-b border-white/50 shadow-sm gap-2">
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-600/90 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm shrink-0">Tutup</button>
+            <div class="bg-white/90 px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-sm border border-sky-100 text-xs sm:text-sm whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
           </div>
 
           <div class="absolute top-20 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_8px_20px_rgba(0,0,0,0.15)] border-4 border-white/80 p-4 z-30 pointer-events-none flex flex-col items-center">
@@ -2244,9 +2423,9 @@
       return `
         <div class="flex flex-col h-full w-full bg-slate-50 relative overflow-hidden">
           ${renderShelfDecor()}
-          <div class="bg-gradient-to-r from-sky-500 to-sky-600 shadow-md p-4 flex justify-between items-center z-20 rounded-b-3xl gap-2">
+          <div class="bg-gradient-to-r from-sky-500 to-sky-600 shadow-md p-4 pr-24 sm:pr-4 flex justify-between items-center z-20 rounded-b-3xl gap-2">
             <button onclick="setGameState('levels')" class="text-white font-bold bg-sky-700 px-4 py-1.5 rounded-full border-b-4 border-sky-800 active:border-0 active:translate-y-1 text-sm shrink-0">Tutup</button>
-            <div class="bg-white px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-inner text-sm whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
+            <div class="bg-white px-3.5 sm:px-4 py-1.5 rounded-full font-bold text-sky-700 shadow-inner text-xs sm:text-sm whitespace-nowrap">Soalan ${state.currentMissionIndex + 1} / 5</div>
           </div>
 
           <div class="flex-1 flex flex-col items-center pt-2 pb-2 relative z-10 w-full px-4 overflow-y-auto">
@@ -2320,14 +2499,14 @@
         <div class="flex flex-col h-full w-full bg-emerald-50 relative overflow-hidden">
           ${renderShelfDecor()}
           <!-- Header Juruwang -->
-          <div class="bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md p-3 flex justify-between items-center z-20 rounded-b-3xl gap-2">
-            <button onclick="setGameState('levels')" class="text-white font-bold bg-emerald-800 px-3.5 py-1.5 rounded-full border-b-4 border-emerald-950 active:border-0 active:translate-y-1 text-xs shrink-0">Tutup</button>
-            <div class="bg-white/95 px-3 py-1 rounded-full font-black text-emerald-700 text-xs shadow-inner">
+          <div class="bg-gradient-to-r from-emerald-600 to-teal-600 shadow-md p-3 pl-2.5 pr-[88px] sm:px-3 flex justify-between items-center z-20 rounded-b-3xl gap-1.5 sm:gap-2">
+            <button onclick="setGameState('levels')" class="text-white font-bold bg-emerald-800 px-3 sm:px-3.5 py-1.5 rounded-full border-b-4 border-emerald-950 active:border-0 active:translate-y-1 text-[11px] sm:text-xs shrink-0">Tutup</button>
+            <div class="bg-white/95 px-2.5 sm:px-3 py-1 rounded-full font-black text-emerald-700 text-[11px] sm:text-xs shadow-inner whitespace-nowrap">
               👥 Dilayan: ${state.cashierServed}
             </div>
             ${state.cashierMode === 'timed'
-              ? `<div id="cashier-timer" class="bg-amber-300 text-slate-900 px-3 py-1 rounded-full font-black text-xs shadow">⏱️ ${mins}:${secs < 10 ? '0' : ''}${secs}</div>`
-              : `<div class="bg-amber-300 text-slate-900 px-3 py-1 rounded-full font-black text-xs shadow">⭐ +${state.cashierSessionStars}</div>`
+              ? `<div id="cashier-timer" class="bg-amber-300 text-slate-900 px-2.5 sm:px-3 py-1 rounded-full font-black text-[11px] sm:text-xs shadow whitespace-nowrap">⏱️ ${mins}:${secs < 10 ? '0' : ''}${secs}</div>`
+              : `<div class="bg-amber-300 text-slate-900 px-2.5 sm:px-3 py-1 rounded-full font-black text-[11px] sm:text-xs shadow whitespace-nowrap">⭐ +${state.cashierSessionStars}</div>`
             }
           </div>
 
@@ -2417,15 +2596,21 @@
           ${state.cashierEnded ? `
             <div class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4">
               <div class="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full text-center border-4 border-emerald-300 animate-fade-in">
-                <div class="text-5xl mb-2">⏱️</div>
+                <div class="text-5xl mb-2">${state.cashierBrokeRecord ? '🏆' : '⏱️'}</div>
                 <h3 class="text-2xl font-black text-emerald-600 mb-1">Masa Tamat!</h3>
-                <p class="text-sm font-bold text-slate-600 mb-4">Anda berjaya melayan <span class="text-emerald-600 font-black text-lg">${state.cashierServed}</span> pelanggan!</p>
-                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-4 space-y-1">
-                  <div class="text-xs font-bold text-slate-600">Rekod Terbaik (High Score): <span class="font-black text-purple-600">${state.cashierHighScore} Pelanggan</span></div>
-                  ${state.cashierServed >= 5
-                    ? `<div class="text-sm font-black text-amber-600">🎉 Bonus Cabaran: +3 ⭐ Bintang!</div>`
-                    : `<div class="text-xs font-bold text-slate-500">Layan 5+ pelanggan dalam 2 minit untuk bonus +3 ⭐!</div>`
+                ${state.cashierBrokeRecord
+                  ? `<div class="inline-block bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-900 font-black text-xs px-3 py-1 rounded-full shadow-sm mb-2 animate-bounce-slight">🎉 REKOD BAHARU! 🎉</div>`
+                  : ''
+                }
+                <p class="text-sm font-bold text-slate-600 mb-3">Anda berjaya melayan <span class="text-emerald-600 font-black text-lg">${state.cashierServed}</span> pelanggan!</p>
+                <div class="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3 mb-4 space-y-1.5 text-xs">
+                  ${state.cashierBrokeRecord
+                    ? `<div class="font-bold text-slate-700">Skor Sekarang: <span class="font-black text-emerald-600">${state.cashierServed} Pelanggan</span> | Rekod Lama: <span class="font-black text-slate-500">${state.cashierOldHighScore} Pelanggan</span></div>`
+                    : `<div class="font-bold text-slate-700">Skor Anda: <span class="font-black text-purple-600">${state.cashierServed} Pelanggan</span> | Rekod Terbaik: <span class="font-black text-amber-600">${state.cashierHighScore} Pelanggan</span></div>
+                       <div class="font-bold text-sky-700">Hebat! Layan ${Math.max(1, state.cashierHighScore - state.cashierServed + 1)} lagi pelanggan untuk pecah rekod!</div>`
                   }
+                  ${state.cashierFinishStar > 0 ? `<div class="font-black text-amber-600">+1 ⭐ Bintang Tamat!</div>` : `<div class="font-bold text-slate-500">Layan sekurang-kurangnya 3 pelanggan untuk +1 ⭐ Bintang Tamat!</div>`}
+                  ${state.cashierRecordBonus > 0 ? `<div class="font-black text-emerald-600">+2 ⭐ Bintang Bonus Rekod Baharu!</div>` : ''}
                 </div>
                 <div class="flex gap-2">
                   ${Button3D('Main Lagi', "startCashierMode('timed')", 'green', 'flex-1 py-2 text-sm')}
@@ -2454,6 +2639,11 @@
         </div>
 
         <h1 class="text-3xl font-black text-green-600 drop-shadow-sm z-20 uppercase leading-snug">Tahniah! 🎉<br/>Anda Telah Tamat<br/>Tahap Ini!</h1>
+
+        ${state.lastReviewBonus ? `
+          <div class="z-20 bg-amber-100 border-2 border-amber-400 text-amber-800 px-4 py-1.5 rounded-full font-black text-xs shadow-sm animate-bounce-slight">
+            ⭐ +1 Bintang Bonus Ulang Kaji (Skor Penuh)!
+          </div>` : ''}
 
         ${state.showVictory && state.newStickerWon ? `
           <div class="bg-white px-6 py-4 rounded-3xl shadow-xl border-4 border-amber-300 z-20 animate-fade-in flex flex-col items-center">
