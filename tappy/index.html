@@ -140,7 +140,7 @@
         <!-- Player Profile Summary Button with Edit Pen Icon -->
         <button id="profileBtn" onclick="openProfileModal()" class="clay-button flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-full transition shadow-md" title="Sunting Profil">
           <span id="navAvatar" class="text-xl">👨‍🍳</span>
-          <span id="navName" class="font-bold text-sm sm:text-base max-w-[90px] truncate">Tappy</span>
+          <span id="navName" class="font-bold text-sm sm:text-base max-w-[90px] truncate">Nama...</span>
           <span class="text-xs bg-amber-700/80 p-1 rounded-full flex items-center justify-center shadow-inner">✏️</span>
           <span id="navStars" class="bg-amber-900/50 text-amber-100 text-xs px-2.5 py-1 rounded-full font-extrabold flex items-center gap-1 shadow-inner">
             ⭐ <span id="starCountNav">0</span>
@@ -244,6 +244,36 @@
         </button>
       </div>
 
+      <!-- MOD KHAS • PESANAN TANPA HENTI -->
+      <div class="pt-1 flex justify-center">
+        <div class="clay-card p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-sky-100 via-indigo-50 to-purple-100 border-3 border-indigo-300 shadow-xl w-full max-w-xl mx-auto space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-extrabold text-indigo-700 uppercase tracking-wider mb-1 flex items-center gap-1"><span>♾️</span> MOD KHAS • PESANAN TANPA HENTI</div>
+              <div class="text-xl sm:text-2xl font-black text-indigo-950">Pesanan Tanpa Henti</div>
+              <div class="text-xs text-slate-600 font-semibold mt-0.5">Gabungan rawak Tambah & Tolak (1 - 100)</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <button onclick="startEndlessMode('santai')" class="clay-button bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-bold p-4 rounded-2xl text-left flex items-center justify-between shadow-md">
+              <div>
+                <div class="text-base font-extrabold">Mod Santai</div>
+                <div class="text-[11px] text-teal-100 font-medium">Tanpa Had (+1 ⭐ setiap 3 pesanan)</div>
+              </div>
+              <span class="text-2xl">☕</span>
+            </button>
+            <button onclick="startEndlessMode('masa')" class="clay-button bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold p-4 rounded-2xl text-left flex items-center justify-between shadow-md">
+              <div>
+                <div class="text-base font-extrabold">Cabaran Masa</div>
+                <div class="text-[11px] text-indigo-100 font-medium">2 Minit (120 Saat Undur)</div>
+                <div class="text-[11px] text-amber-200 font-extrabold mt-1">🏆 Rekod Terbaik: <span id="bestTimeChallengeRecord">0</span> Pesanan</div>
+              </div>
+              <span class="text-2xl">⏱️</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Action Buttons Row (Badges & Parents Report) -->
       <div class="flex flex-col sm:flex-row gap-3 pt-2">
         <button onclick="openBadgesModal()" class="clay-button flex-1 bg-amber-100 hover:bg-amber-200 text-amber-900 p-4 rounded-2xl font-bold transition flex items-center justify-center gap-2 shadow-md">
@@ -299,6 +329,7 @@
       <div class="clay-card rounded-3xl p-6 text-center space-y-5 relative">
         <div class="flex items-center justify-between text-xs sm:text-sm text-slate-500 font-semibold px-2">
           <span id="questionProgressText">Soalan 1 / 10</span>
+          <span id="endlessTimerDisplay" class="hidden bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1 rounded-xl font-extrabold text-xs sm:text-sm">⏱️ 02:00</span>
           <button onclick="speakQuestionText()" class="clay-button bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1 font-bold text-xs shadow-sm">
             🔊 Sebut Soalan
           </button>
@@ -501,13 +532,34 @@
     </div>
   </div>
 
+  <!-- MODAL: TIME CHALLENGE RESULT POPUP -->
+  <div id="timeChallengeResultModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="clay-card bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-pop border-3 border-indigo-400 text-center">
+      <div class="text-4xl">⏱️</div>
+      <h3 class="text-2xl font-playful font-bold text-indigo-900">Masa Tamat!</h3>
+      <div id="newRecordBadge" class="hidden bg-gradient-to-r from-amber-400 to-orange-500 text-white font-extrabold py-2 px-4 rounded-2xl text-base sm:text-lg shadow-md animate-bounce">
+        🎉 REKOD BAHARU! 🎉
+      </div>
+      <div class="clay-circle p-4 rounded-2xl space-y-1">
+        <div class="text-xs font-bold text-slate-500 uppercase">Jumlah Pesanan Berjaya</div>
+        <div id="timeChallengeFinalScore" class="text-3xl font-black text-indigo-800">0 Pesanan</div>
+        <div class="text-xs font-bold text-amber-700 pt-1">🏆 Rekod Terbaik: <span id="timeChallengeModalBest">0</span> Pesanan</div>
+      </div>
+      <div id="timeChallengeRewardsSummary" class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3 text-xs sm:text-sm font-bold text-emerald-800 space-y-1">
+      </div>
+      <button onclick="closeTimeChallengeResultModal()" class="clay-button w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-2xl text-base shadow-md transition">
+        🏠 Kembali ke Menu Utama
+      </button>
+    </div>
+  </div>
+
   <script>
     /* GAME CONFIGURATION & STATE */
-    let currentOperation = 'tambah'; // 'tambah', 'tolak', or 'kenali'
+    let currentOperation = 'tambah'; /* 'tambah', 'tolak', or 'kenali' */
     let currentLevel = 1;
     let selectedLevelForOp = 1;
-    let earlyTier = 1; // 1 (1-5) or 2 (1-10) for Tahap Awal
-    let currentEarlyActivityType = 1; // 1: Kenali, 2: Cari, 3: Padankan, 4: Teka
+    let earlyTier = 1; /* 1 (1-5) or 2 (1-10) for Tahap Awal */
+    let currentEarlyActivityType = 1; /* 1: Kenali, 2: Cari, 3: Padankan, 4: Teka */
     let questionNumber = 0;
     const MAX_QUESTIONS = 10;
     let currentScore = 0;
@@ -518,13 +570,26 @@
     let currentNum1 = 0;
     let currentNum2 = 0;
 
+    /* PARENT VERIFICATION STATE */
+    let parentVerifyExpectedAnswer = 0;
+
+    /* ENDLESS MODE STATE */
+    let isEndlessMode = false;
+    let endlessSubMode = 'santai'; /* 'santai' or 'masa' */
+    let endlessOrdersCompleted = 0;
+    let endlessRemainingSeconds = 120;
+    let endlessTimerInterval = null;
+    let bestTimeChallengeRecord = 0;
+    const STORAGE_KEY_USER = 'kedaiRotiTappy_userProfile';
+    const STORAGE_KEY_BEST_RECORD = 'kedaiRotiTappy_bestTimeRecord';
+
     const PASTRY_ICONS = ['🥐', '🍩', '🧁', '🥖', '🍪', '🍰', '🥧', '🧇', '🥞'];
 
     let userProfile = {
       name: 'Nama...',
       avatar: '👨‍🍳',
       stars: 0,
-      cumulativeStars: 0, // Used for exponential badge unlocking
+      cumulativeStars: 0, /* Used for exponential badge unlocking */
       stats: {
         totalQuestions: 0,
         totalCorrect: 0,
@@ -713,6 +778,7 @@
     }
 
     function openOperationModal(level) {
+      isEndlessMode = false;
       selectedLevelForOp = level;
       const titleMap = {
         1: "Tahap 1: Asas Mudah",
@@ -731,14 +797,15 @@
 
     function confirmOperationSelection(op) {
       closeOperationModal();
+      isEndlessMode = false;
       currentOperation = op;
       startGame(selectedLevelForOp);
     }
 
     function loadProfileData() {
-      const saved = localStorage.getItem('kedai_roti_tappy_user');
-      if (saved) {
-        try {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY_USER) || localStorage.getItem('kedai_roti_tappy_user');
+        if (saved) {
           const parsed = JSON.parse(saved);
           userProfile = { ...userProfile, ...parsed };
           if (typeof userProfile.cumulativeStars === 'undefined') {
@@ -748,14 +815,23 @@
             userProfile.stats.byLevel['kenali_1'] = { attempted: 0, correct: 0 };
             userProfile.stats.byLevel['kenali_2'] = { attempted: 0, correct: 0 };
           }
-        } catch(e) {
-          console.error("Failed to load user profile", e);
         }
+        const savedRecord = localStorage.getItem(STORAGE_KEY_BEST_RECORD);
+        if (savedRecord !== null) {
+          bestTimeChallengeRecord = parseInt(savedRecord, 10) || 0;
+        }
+      } catch(e) {
+        console.error("Failed to load user profile", e);
       }
     }
 
     function saveProfileData() {
-      localStorage.setItem('kedai_roti_tappy_user', JSON.stringify(userProfile));
+      try {
+        localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(userProfile));
+        localStorage.setItem(STORAGE_KEY_BEST_RECORD, String(bestTimeChallengeRecord));
+      } catch(e) {
+        console.error("Failed to save user profile", e);
+      }
       updateProfileUI();
     }
 
@@ -767,19 +843,27 @@
       
       document.getElementById('appHeaderTitle').textContent = `Kedai Roti Tappy`;
       document.getElementById('welcomeShopName').textContent = `Kedai Roti Tappy`;
+
+      const recordEl = document.getElementById('bestTimeChallengeRecord');
+      if (recordEl) {
+        recordEl.textContent = bestTimeChallengeRecord;
+      }
     }
 
+    /* PROFILE MODAL FUNCTIONS */
+    let tempSelectedAvatar = '👨‍🍳';
+
     function openProfileModal() {
-      document.getElementById('playerNameInput').value = userProfile.name === 'Nama...' ? '' : userProfile.name;
-      highlightSelectedAvatar(userProfile.avatar);
+      const inputEl = document.getElementById('playerNameInput');
+      inputEl.value = (userProfile.name && userProfile.name !== 'Nama...') ? userProfile.name : '';
+      tempSelectedAvatar = userProfile.avatar || '👨‍🍳';
+      highlightSelectedAvatar(tempSelectedAvatar);
       document.getElementById('profileModal').classList.remove('hidden');
     }
 
     function closeProfileModal() {
       document.getElementById('profileModal').classList.add('hidden');
     }
-
-    let tempSelectedAvatar = userProfile.avatar;
 
     function selectAvatar(avatar) {
       tempSelectedAvatar = avatar;
@@ -804,6 +888,7 @@
       closeProfileModal();
     }
 
+    /* EARLY LEVEL MODAL FUNCTIONS */
     function openEarlyLevelModal() {
       document.getElementById('earlyLevelModal').classList.remove('hidden');
     }
@@ -815,6 +900,8 @@
     function startEarlyLevel(tier) {
       closeEarlyLevelModal();
       initAudioContext();
+      stopEndlessTimer();
+      isEndlessMode = false;
       currentOperation = 'kenali';
       earlyTier = tier;
       questionNumber = 0;
@@ -824,6 +911,7 @@
       document.getElementById('mainHeader').classList.add('hidden');
       document.getElementById('mainMenuView').classList.add('hidden');
       document.getElementById('gameScreenView').classList.remove('hidden');
+      document.getElementById('endlessTimerDisplay').classList.add('hidden');
 
       const maxNum = (tier === 1) ? 5 : 10;
       document.getElementById('gameLevelBadge').textContent = `Tahap Awal (1 - ${maxNum})`;
@@ -834,6 +922,8 @@
 
     function startGame(level) {
       initAudioContext();
+      stopEndlessTimer();
+      isEndlessMode = false;
       currentLevel = level;
       questionNumber = 0;
       currentScore = 0;
@@ -842,6 +932,7 @@
       document.getElementById('mainHeader').classList.add('hidden');
       document.getElementById('mainMenuView').classList.add('hidden');
       document.getElementById('gameScreenView').classList.remove('hidden');
+      document.getElementById('endlessTimerDisplay').classList.add('hidden');
 
       const opSymbol = currentOperation === 'tambah' ? 'Tambah' : 'Tolak';
       document.getElementById('gameLevelBadge').textContent = `${opSymbol} - Tahap ${level}`;
@@ -850,8 +941,118 @@
       generateNextQuestion();
     }
 
+    function stopEndlessTimer() {
+      if (endlessTimerInterval) {
+        clearInterval(endlessTimerInterval);
+        endlessTimerInterval = null;
+      }
+    }
+
+    function formatTimerText(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startEndlessMode(subMode) {
+      initAudioContext();
+      stopEndlessTimer();
+      isEndlessMode = true;
+      endlessSubMode = subMode;
+      endlessOrdersCompleted = 0;
+      questionNumber = 0;
+      currentScore = 0;
+      recentQuestionsHistory = [];
+
+      document.getElementById('mainHeader').classList.add('hidden');
+      document.getElementById('mainMenuView').classList.add('hidden');
+      document.getElementById('gameScreenView').classList.remove('hidden');
+
+      const timerEl = document.getElementById('endlessTimerDisplay');
+      if (subMode === 'santai') {
+        document.getElementById('gameLevelBadge').textContent = `Mod Santai • Tanpa Had`;
+        timerEl.classList.add('hidden');
+      } else {
+        document.getElementById('gameLevelBadge').textContent = `Cabaran Masa • 2 Minit`;
+        endlessRemainingSeconds = 120;
+        timerEl.textContent = `⏱️ ${formatTimerText(endlessRemainingSeconds)}`;
+        timerEl.classList.remove('hidden');
+
+        endlessTimerInterval = setInterval(() => {
+          endlessRemainingSeconds--;
+          if (endlessRemainingSeconds <= 0) {
+            endlessRemainingSeconds = 0;
+            timerEl.textContent = `⏱️ 00:00`;
+            finishTimeChallenge();
+          } else {
+            timerEl.textContent = `⏱️ ${formatTimerText(endlessRemainingSeconds)}`;
+          }
+        }, 1000);
+      }
+
+      document.getElementById('gameScoreDisplay').innerHTML = `🧁 0 Pesanan`;
+      generateNextQuestion();
+    }
+
+    function finishTimeChallenge() {
+      stopEndlessTimer();
+      stopSpeech();
+
+      let isNewRecord = false;
+      let earnedStars = 0;
+      let summaryLines = [];
+
+      if (endlessOrdersCompleted >= 3) {
+        earnedStars += 1;
+        summaryLines.push(`✅ Menyiapkan ${endlessOrdersCompleted} pesanan: +1 Bintang Kumulatif`);
+      } else {
+        summaryLines.push(`ℹ️ Siapkan sekurang-kurangnya 3 pesanan untuk +1 Bintang.`);
+      }
+
+      if (endlessOrdersCompleted > bestTimeChallengeRecord) {
+        bestTimeChallengeRecord = endlessOrdersCompleted;
+        isNewRecord = true;
+        earnedStars += 2;
+        summaryLines.push(`🏆 Mengatasi Rekod Terbaik: +2 Bintang Bonus!`);
+      }
+
+      if (earnedStars > 0) {
+        userProfile.stars += earnedStars;
+        userProfile.cumulativeStars += earnedStars;
+      }
+      saveProfileData();
+
+      document.getElementById('timeChallengeFinalScore').textContent = `${endlessOrdersCompleted} Pesanan`;
+      document.getElementById('timeChallengeModalBest').textContent = bestTimeChallengeRecord;
+
+      const newRecordEl = document.getElementById('newRecordBadge');
+      if (isNewRecord) {
+        newRecordEl.classList.remove('hidden');
+      } else {
+        newRecordEl.classList.add('hidden');
+      }
+
+      document.getElementById('timeChallengeRewardsSummary').innerHTML = summaryLines.map(line => `<div>${line}</div>`).join('');
+      document.getElementById('timeChallengeResultModal').classList.remove('hidden');
+
+      if (endlessOrdersCompleted >= 5) {
+        const cappedScore = Math.min(10, endlessOrdersCompleted);
+        playAudioQueue([`audio/tahniah_${cappedScore}.mp3`]);
+      } else {
+        playAudioQueue(['audio/cuba_lagi.mp3']);
+      }
+    }
+
+    function closeTimeChallengeResultModal() {
+      document.getElementById('timeChallengeResultModal').classList.add('hidden');
+      goToMainMenu();
+    }
+
     function goToMainMenu() {
       stopSpeech();
+      stopEndlessTimer();
+      isEndlessMode = false;
+      document.getElementById('endlessTimerDisplay').classList.add('hidden');
       document.getElementById('mainHeader').classList.remove('hidden');
       document.getElementById('gameScreenView').classList.add('hidden');
       document.getElementById('mainMenuView').classList.remove('hidden');
@@ -863,19 +1064,26 @@
       isAnswered = false;
       questionNumber++;
 
-      if (questionNumber > MAX_QUESTIONS) {
+      if (!isEndlessMode && questionNumber > MAX_QUESTIONS) {
         finishGameSession();
         return;
       }
 
-      document.getElementById('questionProgressText').textContent = `Soalan ${questionNumber} / ${MAX_QUESTIONS}`;
-      document.getElementById('progressBar').style.width = `${(questionNumber / MAX_QUESTIONS) * 100}%`;
+      if (isEndlessMode) {
+        document.getElementById('questionProgressText').textContent = `Pesanan #${questionNumber} • Siap: ${endlessOrdersCompleted}`;
+        document.getElementById('progressBar').style.width = endlessSubMode === 'masa'
+          ? `${(endlessRemainingSeconds / 120) * 100}%`
+          : `100%`;
+      } else {
+        document.getElementById('questionProgressText').textContent = `Soalan ${questionNumber} / ${MAX_QUESTIONS}`;
+        document.getElementById('progressBar').style.width = `${(questionNumber / MAX_QUESTIONS) * 100}%`;
+      }
       
       const feedbackArea = document.getElementById('feedbackArea');
       feedbackArea.classList.add('hidden');
       feedbackArea.innerHTML = '';
 
-      if (currentOperation === 'kenali') {
+      if (!isEndlessMode && currentOperation === 'kenali') {
         const maxNum = (earlyTier === 1) ? 5 : 10;
         const minNum = 1;
         
@@ -884,13 +1092,13 @@
         currentAnswer = targetNum;
 
         if (currentEarlyActivityType === 1) {
-          document.getElementById('questionPrompt').textContent = "Ini nombor berapa?";
+          document.getElementById('questionPrompt').textContent = "Apakah nombor ini?";
           document.getElementById('equationDisplay').innerHTML = `<span class="text-6xl sm:text-7xl text-amber-800 font-extrabold px-6 py-2 bg-amber-50 rounded-3xl border-4 border-amber-300 shadow-inner">${targetNum}</span>`;
           document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-lg font-bold text-amber-700">Kenali angka di atas! 🥐</div>`;
         } else if (currentEarlyActivityType === 2) {
-          document.getElementById('questionPrompt').textContent = `Cari nombor... !`;
-          document.getElementById('equationDisplay').innerHTML = `<span class="text-3xl text-slate-700 font-bold">Dengar & cari angka yang tepat</span>`;
-          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-4xl">🔊🔍✨</div>`;
+          document.getElementById('questionPrompt').textContent = "Cari nombor... !";
+          document.getElementById('equationDisplay').innerHTML = `<span class="text-3xl text-slate-700 font-bold">Dengar suara & cari angka yang tepat</span>`;
+          document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-4xl">🔍✨</div>`;
         } else if (currentEarlyActivityType === 3) {
           document.getElementById('questionPrompt').textContent = "Berapakah bilangan pastri ini?";
           document.getElementById('equationDisplay').innerHTML = `<span class="text-xl font-bold text-amber-800">Kira dan padankan angka</span>`;
@@ -916,51 +1124,63 @@
           if (!isAnswered) speakEarlyQuestion(currentEarlyActivityType, targetNum);
         }, 350);
       } else {
-        // Standard Math operations (Levels 1-5 with exact sum limits)
+        /* Standard Math operations (Levels 1-5) or Endless Mode (Random Tambah/Tolak 1-100) */
         let num1, num2, key;
         let attempts = 0;
+
+        if (isEndlessMode) {
+          currentOperation = Math.random() < 0.5 ? 'tambah' : 'tolak';
+          currentLevel = 5;
+        }
 
         do {
           attempts++;
           if (currentOperation === 'tambah') {
-            if (currentLevel === 1) {
-              currentAnswer = Math.floor(Math.random() * 9) + 2; // sum up to 10
+            if (isEndlessMode) {
+              currentAnswer = Math.floor(Math.random() * 99) + 2; /* 2 to 100 */
+              num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
+              num2 = currentAnswer - num1;
+            } else if (currentLevel === 1) {
+              currentAnswer = Math.floor(Math.random() * 9) + 2; /* sum up to 10 */
               num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
               num2 = currentAnswer - num1;
             } else if (currentLevel === 2) {
-              currentAnswer = Math.floor(Math.random() * 15) + 5; // sum up to 20
+              currentAnswer = Math.floor(Math.random() * 15) + 5; /* sum up to 20 */
               num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
               num2 = currentAnswer - num1;
             } else if (currentLevel === 3) {
-              currentAnswer = Math.floor(Math.random() * 20) + 10; // sum up to 30
+              currentAnswer = Math.floor(Math.random() * 20) + 10; /* sum up to 30 */
               num1 = Math.floor(Math.random() * (currentAnswer - 1)) + 1;
               num2 = currentAnswer - num1;
             } else if (currentLevel === 4) {
-              currentAnswer = Math.floor(Math.random() * 25) + 25; // sum up to 50
+              currentAnswer = Math.floor(Math.random() * 25) + 25; /* sum up to 50 */
               num1 = Math.floor(Math.random() * (currentAnswer - 5)) + 5;
               num2 = currentAnswer - num1;
             } else {
-              currentAnswer = Math.floor(Math.random() * 50) + 50; // sum up to 100
+              currentAnswer = Math.floor(Math.random() * 50) + 50; /* sum up to 100 */
               num1 = Math.floor(Math.random() * (currentAnswer - 10)) + 10;
               num2 = currentAnswer - num1;
             }
             key = `${num1}+${num2}`;
           } else {
-            // Tolak
-            if (currentLevel === 1) {
-              num1 = Math.floor(Math.random() * 9) + 2; // max 10
+            /* Tolak */
+            if (isEndlessMode) {
+              num1 = Math.floor(Math.random() * 99) + 2; /* 2 to 100 */
+              num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+            } else if (currentLevel === 1) {
+              num1 = Math.floor(Math.random() * 9) + 2; /* max 10 */
               num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
             } else if (currentLevel === 2) {
-              num1 = Math.floor(Math.random() * 18) + 2; // max 20
+              num1 = Math.floor(Math.random() * 18) + 2; /* max 20 */
               num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
             } else if (currentLevel === 3) {
-              num1 = Math.floor(Math.random() * 27) + 3; // max 30
+              num1 = Math.floor(Math.random() * 27) + 3; /* max 30 */
               num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
             } else if (currentLevel === 4) {
-              num1 = Math.floor(Math.random() * 40) + 10; // max 50
+              num1 = Math.floor(Math.random() * 40) + 10; /* max 50 */
               num2 = Math.floor(Math.random() * (num1 - 5)) + 1;
             } else {
-              num1 = Math.floor(Math.random() * 60) + 40; // max 100
+              num1 = Math.floor(Math.random() * 60) + 40; /* max 100 */
               num2 = Math.floor(Math.random() * (num1 - 10)) + 10;
             }
             currentAnswer = num1 - num2;
@@ -968,11 +1188,11 @@
           }
         } while (recentQuestionsHistory.includes(key) && attempts < 25);
 
-        recentQuestionsHistory.push(key);
-        if (recentQuestionsHistory.length > 5) recentQuestionsHistory.shift();
-
         currentNum1 = num1;
         currentNum2 = num2;
+
+        recentQuestionsHistory.push(key);
+        if (recentQuestionsHistory.length > 5) recentQuestionsHistory.shift();
 
         const promptText = currentOperation === 'tambah'
           ? "Berapakah jumlah pastri?"
@@ -1023,24 +1243,13 @@
     }
 
     function speakCurrentQuestion(n1, n2) {
-      if (currentLevel === 1) {
+      if (!isEndlessMode && currentLevel === 1) {
         if (currentOperation === 'tambah') {
-          playAudioQueue([
-            'audio/berapa_jumlah.mp3',
-            `audio/${n1}.mp3`,
-            'audio/ditambah.mp3',
-            `audio/${n2}.mp3`
-          ]);
+          playAudioQueue(['audio/berapa_jumlah.mp3', `audio/${n1}.mp3`, 'audio/ditambah.mp3', `audio/${n2}.mp3`]);
         } else {
-          playAudioQueue([
-            'audio/berapa_baki_apabila.mp3',
-            `audio/${n1}.mp3`,
-            'audio/ditolak.mp3',
-            `audio/${n2}.mp3`
-          ]);
+          playAudioQueue(['audio/berapa_baki_apabila.mp3', `audio/${n1}.mp3`, 'audio/ditolak.mp3', `audio/${n2}.mp3`]);
         }
       } else {
-        // Tahap 2, 3, 4 & 5
         if (currentOperation === 'tambah') {
           playAudioQueue(['audio/jumlah_pastri.mp3']);
         } else {
@@ -1060,7 +1269,7 @@
     }
 
     function speakQuestionText() {
-      if (currentOperation === 'kenali') {
+      if (!isEndlessMode && currentOperation === 'kenali') {
         speakEarlyQuestion(currentEarlyActivityType, currentAnswer);
       } else {
         speakCurrentQuestion(currentNum1, currentNum2);
@@ -1117,7 +1326,7 @@
       isAnswered = true;
       stopSpeech();
 
-      // Kunci sementara (disabled) semua butang jawapan supaya pemain tidak tertekan butang lain
+      /* Kunci sementara (disabled) semua butang jawapan supaya pemain tidak tertekan butang lain */
       const allAnswerBtns = document.querySelectorAll('#answersGrid button');
       allAnswerBtns.forEach(b => {
         b.disabled = true;
@@ -1127,53 +1336,72 @@
       const feedbackArea = document.getElementById('feedbackArea');
       feedbackArea.classList.remove('hidden');
 
-      // Update statistics
+      /* Update statistics */
       userProfile.stats.totalQuestions++;
-      if (currentOperation === 'kenali') {
-        const key = `kenali_${earlyTier}`;
-        if (!userProfile.stats.byLevel[key]) userProfile.stats.byLevel[key] = { attempted: 0, correct: 0 };
-        userProfile.stats.byLevel[key].attempted++;
-      } else {
-        const key = `${currentOperation}_${currentLevel}`;
-        if (!userProfile.stats.byLevel[key]) userProfile.stats.byLevel[key] = { attempted: 0, correct: 0 };
-        userProfile.stats.byLevel[key].attempted++;
+      if (!isEndlessMode) {
+        if (currentOperation === 'kenali') {
+          const key = `kenali_${earlyTier}`;
+          if (!userProfile.stats.byLevel[key]) userProfile.stats.byLevel[key] = { attempted: 0, correct: 0 };
+          userProfile.stats.byLevel[key].attempted++;
+        } else {
+          const key = `${currentOperation}_${currentLevel}`;
+          if (!userProfile.stats.byLevel[key]) userProfile.stats.byLevel[key] = { attempted: 0, correct: 0 };
+          userProfile.stats.byLevel[key].attempted++;
+        }
       }
 
       if (selected === correct) {
         currentScore++;
-        userProfile.stars++;
-        userProfile.cumulativeStars++;
-
         userProfile.stats.totalCorrect++;
-        if (currentOperation === 'kenali') {
-          userProfile.stats.byLevel[`kenali_${earlyTier}`].correct++;
+
+        let bonusStarNote = "";
+
+        if (isEndlessMode) {
+          endlessOrdersCompleted++;
+          document.getElementById('gameScoreDisplay').innerHTML = `🧁 ${endlessOrdersCompleted} Pesanan`;
+
+          if (endlessSubMode === 'santai' && endlessOrdersCompleted % 3 === 0) {
+            userProfile.stars++;
+            userProfile.cumulativeStars++;
+            bonusStarNote = `<div class="text-xs font-extrabold text-amber-700 bg-amber-100 px-3 py-1 rounded-full inline-block mt-1">🌟 3 Pesanan Siap! +1 Bintang Kumulatif!</div>`;
+          }
         } else {
-          userProfile.stats.byLevel[`${currentOperation}_${currentLevel}`].correct++;
+          userProfile.stars++;
+          userProfile.cumulativeStars++;
+
+          if (currentOperation === 'kenali') {
+            userProfile.stats.byLevel[`kenali_${earlyTier}`].correct++;
+          } else {
+            userProfile.stats.byLevel[`${currentOperation}_${currentLevel}`].correct++;
+          }
+          document.getElementById('gameScoreDisplay').innerHTML = `⭐ ${currentScore}`;
         }
         saveProfileData();
-
-        document.getElementById('gameScoreDisplay').innerHTML = `⭐ ${currentScore}`;
 
         btnElement.classList.remove('bg-white', 'hover:bg-amber-50');
         btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
 
-        // Auto advance on correct answer without Seterusnya button
+        /* Auto advance on correct answer without Seterusnya button */
         feedbackArea.innerHTML = `
           <div class="clay-card bg-emerald-50 border-2 border-emerald-300 p-4 rounded-3xl text-center space-y-2 animate-pop shadow-lg">
             <div class="text-2xl font-bold text-emerald-700">✨ Bagus ! 🎉</div>
             <p class="text-xs text-slate-600 font-medium">Tahniah! Jawapan kamu betul dan tepat.</p>
+            ${bonusStarNote}
           </div>
         `;
 
         const advanceAfterAudio = () => {
           nextQuestionTimeoutId = setTimeout(() => {
             if (!document.getElementById('gameScreenView').classList.contains('hidden')) {
+              if (isEndlessMode && endlessSubMode === 'masa' && endlessRemainingSeconds <= 0) {
+                return;
+              }
               generateNextQuestion();
             }
           }, 500);
         };
 
-        if (currentOperation === 'kenali') {
+        if (!isEndlessMode && currentOperation === 'kenali') {
           playAudioQueue([`audio/${selected}.mp3`, 'audio/bagus.mp3'], advanceAfterAudio);
         } else {
           playAudioQueue(['audio/bagus.mp3'], advanceAfterAudio);
@@ -1182,7 +1410,7 @@
         btnElement.classList.remove('bg-white', 'hover:bg-amber-50');
         btnElement.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
 
-        // Incorrect answer with Larger Seterusnya button placed beside text
+        /* Incorrect answer with Larger Seterusnya button placed beside text */
         feedbackArea.innerHTML = `
           <div class="clay-card bg-rose-50 border-2 border-rose-300 p-4 rounded-3xl text-center space-y-3 animate-pop shadow-lg">
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -1194,7 +1422,7 @@
             <p class="text-xs text-slate-600 font-medium text-center">Jangan putus asa, cuba semak semula jawapan kamu.</p>
           </div>
         `;
-        if (currentOperation === 'kenali') {
+        if (!isEndlessMode && currentOperation === 'kenali') {
           playAudioQueue([`audio/${selected}.mp3`, 'audio/sila_kira.mp3']);
         } else {
           playAudioQueue(['audio/sila_kira.mp3']);
@@ -1206,13 +1434,14 @@
       const feedbackArea = document.getElementById('feedbackArea');
       feedbackArea.classList.remove('hidden');
 
+      const displayName = (userProfile.name && userProfile.name !== 'Nama...') ? userProfile.name : 'Chef Cilik';
       const isLowScore = currentScore < 5;
       let endMessage = "";
       if (isLowScore) {
-        endMessage = `Cuba lagi ${userProfile.name} !`;
+        endMessage = `Cuba lagi ${displayName} !`;
         playAudioQueue(['audio/cuba_lagi.mp3']);
       } else {
-        endMessage = `Tahniah ${userProfile.name} ! Cemerlang!`;
+        endMessage = `Tahniah ${displayName} ! Cemerlang!`;
         playAudioQueue([`audio/tahniah_${currentScore}.mp3`]);
       }
 
@@ -1220,7 +1449,6 @@
       document.getElementById('equationDisplay').innerHTML = `⭐ Skor: ${currentScore} / ${MAX_QUESTIONS}`;
       document.getElementById('pastryVisualContainer').innerHTML = `<div class="text-3xl sm:text-4xl font-playful font-bold text-amber-700">${endMessage}</div>`;
       
-      // Results screen with Menu Utama button only (no Seterusnya)
       document.getElementById('answersGrid').innerHTML = `
         <button onclick="goToMainMenu()" class="clay-button col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-bold py-4 rounded-2xl text-lg shadow-md transition flex items-center justify-center gap-2">
           <span>🏠</span> Kembali ke Menu Utama
@@ -1230,7 +1458,6 @@
 
     /* EXPONENTIAL PROGRESSION LOGIC FOR BADGES */
     function getBadgeStatus(tierIndex, cumulativeStars) {
-      // Exponential tier thresholds: Tier 0: 10, Tier 1: 35, Tier 2: 75, Tier 3: 115, Tier 4: 150
       const thresholds = [10, 35, 75, 115, 150];
       const required = thresholds[tierIndex] || 200;
       const unlocked = cumulativeStars >= required;
@@ -1282,22 +1509,14 @@
       document.getElementById('badgesModal').classList.add('hidden');
     }
 
-    let parentVerifyNum1 = 3;
-    let parentVerifyNum2 = 4;
-    let parentVerifyCorrect = 7;
-
+    /* PARENT GATE & DASHBOARD FUNCTIONS */
     function openParentsModal() {
-      parentVerifyNum1 = Math.floor(Math.random() * 5) + 2;
-      parentVerifyNum2 = Math.floor(Math.random() * 5) + 1;
-      parentVerifyCorrect = parentVerifyNum1 + parentVerifyNum2;
-      
-      document.getElementById('parentVerifyEquation').textContent = `${parentVerifyNum1} + ${parentVerifyNum2} = ?`;
-      document.getElementById('parentVerifyEquation').className = "text-2xl font-bold text-slate-800 my-2";
+      const a = Math.floor(Math.random() * 8) + 2;
+      const b = Math.floor(Math.random() * 8) + 2;
+      parentVerifyExpectedAnswer = a + b;
+      document.getElementById('parentVerifyEquation').textContent = `${a} + ${b} = ?`;
       document.getElementById('parentVerifyInput').value = '';
       document.getElementById('parentVerifyModal').classList.remove('hidden');
-      setTimeout(() => {
-        document.getElementById('parentVerifyInput').focus();
-      }, 100);
     }
 
     function closeParentVerifyModal() {
@@ -1305,23 +1524,16 @@
     }
 
     function verifyParentAnswer() {
-      const val = parseInt(document.getElementById('parentVerifyInput').value);
-      if (val === parentVerifyCorrect) {
+      const val = parseInt(document.getElementById('parentVerifyInput').value, 10);
+      if (val === parentVerifyExpectedAnswer) {
         closeParentVerifyModal();
-        showActualParentsModal();
+        showParentsDashboardContent();
       } else {
-        const eqEl = document.getElementById('parentVerifyEquation');
-        eqEl.textContent = `${parentVerifyNum1} + ${parentVerifyNum2} = ? (Salah, Cuba Lagi!)`;
-        eqEl.className = "text-xl font-bold text-rose-600 my-2";
-        document.getElementById('parentVerifyInput').value = '';
-        setTimeout(() => {
-          eqEl.className = "text-2xl font-bold text-slate-800 my-2";
-          eqEl.textContent = `${parentVerifyNum1} + ${parentVerifyNum2} = ?`;
-        }, 1500);
+        document.getElementById('parentVerifyInput').classList.add('border-rose-500');
       }
     }
 
-    function showActualParentsModal() {
+    function showParentsDashboardContent() {
       const stats = userProfile.stats;
       document.getElementById('parentTotalQuestions').textContent = stats.totalQuestions;
       document.getElementById('parentTotalCorrect').textContent = stats.totalCorrect;
@@ -1377,7 +1589,14 @@
     }
 
     function executeFullReset() {
-      localStorage.removeItem('kedai_roti_tappy_user');
+      try {
+        localStorage.removeItem(STORAGE_KEY_USER);
+        localStorage.removeItem(STORAGE_KEY_BEST_RECORD);
+        localStorage.removeItem('kedai_roti_tappy_user');
+      } catch(e) {
+        console.error("Failed to clear localStorage", e);
+      }
+      bestTimeChallengeRecord = 0;
       userProfile = {
         name: 'Nama...',
         avatar: '👨‍🍳',
