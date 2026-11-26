@@ -93,6 +93,16 @@
             opacity: 0.9;
         }
 
+        /* Header Stickers & Trophies Raised Buttons */
+        .header-action-btn {
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.08);
+        }
+        .header-action-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.08);
+        }
+
         /* Scrollable container */
         .app-container {
             height: 100vh;
@@ -202,14 +212,17 @@
             </div>
             <div class="flex items-center gap-2 md:gap-3">
                 <!-- Stickers Button -->
-                <button onclick="showStickers()" class="bg-pink-100 border-2 border-pink-300 rounded-2xl p-2 px-3 flex flex-col items-center justify-center hover:animate-pulse cursor-pointer transition-transform active:scale-95 shadow-sm">
-                    <span class="text-2xl md:text-3xl mb-1">🖼️</span>
+                <button onclick="showStickers()" class="header-action-btn bg-pink-100 border-2 border-pink-300 rounded-2xl p-2 px-3 flex flex-col items-center justify-center hover:animate-pulse cursor-pointer">
+                    <span class="text-2xl md:text-3xl mb-1 leading-none">🎁</span>
                     <span class="text-xs font-extrabold text-pink-700 whitespace-nowrap">Stickers</span>
                 </button>
                 <!-- Existing Stars/Trophy Button -->
-                <button onclick="openTrophyModal()" class="bg-yellow-100 border-2 border-yellow-300 rounded-2xl p-2 px-3 flex flex-col items-center justify-center hover:animate-pulse cursor-pointer transition-transform active:scale-95 shadow-sm">
-                    <span class="text-2xl md:text-3xl mb-1">⭐</span>
-                    <span id="total-stars" class="text-sm md:text-base font-extrabold text-yellow-700">0</span>
+                <button onclick="openTrophyModal()" class="header-action-btn bg-yellow-100 border-2 border-yellow-300 rounded-2xl p-2 px-3 flex flex-col items-center justify-center hover:animate-pulse cursor-pointer">
+                    <span class="flex items-center justify-center gap-1 mb-1 leading-none">
+                        <span class="text-2xl md:text-3xl">⭐</span>
+                        <span id="total-stars" class="text-lg md:text-xl font-extrabold text-yellow-700">0</span>
+                    </span>
+                    <span class="text-xs font-extrabold text-yellow-700 whitespace-nowrap">Trophies</span>
                 </button>
             </div>
         </div>
@@ -591,11 +604,11 @@
 
     <!-- 5. TROPHY MODAL -->
     <div id="modal-trophy" class="hide absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-all text-center">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl transform transition-all text-center flex flex-col max-h-[90vh]">
             <h2 class="text-3xl font-extrabold text-yellow-500 mb-2">My Trophies</h2>
-            <p class="text-gray-500 font-bold mb-6">Collect stars to unlock!</p>
+            <p class="text-gray-500 font-bold mb-4">Collect stars to unlock!</p>
             
-            <div class="flex flex-col gap-4 mb-6">
+            <div class="flex flex-col gap-3 mb-6 overflow-y-auto pr-1">
                 <div id="trophy-10" class="flex items-center bg-orange-50 p-3 rounded-2xl border-2 border-orange-200 grayscale opacity-60 transition-all duration-500">
                     <div class="text-5xl mr-4">🐻</div>
                     <div class="text-left">
@@ -615,6 +628,20 @@
                     <div class="text-left">
                         <h3 class="font-bold text-yellow-700">Gold Lion</h3>
                         <p class="text-sm text-yellow-600">50 Stars</p>
+                    </div>
+                </div>
+                <div id="trophy-75" class="flex items-center bg-sky-50 p-3 rounded-2xl border-2 border-sky-200 grayscale opacity-60 transition-all duration-500">
+                    <div class="text-5xl mr-4 drop-shadow-md">🦄</div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-sky-800">Diamond Unicorn</h3>
+                        <p class="text-sm text-sky-600">75 Stars</p>
+                    </div>
+                </div>
+                <div id="trophy-100" class="flex items-center bg-purple-50 p-3 rounded-2xl border-2 border-purple-200 grayscale opacity-60 transition-all duration-500">
+                    <div class="text-5xl mr-4 drop-shadow-md">🐉</div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-purple-800">Champion Dragon</h3>
+                        <p class="text-sm text-purple-600">100 Stars</p>
                     </div>
                 </div>
             </div>
@@ -2038,9 +2065,17 @@
 
     function openTrophyModal() {
         document.getElementById('modal-trophy').classList.remove('hide');
-        if (totalStars >= 10) document.getElementById('trophy-10').classList.remove('grayscale', 'opacity-60');
-        if (totalStars >= 25) document.getElementById('trophy-25').classList.remove('grayscale', 'opacity-60');
-        if (totalStars >= 50) document.getElementById('trophy-50').classList.remove('grayscale', 'opacity-60');
+        const trophyLevels = [10, 25, 50, 75, 100];
+        trophyLevels.forEach(req => {
+            const el = document.getElementById('trophy-' + req);
+            if (el) {
+                if (totalStars >= req) {
+                    el.classList.remove('grayscale', 'opacity-60');
+                } else {
+                    el.classList.add('grayscale', 'opacity-60');
+                }
+            }
+        });
     }
     function closeTrophyModal() { document.getElementById('modal-trophy').classList.add('hide'); }
 
