@@ -185,6 +185,11 @@
     <!-- 1. HOME SCREEN -->
     <div id="screen-home" class="hide flex-1 flex flex-col p-4 w-full h-full overflow-y-auto pb-10 relative z-10">
         
+        <!-- Quick Parent Menu Button (Top Left) -->
+        <button onclick="openQuickParentMenu()" id="btn-parent-gear" title="Parent Menu" class="absolute top-4 left-4 z-30 bg-white hover:bg-gray-100 text-gray-600 rounded-full border-2 border-gray-300 shadow-md w-11 h-11 flex items-center justify-center text-xl font-bold transition-transform active:scale-95">
+            ⚙️
+        </button>
+
         <!-- CelikPlay Branding at Top of Menu -->
         <div class="flex justify-center mt-12 mb-[-1rem] relative z-20">
             <img src="https://i.ibb.co/mCtNcC8p/CP1.jpg" alt="" class="w-16 h-16 object-cover rounded-full shadow-lg border-2 border-white bg-white p-1 relative z-20" onerror="this.outerHTML='<div class=\'w-16 h-16 shadow-lg border-2 border-white bg-white rounded-full p-1 relative z-20 flex items-center justify-center\'><h1 class=\'text-[11px] font-extrabold text-blue-600 leading-none text-center\'>Celik<br><span class=\'text-yellow-500\'>Play</span></h1></div>'">
@@ -243,6 +248,11 @@
                 <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
                 <div class="text-6xl">💬</div>
                 <h3 class="text-2xl font-extrabold text-white drop-shadow-md">Let's Speak!</h3>
+            </button>
+            <button onclick="startQuickShuffle()" class="game-btn anim-float sm:col-span-2 bg-gradient-to-b from-indigo-400 to-violet-500 rounded-3xl p-6 border-4 border-indigo-600 flex flex-col items-center gap-2 group relative overflow-hidden" style="animation-delay: 0.7s;">
+                <div class="absolute top-0 left-0 w-full h-full bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
+                <div class="text-6xl">🎲</div>
+                <h3 class="text-2xl font-extrabold text-white drop-shadow-md">Quick Shuffle (Endless)</h3>
             </button>
         </div>
 
@@ -644,6 +654,29 @@
             <div class="flex gap-3 mt-6">
                 <button onclick="closeParentsDash()" class="flex-1 text-gray-600 hover:text-gray-800 font-bold py-3 bg-gray-100 rounded-xl border-2 border-gray-200 transition-colors">Tutup ❌</button>
                 <button onclick="openResetConfirm()" id="btn-dash-reset" class="flex-1 text-red-500 hover:text-red-700 font-bold py-3 bg-red-50 rounded-xl border-2 border-red-200 transition-colors">Reset Progress</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7.2 QUICK PARENT MENU MODAL -->
+    <div id="modal-parent-quick-menu" class="hide absolute inset-0 z-[65] flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center anim-pop">
+            <div class="text-5xl mb-3">⚙️</div>
+            <h2 class="text-2xl font-extrabold text-blue-800 mb-1">Parent Menu</h2>
+            <p class="text-gray-500 text-sm font-semibold mb-5">Manage saved progress for your child.</p>
+
+            <div class="bg-blue-50 border-2 border-blue-100 rounded-2xl p-3 mb-5 flex justify-around text-sm font-bold text-blue-800">
+                <div>⭐ Stars: <span id="quick-parent-stars">0</span></div>
+                <div>🖼️ Stickers: <span id="quick-parent-stickers">0 / 10</span></div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="openResetConfirm()" class="game-btn w-full bg-red-50 hover:bg-red-100 text-red-600 font-extrabold text-lg py-3 rounded-2xl border-2 border-red-300">
+                    🔄 Reset Progress
+                </button>
+                <button onclick="closeQuickParentMenu()" class="w-full text-gray-600 hover:text-gray-800 font-bold py-3 bg-gray-100 rounded-2xl border-2 border-gray-200 transition-colors">
+                    Tutup ❌
+                </button>
             </div>
         </div>
     </div>
@@ -1092,17 +1125,72 @@
     };
 
     /* =========================================================================
-       STICKER BOOK SYSTEM
+       STICKER BOOK SYSTEM & LOCAL STORAGE (englishAdventure_)
        ========================================================================= */
+    const STORAGE_PREFIX = 'englishAdventure_';
+
+    const StorageSys = {
+        get: function(key, legacyKey = null) {
+            try {
+                const value = localStorage.getItem(STORAGE_PREFIX + key);
+                if (value === null && legacyKey) {
+                    const oldValue = localStorage.getItem(legacyKey);
+                    if (oldValue !== null) {
+                        localStorage.setItem(STORAGE_PREFIX + key, oldValue);
+                        return oldValue;
+                    }
+                }
+                return value;
+            } catch (err) {
+                return null;
+            }
+        },
+        set: function(key, value) {
+            try {
+                localStorage.setItem(STORAGE_PREFIX + key, value);
+            } catch (err) {
+                /* Abaikan ralat jika localStorage disekat pelayar */
+            }
+        },
+        remove: function(key, legacyKey = null) {
+            try {
+                localStorage.removeItem(STORAGE_PREFIX + key);
+                if (legacyKey) {
+                    localStorage.removeItem(legacyKey);
+                }
+            } catch (err) {
+                /* Abaikan ralat jika localStorage disekat pelayar */
+            }
+        }
+    };
+
     const stickerData = [
         { name: "Super Lion", emoji: "🦁🦸", cost: 10, bg: "bg-orange-100" },
         { name: "Space Cat", emoji: "🐱🚀", cost: 15, bg: "bg-blue-100" },
         { name: "Dancing Boy", emoji: "👦🕺", cost: 20, bg: "bg-green-100" },
         { name: "Yummy Apple", emoji: "🍎😋", cost: 25, bg: "bg-red-100" },
         { name: "Cool Elephant", emoji: "🐘🕶️", cost: 30, bg: "bg-indigo-100" },
-        { name: "Star Catcher Wizard", emoji: "🧙‍♂️⭐", cost: 40, bg: "bg-purple-100" }
+        { name: "Star Catcher Wizard", emoji: "🧙‍♂️⭐", cost: 40, bg: "bg-purple-100" },
+        { name: "Robo Buddy", emoji: "🤖⚡", cost: 50, bg: "bg-cyan-100" },
+        { name: "Dino King", emoji: "🦖👑", cost: 65, bg: "bg-emerald-100" },
+        { name: "Unicorn Magic", emoji: "🦄🌈", cost: 80, bg: "bg-pink-100" },
+        { name: "English Champion", emoji: "🏆🎓", cost: 100, bg: "bg-yellow-100" }
     ];
-    let unlockedStickers = JSON.parse(localStorage.getItem('ela_stickers')) || [false, false, false, false, false, false];
+
+    function loadUnlockedStickers() {
+        const defaultStickers = stickerData.map(() => false);
+        try {
+            const saved = StorageSys.get('stickers', 'ela_stickers');
+            if (!saved) return defaultStickers;
+            const parsed = JSON.parse(saved);
+            if (!Array.isArray(parsed)) return defaultStickers;
+            return stickerData.map((_, index) => Boolean(parsed[index]));
+        } catch (err) {
+            return defaultStickers;
+        }
+    }
+
+    let unlockedStickers = loadUnlockedStickers();
 
     function showStickers() {
         showScreen('screen-stickers');
@@ -1143,7 +1231,7 @@
             totalStars -= st.cost;
             unlockedStickers[idx] = true;
             saveStars(); 
-            localStorage.setItem('ela_stickers', JSON.stringify(unlockedStickers));
+            StorageSys.set('stickers', JSON.stringify(unlockedStickers));
             renderStickers();
             
             AudioSys.speak("Yay! New sticker unlocked!");
@@ -1164,13 +1252,25 @@
     /* =========================================================================
        STATE MANAGEMENT & STATS
        ========================================================================= */
-    let totalStars = parseInt(localStorage.getItem('ela_totalStars')) || 0;
-    let userName = localStorage.getItem('ela_userName') || 'Learner';
-    let userAvatar = localStorage.getItem('ela_userAvatar') || '🦁';
+    let totalStars = parseInt(StorageSys.get('totalStars', 'ela_totalStars'), 10) || 0;
+    let userName = StorageSys.get('userName', 'ela_userName') || 'Learner';
+    let userAvatar = StorageSys.get('userAvatar', 'ela_userAvatar') || '🦁';
     
     let defaultStats = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
-    let learnStats = JSON.parse(localStorage.getItem('ela_stats')) || defaultStats;
-    if (!learnStats[5]) learnStats[5] = {}; // Fallback for older saves
+    let learnStats = defaultStats;
+    try {
+        const savedStats = StorageSys.get('stats', 'ela_stats');
+        if (savedStats) {
+            learnStats = JSON.parse(savedStats);
+        }
+    } catch (err) {
+        learnStats = defaultStats;
+    }
+    if (!learnStats[1]) learnStats[1] = {};
+    if (!learnStats[2]) learnStats[2] = {};
+    if (!learnStats[3]) learnStats[3] = {};
+    if (!learnStats[4]) learnStats[4] = {};
+    if (!learnStats[5]) learnStats[5] = {};
 
     let isGameActive = false; 
     let nextQuestionTimeout = null; 
@@ -1184,11 +1284,17 @@
     let currentAudioPrompt = "";
     let isBgmPlaying = false;
 
+    /* Pemboleh ubah mod Quick Shuffle (Endless) */
+    let shuffleStreak = 0;
+    let shuffleTotalCorrect = 0;
+    let shuffleStarsEarned = 0;
+    let lastShuffleId = "";
+
     const avatarList = ["🦁", "🐶", "🐱", "🐻", "🐰", "🦊", "🐼", "🐯"];
     let tempAvatar = userAvatar;
 
     function saveStars() {
-        localStorage.setItem('ela_totalStars', totalStars.toString());
+        StorageSys.set('totalStars', totalStars.toString());
         document.getElementById('total-stars').innerText = totalStars;
     }
 
@@ -1221,8 +1327,8 @@
         let newName = document.getElementById('input-name').value.trim();
         if (newName) userName = newName;
         userAvatar = tempAvatar;
-        localStorage.setItem('ela_userName', userName);
-        localStorage.setItem('ela_userAvatar', userAvatar);
+        StorageSys.set('userName', userName);
+        StorageSys.set('userAvatar', userAvatar);
         updateProfileUI();
         closeProfileModal();
     }
@@ -1318,13 +1424,130 @@
         sessionScore = 0;
         sessionQuestions = generateQuestions(worldId, subLevel);
         
-        // Auto pause BGM when game starts so audio isn't distracted
+        /* Hentikan BGM buat sementara apabila sesi permainan bermula */
         if (isBgmPlaying) {
             pauseBGM();
         }
 
         showScreen('screen-game');
         loadQuestion();
+    }
+
+    function startQuickShuffle() {
+        shuffleStreak = 0;
+        shuffleTotalCorrect = 0;
+        shuffleStarsEarned = 0;
+        lastShuffleId = "";
+        startGame(6, 0);
+    }
+
+    function generateShuffleQuestion() {
+        const firstWordsBank = [];
+        const seenWords = {};
+        [...housePool, ...foodPool, ...wearPool, ...wordsPool].forEach(item => {
+            if (!seenWords[item.word]) {
+                seenWords[item.word] = true;
+                firstWordsBank.push(item);
+            }
+        });
+
+        const animalBank = [];
+        const seenAnimals = {};
+        [...petsPool, ...farmPool, ...wildPool, ...animalsPool].forEach(item => {
+            if (!seenAnimals[item.word]) {
+                seenAnimals[item.word] = true;
+                animalBank.push(item);
+            }
+        });
+
+        const spellingBank = [...spellL1Pool, ...spellL2Pool, ...spellL3Pool];
+        const categoryRoll = Math.floor(Math.random() * 3);
+
+        if (categoryRoll === 0) {
+            const candidates = firstWordsBank.filter(item => item.word !== lastShuffleId);
+            const target = candidates[Math.floor(Math.random() * candidates.length)] || firstWordsBank[0];
+            lastShuffleId = target.word;
+            const wrongOptions = getRandomElements(firstWordsBank.filter(item => item.word !== target.word), 2);
+            const options = [
+                { isCorrect: true, display: target.emoji, val: target.word },
+                { isCorrect: false, display: wrongOptions[0].emoji, val: wrongOptions[0].word },
+                { isCorrect: false, display: wrongOptions[1].emoji, val: wrongOptions[1].word }
+            ];
+            return {
+                id: target.word,
+                audio: target.word,
+                visual: "Listen and find:",
+                options: shuffleArray(options),
+                shuffleType: "listen",
+                shuffleBadge: "🍎 My First Words",
+                sourceWorld: 1
+            };
+        } else if (categoryRoll === 1) {
+            const candidates = animalBank.filter(item => item.word !== lastShuffleId);
+            const target = candidates[Math.floor(Math.random() * candidates.length)] || animalBank[0];
+            lastShuffleId = target.word;
+            const wrongOptions = getRandomElements(animalBank.filter(item => item.word !== target.word), 2);
+            const options = [
+                { isCorrect: true, display: target.emoji, val: target.word },
+                { isCorrect: false, display: wrongOptions[0].emoji, val: wrongOptions[0].word },
+                { isCorrect: false, display: wrongOptions[1].emoji, val: wrongOptions[1].word }
+            ];
+            return {
+                id: target.word,
+                audio: target.word,
+                visual: "Listen and find:",
+                options: shuffleArray(options),
+                shuffleType: "listen",
+                shuffleBadge: "🐶 Animal World",
+                sourceWorld: 2
+            };
+        } else {
+            const candidates = spellingBank.filter(item => item.word !== lastShuffleId);
+            const t = candidates[Math.floor(Math.random() * candidates.length)] || spellingBank[0];
+            lastShuffleId = t.word;
+            const wrongLetters = getRandomElements(t.wrong, 2);
+            const options = [
+                { isCorrect: true, display: t.missing, type: 'text' },
+                { isCorrect: false, display: wrongLetters[0], type: 'text' },
+                { isCorrect: false, display: wrongLetters[1], type: 'text' }
+            ];
+            return {
+                id: t.word,
+                audio: t.word,
+                visual: `<div class="text-6xl mb-4 anim-float">${t.emoji}</div><div class="text-4xl md:text-5xl font-extrabold tracking-widest text-blue-700 bg-white px-6 py-4 rounded-2xl shadow-inner border-2 border-blue-100">${t.prompt}</div>`,
+                options: shuffleArray(options),
+                isHtmlVisual: true,
+                shuffleType: "spelling",
+                shuffleBadge: "🔤 Fun Spelling",
+                sourceWorld: 5
+            };
+        }
+    }
+
+    function renderShuffleProgress(justEarnedStar = false) {
+        const progressDiv = document.getElementById('session-progress');
+        if (!progressDiv) return;
+        if (justEarnedStar) {
+            progressDiv.innerHTML = `
+                <div class="flex flex-col items-center anim-bounce">
+                    <div class="text-base md:text-lg font-extrabold text-yellow-600">⭐⭐⭐⭐⭐ +1 Star!</div>
+                    <div class="text-xs font-extrabold text-indigo-700">🔥 Streak: ${shuffleStreak} | ⭐ +${shuffleStarsEarned}</div>
+                </div>
+            `;
+            return;
+        }
+        const streakInCycle = shuffleStreak % 5;
+        let starsHtml = '';
+        for (let i = 0; i < 5; i++) {
+            const filled = i < streakInCycle;
+            starsHtml += `<span class="text-xl transition-all duration-300" style="color: ${filled ? '#fbbf24' : '#d1d5db'}">${filled ? '⭐' : '☆'}</span>`;
+        }
+        progressDiv.innerHTML = `
+            <div class="flex flex-col items-center">
+                <div class="flex items-center gap-1">${starsHtml}</div>
+                <div class="text-xs font-extrabold text-indigo-700">🔥 Streak: ${shuffleStreak} | ⭐ +${shuffleStarsEarned}</div>
+            </div>
+        `;
     }
 
     function generateQuestions(worldId, subLevel = 0) {
@@ -1442,6 +1665,8 @@
                     });
                 }
             });
+        } else if (worldId === 6) {
+            qs.push(generateShuffleQuestion());
         }
         return qs;
     }
@@ -1456,12 +1681,16 @@
         
         const progressDiv = document.getElementById('session-progress');
         progressDiv.innerHTML = '';
-        for (let i = 0; i < totalQ; i++) {
-            let star = document.createElement('span');
-            star.className = 'text-2xl transition-all duration-300';
-            star.innerText = i < currentQuestionIndex ? '⭐' : '☆';
-            star.style.color = i < currentQuestionIndex ? '#fbbf24' : '#d1d5db';
-            progressDiv.appendChild(star);
+        if (currentWorld === 6) {
+            renderShuffleProgress(false);
+        } else {
+            for (let i = 0; i < totalQ; i++) {
+                let star = document.createElement('span');
+                star.className = 'text-2xl transition-all duration-300';
+                star.innerText = i < currentQuestionIndex ? '⭐' : '☆';
+                star.style.color = i < currentQuestionIndex ? '#fbbf24' : '#d1d5db';
+                progressDiv.appendChild(star);
+            }
         }
 
         const promptDiv = document.getElementById('question-prompt');
@@ -1475,6 +1704,26 @@
                     <span class="text-base md:text-lg font-bold text-cyan-800">Tap to listen</span>
                 </button>
             `;
+        } else if (currentWorld === 6) {
+            if (q.shuffleType === "listen") {
+                promptDiv.innerHTML = `
+                    <span class="inline-block bg-indigo-100 text-indigo-700 border-2 border-indigo-200 rounded-full px-4 py-1 text-xs md:text-sm font-extrabold mb-3">🎲 Quick Shuffle • ${q.shuffleBadge}</span>
+                    <h2 class="text-3xl font-extrabold text-blue-600 mb-4">Listen & Find:</h2>
+                    <button onclick="replayAudio()" class="game-btn bg-cyan-100 border-4 border-cyan-400 rounded-3xl px-8 py-4 flex flex-col items-center justify-center gap-2 hover:bg-cyan-200 shadow-sm mx-auto group w-full max-w-[250px]">
+                        <span class="text-5xl md:text-6xl group-hover:scale-110 transition-transform">🔊</span>
+                        <span class="text-base md:text-lg font-bold text-cyan-800">Tap to listen</span>
+                    </button>
+                `;
+            } else {
+                promptDiv.innerHTML = `
+                    <span class="inline-block bg-indigo-100 text-indigo-700 border-2 border-indigo-200 rounded-full px-4 py-1 text-xs md:text-sm font-extrabold mb-3">🎲 Quick Shuffle • ${q.shuffleBadge}</span>
+                    ${q.visual}
+                    <button onclick="replayAudio()" class="game-btn mt-5 bg-cyan-100 border-4 border-cyan-400 rounded-full px-6 py-2 flex items-center justify-center gap-3 hover:bg-cyan-200 shadow-sm mx-auto group">
+                        <span class="text-3xl group-hover:scale-110 transition-transform">🔊</span>
+                        <span class="text-sm md:text-base font-bold text-cyan-800">Tap to listen</span>
+                    </button>
+                `;
+            }
         } else if (currentWorld === 4) {
             if (q.isConversation) {
                 let helperText = q.isChatAndChoose ? "Listen, then pick the correct answer!" : "Listen, then tap the mic to practice the reply!";
@@ -1613,10 +1862,13 @@
         if (!isGameActive) return;
 
         currentQuestionAttempts++;
-        const qKey = sessionQuestions[currentQuestionIndex].id;
+        const currentQ = sessionQuestions[currentQuestionIndex];
+        const qKey = currentQ.id;
+        const statsWorld = (currentWorld === 6 && currentQ.sourceWorld) ? currentQ.sourceWorld : currentWorld;
 
-        if (!learnStats[currentWorld][qKey]) learnStats[currentWorld][qKey] = { firstTryCorrect: false, eventuallyCorrect: false };
-        if (currentQuestionAttempts === 1) learnStats[currentWorld][qKey].firstTryCorrect = isCorrect;
+        if (!learnStats[statsWorld]) learnStats[statsWorld] = {};
+        if (!learnStats[statsWorld][qKey]) learnStats[statsWorld][qKey] = { firstTryCorrect: false, eventuallyCorrect: false };
+        if (currentQuestionAttempts === 1) learnStats[statsWorld][qKey].firstTryCorrect = isCorrect;
 
         const buttons = document.getElementById('options-container').querySelectorAll('button');
         buttons.forEach(b => b.disabled = true);
@@ -1624,15 +1876,51 @@
         speakers.forEach(s => s.classList.add('pointer-events-none', 'opacity-50'));
 
         if (isCorrect) {
-            learnStats[currentWorld][qKey].eventuallyCorrect = true;
-            localStorage.setItem('ela_stats', JSON.stringify(learnStats));
+            learnStats[statsWorld][qKey].eventuallyCorrect = true;
+            StorageSys.set('stats', JSON.stringify(learnStats));
 
             buttonElement.classList.replace('bg-white', 'bg-green-300');
             buttonElement.classList.remove('border-gray-200', 'border-blue-200');
             buttonElement.classList.add('border-green-500', 'anim-bounce');
             
             let nextDelay = 1500;
-            if (currentWorld === 4 && qObj && qObj.isConversation) {
+            let hasAdvanced = false;
+            const advanceToNextQuestion = () => {
+                if (!isGameActive || hasAdvanced) return;
+                hasAdvanced = true;
+                if (nextQuestionTimeout) {
+                    clearTimeout(nextQuestionTimeout);
+                    nextQuestionTimeout = null;
+                }
+                if (currentWorld === 6) {
+                    sessionQuestions = [generateShuffleQuestion()];
+                    currentQuestionIndex = 0;
+                    loadQuestion();
+                } else {
+                    currentQuestionIndex++; loadQuestion();
+                }
+            };
+
+            if (currentWorld === 6) {
+                shuffleStreak++;
+                shuffleTotalCorrect++;
+                if (shuffleStreak % 5 === 0) {
+                    totalStars++;
+                    shuffleStarsEarned++;
+                    saveStars();
+                    renderShuffleProgress(true);
+                    /* Tunggu sehingga sebutan ganjaran bintang habis sepenuhnya sebelum ke soalan seterusnya */
+                    nextDelay = 6000;
+                    AudioSys.speak("Awesome! Five in a row! Plus one star!", false, 0.9, 1.1, () => {
+                        if (!isGameActive || hasAdvanced) return;
+                        if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
+                        nextQuestionTimeout = setTimeout(advanceToNextQuestion, 600);
+                    });
+                } else {
+                    renderShuffleProgress(false);
+                    AudioSys.speak(positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)]);
+                }
+            } else if (currentWorld === 4 && qObj && qObj.isConversation) {
                 const girlBubble = document.getElementById('girl-bubble');
                 if (girlBubble) {
                     girlBubble.innerHTML = `"${qObj.girlCorrect}"`;
@@ -1641,20 +1929,21 @@
                 AudioSys.playConversation(qObj.boyAudio, qObj.girlCorrect, 0.8);
                 const textLength = qObj.boyAudio.length + qObj.girlCorrect.length;
                 nextDelay = Math.max(5000, textLength * 120); 
+                sessionScore++; totalStars++; saveStars();
             } else {
                 AudioSys.speak(positiveFeedback[Math.floor(Math.random() * positiveFeedback.length)]);
+                sessionScore++; totalStars++; saveStars();
             }
-            
-            sessionScore++; totalStars++; saveStars();
 
             if (nextQuestionTimeout) clearTimeout(nextQuestionTimeout);
-            nextQuestionTimeout = setTimeout(() => {
-                if (!isGameActive) return; 
-                currentQuestionIndex++; loadQuestion();
-            }, nextDelay);
+            nextQuestionTimeout = setTimeout(advanceToNextQuestion, nextDelay);
 
         } else {
-            localStorage.setItem('ela_stats', JSON.stringify(learnStats));
+            StorageSys.set('stats', JSON.stringify(learnStats));
+            if (currentWorld === 6) {
+                shuffleStreak = 0;
+                renderShuffleProgress(false);
+            }
             buttonElement.classList.replace('bg-white', 'bg-red-200');
             buttonElement.classList.remove('border-gray-200', 'border-blue-200');
             buttonElement.classList.add('border-red-400', 'anim-shake');
@@ -1789,6 +2078,21 @@
     function openParentsDash() { document.getElementById('modal-parents-dash').classList.remove('hide'); renderStats(); }
     function closeParentsDash() { document.getElementById('modal-parents-dash').classList.add('hide'); }
 
+    function openQuickParentMenu() {
+        const starsEl = document.getElementById('quick-parent-stars');
+        const stickersEl = document.getElementById('quick-parent-stickers');
+        if (starsEl) starsEl.innerText = totalStars;
+        if (stickersEl) {
+            const ownedCount = unlockedStickers.filter(Boolean).length;
+            stickersEl.innerText = ownedCount + " / " + stickerData.length;
+        }
+        document.getElementById('modal-parent-quick-menu').classList.remove('hide');
+    }
+
+    function closeQuickParentMenu() {
+        document.getElementById('modal-parent-quick-menu').classList.add('hide');
+    }
+
     function renderStats() {
         const container = document.getElementById('stats-container');
         container.innerHTML = '';
@@ -1850,36 +2154,52 @@
     }
 
     function executeFullReset() {
-        // 1. Reset Stats
+        /* 1. Padam statistik pembelajaran */
         learnStats = { 1: {}, 2: {}, 3: {}, 4: {}, 5: {} };
-        localStorage.setItem('ela_stats', JSON.stringify(learnStats));
+        StorageSys.remove('stats', 'ela_stats');
+        StorageSys.set('stats', JSON.stringify(learnStats));
         
-        // 2. Reset Stars
+        /* 2. Padam jumlah bintang */
         totalStars = 0;
+        StorageSys.remove('totalStars', 'ela_totalStars');
         saveStars();
         
-        // 3. Reset Stickers
-        unlockedStickers = [false, false, false, false, false, false];
-        localStorage.setItem('ela_stickers', JSON.stringify(unlockedStickers));
+        /* 3. Padam semua stiker yang telah dibuka */
+        unlockedStickers = stickerData.map(() => false);
+        StorageSys.remove('stickers', 'ela_stickers');
+        StorageSys.set('stickers', JSON.stringify(unlockedStickers));
         renderStickers();
 
-        // 4. Update UI
+        /* 4. Tetapkan semula rekod Quick Shuffle */
+        shuffleStreak = 0;
+        shuffleTotalCorrect = 0;
+        shuffleStarsEarned = 0;
+
+        /* 5. Kemas kini paparan UI */
         renderStats();
         closeResetConfirm();
+        closeQuickParentMenu();
         
-        // 5. Visual Confirmation Feedback on Button
+        /* 6. Maklum balas visual butang dan pengesahan */
         const btn = document.getElementById('btn-dash-reset');
-        let oldText = "Reset Progress";
-        btn.innerText = "All Data Cleared!";
-        btn.classList.replace('text-red-500', 'text-green-600');
-        btn.classList.replace('bg-red-50', 'bg-green-50');
-        btn.classList.replace('border-red-200', 'border-green-200');
-        setTimeout(() => {
-            btn.innerText = oldText;
-            btn.classList.replace('text-green-600', 'text-red-500');
-            btn.classList.replace('bg-green-50', 'bg-red-50');
-            btn.classList.replace('border-green-200', 'border-red-200');
-        }, 2500);
+        if (btn) {
+            let oldText = "Reset Progress";
+            btn.innerText = "All Data Cleared!";
+            btn.classList.replace('text-red-500', 'text-green-600');
+            btn.classList.replace('bg-red-50', 'bg-green-50');
+            btn.classList.replace('border-red-200', 'border-green-200');
+            setTimeout(() => {
+                btn.innerText = oldText;
+                btn.classList.replace('text-green-600', 'text-red-500');
+                btn.classList.replace('bg-green-50', 'bg-red-50');
+                btn.classList.replace('border-green-200', 'border-red-200');
+            }, 2500);
+        }
+
+        const dashModal = document.getElementById('modal-parents-dash');
+        if (dashModal && dashModal.classList.contains('hide')) {
+            showCustomAlert("All stars, stickers, and progress have been reset!", "Progress Reset", "✅");
+        }
     }
 </script>
 </body>
