@@ -89,6 +89,16 @@
     .animate-bread {
       animation: bounce-slow 2s infinite ease-in-out;
     }
+    #feedbackArea {
+      position: fixed !important;
+      top: auto !important;
+      bottom: 16px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: 92%;
+      max-width: 440px;
+      z-index: 999 !important;
+    }
   </style>
 </head>
 <body class="text-slate-800 flex flex-col justify-between selection:bg-amber-200">
@@ -354,8 +364,8 @@
         <!-- Answer Buttons injected dynamically -->
       </div>
 
-      <!-- Feedback Area -->
-      <div id="feedbackArea" class="hidden">
+      <!-- Feedback Area (Floating Fixed Toast in Center Screen) -->
+      <div id="feedbackArea" class="hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; width: 90%; max-width: 420px; border-radius: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
         <!-- Will be dynamically populated for Correct or Incorrect -->
       </div>
     </div>
@@ -1202,18 +1212,32 @@
         const container = document.getElementById('pastryVisualContainer');
         container.innerHTML = '';
         const pastryIcon = PASTRY_ICONS[(questionNumber + currentLevel) % PASTRY_ICONS.length];
+        const totalPastries = currentOperation === 'tambah' ? (num1 + num2) : num1;
+        const isLargePastryCount = totalPastries > 30;
+
+        if (isLargePastryCount) {
+          container.className = "clay-circle p-2.5 rounded-2xl min-h-[90px] flex items-center justify-center gap-2 flex-wrap shadow-inner";
+        } else {
+          container.className = "clay-circle p-4 rounded-2xl min-h-[120px] flex items-center justify-center gap-4 flex-wrap shadow-inner";
+        }
 
         if (currentOperation === 'tambah') {
           const group1 = document.createElement('div');
-          group1.className = "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm";
+          group1.className = isLargePastryCount
+            ? "flex gap-0.5 flex-wrap justify-center bg-white p-1.5 rounded-xl border-2 border-amber-200 text-sm sm:text-base leading-tight shadow-sm"
+            : "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm";
           for (let i = 0; i < num1; i++) group1.innerHTML += `<span>${pastryIcon}</span>`;
 
           const plusSign = document.createElement('div');
-          plusSign.className = "text-2xl font-bold text-amber-600";
+          plusSign.className = isLargePastryCount
+            ? "text-lg font-bold text-amber-600"
+            : "text-2xl font-bold text-amber-600";
           plusSign.innerHTML = "+";
 
           const group2 = document.createElement('div');
-          group2.className = "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm";
+          group2.className = isLargePastryCount
+            ? "flex gap-0.5 flex-wrap justify-center bg-white p-1.5 rounded-xl border-2 border-amber-200 text-sm sm:text-base leading-tight shadow-sm"
+            : "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm";
           for (let i = 0; i < num2; i++) group2.innerHTML += `<span>${pastryIcon}</span>`;
 
           container.appendChild(group1);
@@ -1223,7 +1247,9 @@
           document.getElementById('equationDisplay').innerHTML = `${num1} + ${num2} = ?`;
         } else {
           const group1 = document.createElement('div');
-          group1.className = "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm relative";
+          group1.className = isLargePastryCount
+            ? "flex gap-0.5 flex-wrap justify-center bg-white p-1.5 rounded-xl border-2 border-amber-200 text-sm sm:text-base leading-tight shadow-sm relative"
+            : "flex gap-1.5 flex-wrap justify-center bg-white p-2.5 rounded-2xl border-2 border-amber-200 text-2xl sm:text-3xl shadow-sm relative";
           for (let i = 0; i < num1; i++) {
             const isTakenAway = i >= currentAnswer;
             const styleStr = isTakenAway ? 'opacity: 0.3; filter: grayscale(100%); text-decoration: line-through;' : '';
