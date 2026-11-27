@@ -29,6 +29,11 @@
 <body>
 
 <div class="container">
+  <div id="barKembali" style="display: none; text-align: left; margin-bottom: 8px;">
+    <a href="index.html" style="font-size: 13px; color: #64748b; text-decoration: none; font-weight: bold;">
+      ← Kembali ke Lobi Permainan
+    </a>
+  </div>
   <div style="text-align: center; margin-bottom: 10px;">
     <img src="logo.png" alt="CelikPlay Logo" style="width: 140px; height: auto; border-radius: 50%;">
   </div>
@@ -107,7 +112,9 @@
 </div>
 <script>
   const URL_APPS_SCRIPT = ["https:", "", "script." + "google.com", "macros", "s", "AKfycbx93hmttJCzlsVMqk2K1Ly34eFvPtUeaDcishAYvoL3KNu9qdB-as1-V_H4lw2mBLCUDw", "exec"].join("/");
-
+if (localStorage.getItem("celikplay_games")) {
+    document.getElementById("barKembali").style.display = "block";
+  }
   function pilihSemuaCombo() {
     document.querySelectorAll('.chk-game').forEach(chk => chk.checked = true);
     kemaskiniHarga();
