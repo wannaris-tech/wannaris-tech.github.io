@@ -4,13 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lobi Permainan CelikPlay</title>
-  <button type="button" id="btnBatal" onclick="batalTukarKod()" style="display: none; width: 100%; background: transparent; color: #64748b; border: 1px solid #cbd5e1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px;">
-      Batal &amp; Kembali ke Lobi
-    </button>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f0f9ff; margin: 0; padding: 20px; text-align: center; }
     .grid-game { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; max-width: 600px; margin: 20px auto; }
-    .kad-game { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: relative; transition: 0.2s; }
+    .kad-game { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; transition: 0.2s; }
     .kad-game.terkunci { opacity: 0.6; background: #e2e8f0; }
     .btn-main { display: inline-block; margin-top: 12px; padding: 10px 20px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
     .kad-game.terkunci .btn-main { background: #64748b; pointer-events: none; }
@@ -22,8 +19,13 @@
     <div style="background:white; padding:25px; border-radius:15px; max-width:350px; width:100%;">
       <h2 style="margin-top:0;">🔒 Akses CelikPlay</h2>
       <p style="font-size:14px; color:#64748b;">Masukkan Kod Akses anda (Maksimum 3 peranti keluarga).</p>
-      <input type="text" id="inputKod" placeholder="Contoh: CP-1234" style="width:100%; padding:12px; margin:10px 0; border:2px solid #cbd5e1; border-radius:8px; font-size:16px; text-align:center; text-transform:uppercase; box-sizing:border-box;">
+      <input type="text" id="inputKod" placeholder="CONTOH: CP-1234" style="width:100%; padding:12px; margin:10px 0; border:2px solid #cbd5e1; border-radius:8px; font-size:16px; text-align:center; text-transform:uppercase; box-sizing:border-box;">
       <button id="btnSemak" onclick="semakKod()" style="width:100%; padding:12px; background:#10b981; color:white; border:none; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer;">Buka Lobi Permainan</button>
+      
+      <button type="button" id="btnBatal" onclick="batalTukarKod()" style="display:none; width:100%; background:transparent; color:#64748b; border:1px solid #cbd5e1; padding:10px; border-radius:8px; font-size:14px; font-weight:bold; cursor:pointer; margin-top:10px;">
+        Batal &amp; Kembali ke Lobi
+      </button>
+
       <p id="mesejRalat" style="color:#ef4444; font-size:13px; margin-top:10px; display:none;"></p>
     </div>
   </div>
