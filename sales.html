@@ -17,8 +17,7 @@
     .bonus-box.terbuka { border-color: #8b5cf6; background: #f5f3ff; opacity: 1; }
     .badge { background: #8b5cf6; color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .borang input[type="text"], .borang input[type="email"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
-    .kotak-gabung { display: flex; align-items: flex-start; gap: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 10px; margin-bottom: 15px; cursor: pointer; text-align: left; font-size: 13px; color: #166534; line-height: 1.4; }
-    .kotak-gabung input { width: 18px; height: 18px; margin-top: 2px; accent-color: #10b981; flex-shrink: 0; }
+    .nota-emel { font-size: 12px; color: #166534; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px 12px; border-radius: 8px; margin-top: -4px; margin-bottom: 15px; line-height: 1.4; }
     .jumlah-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; border: 1px solid #e2e8f0; }
     .harga-besar { font-size: 28px; font-weight: bold; color: #10b981; }
     .btn-bayar { width: 100%; background: #10b981; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; }
@@ -142,7 +141,7 @@
     } else {
       total = jumlahDipilih * 19.90;
       kotakBonus.classList.remove('terbuka');
-      statusBonus.innerText = "Percuma dengan Combo, atau apabila cukup 3 game melalui gabungan kod.";
+      statusBonus.innerText = "Percuma dengan Combo, atau apabila cukup 3 game menggunakan e-mel yang sama.";
     }
 
     paparanHarga.innerText = "RM " + total.toFixed(2);
@@ -151,7 +150,6 @@
   function prosesBayaran() {
     const nama = document.getElementById('namaPembeli').value.trim();
     const email = document.getElementById('emailPembeli').value.trim();
-    const mahuGabung = document.getElementById('gabungKod').checked ? "ya" : "tidak";
     const btn = document.getElementById('btnBayar');
     
     let gamesDipilih = [];
@@ -182,7 +180,7 @@
         nama: nama,
         email: email,
         games: gamesDipilih,
-        gabung: mahuGabung
+        gabung: "ya"
       })
     })
     .then(res => res.json())
