@@ -13,10 +13,12 @@
     .pilihan-game { border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
     .pilihan-game.aktif { border-color: #10b981; background: #ecfdf5; }
     .pilihan-game input { width: 20px; height: 20px; accent-color: #10b981; }
-    .bonus-box { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 20px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; opacity: 0.6; transition: 0.3s; }
+    .bonus-box { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 20px; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; opacity: 0.75; transition: 0.3s; }
     .bonus-box.terbuka { border-color: #8b5cf6; background: #f5f3ff; opacity: 1; }
     .badge { background: #8b5cf6; color: white; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: bold; }
     .borang input[type="text"], .borang input[type="email"] { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+    .kotak-gabung { display: flex; align-items: flex-start; gap: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px; border-radius: 10px; margin-bottom: 15px; cursor: pointer; text-align: left; font-size: 13px; color: #166534; line-height: 1.4; }
+    .kotak-gabung input { width: 18px; height: 18px; margin-top: 2px; accent-color: #10b981; flex-shrink: 0; }
     .jumlah-box { background: #f8fafc; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; border: 1px solid #e2e8f0; }
     .harga-besar { font-size: 28px; font-weight: bold; color: #10b981; }
     .btn-bayar { width: 100%; background: #10b981; color: white; border: none; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: bold; cursor: pointer; }
@@ -41,7 +43,7 @@
   <label class="pilihan-game" id="label-tappy">
     <div>
       <strong>🍞 Kedai Roti Tappy</strong><br>
-      <span style="font-size:13px; color:#64748b;">Belajar mengira, asas nombor & operasi tambah tolak</span>
+      <span style="font-size:13px; color:#64748b;">Belajar mengira & pengurusan wang</span>
     </div>
     <div>
       <span style="font-weight:bold; margin-right:8px;">RM19.90</span>
@@ -52,7 +54,7 @@
   <label class="pilihan-game" id="label-english">
     <div>
       <strong>🔤 English First Words</strong><br>
-      <span style="font-size:13px; color:#64748b;">Kuasai fonik, kosa kata & ejaan asas Bahasa Inggeris</span>
+      <span style="font-size:13px; color:#64748b;">Kosa kata & ejaan asas Bahasa Inggeris</span>
     </div>
     <div>
       <span style="font-weight:bold; margin-right:8px;">RM19.90</span>
@@ -63,7 +65,7 @@
   <label class="pilihan-game" id="label-pasar">
     <div>
       <strong>🛒 Pasar Mini Bijak</strong><br>
-      <span style="font-size:13px; color:#64748b;">Mengecam wang, padanan logik & kemahiran berfikir</span>
+      <span style="font-size:13px; color:#64748b;">Logik, padanan & kemahiran berfikir</span>
     </div>
     <div>
       <span style="font-weight:bold; margin-right:8px;">RM19.90</span>
@@ -72,12 +74,12 @@
   </label>
 
   <div class="bonus-box" id="kotakBonus">
-    <div>
+    <div style="padding-right: 10px;">
       <span class="badge">BONUS COMBO</span><br>
       <strong>🚀 Misi Angkasa</strong><br>
-      <span id="statusBonus" style="font-size:12px; color:#64748b;">Pilih kesemua 3 game di atas untuk buka bonus ini</span>
+      <span id="statusBonus" style="font-size:12px; color:#64748b;">Percuma dengan Combo, atau apabila cukup 3 game melalui gabungan kod.</span>
     </div>
-    <div style="font-weight:bold; color:#8b5cf6;">PERCUMA</div>
+    <div style="font-weight:bold; color:#8b5cf6; flex-shrink:0;">PERCUMA</div>
   </div>
 
   <div class="jumlah-box">
@@ -88,6 +90,12 @@
   <div class="borang">
     <input type="text" id="namaPembeli" placeholder="Nama Penuh Anda" required>
     <input type="email" id="emailPembeli" placeholder="Alamat E-mel (Untuk terima kod akses)" required>
+    
+    <label class="kotak-gabung">
+      <input type="checkbox" id="gabungKod">
+      <span><strong>Gabungkan dengan kod akses sedia ada saya</strong><br><span style="font-size:11.5px; color:#15803d;">Gunakan e-mel sama. Lepas bayar, hanya <strong>Refresh</strong> lobi sedia ada (tidak makan slot peranti baharu). Biarkan kosong jika beli untuk orang lain.</span></span>
+    </label>
+
     <button type="button" id="btnBayar" class="btn-bayar" onclick="prosesBayaran()">Teruskan ke Pembayaran FPX</button>
     
     <div class="nota-terma">
@@ -134,7 +142,7 @@
     } else {
       total = jumlahDipilih * 19.90;
       kotakBonus.classList.remove('terbuka');
-      statusBonus.innerText = "Pilih kesemua 3 game di atas untuk buka bonus ini";
+      statusBonus.innerText = "Percuma dengan Combo, atau apabila cukup 3 game melalui gabungan kod.";
     }
 
     paparanHarga.innerText = "RM " + total.toFixed(2);
@@ -143,6 +151,7 @@
   function prosesBayaran() {
     const nama = document.getElementById('namaPembeli').value.trim();
     const email = document.getElementById('emailPembeli').value.trim();
+    const mahuGabung = document.getElementById('gabungKod').checked ? "ya" : "tidak";
     const btn = document.getElementById('btnBayar');
     
     let gamesDipilih = [];
@@ -172,7 +181,8 @@
         tindakan: "cipta_bil",
         nama: nama,
         email: email,
-        games: gamesDipilih
+        games: gamesDipilih,
+        gabung: mahuGabung
       })
     })
     .then(res => res.json())
