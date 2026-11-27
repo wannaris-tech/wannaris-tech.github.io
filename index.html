@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lobi Permainan CelikPlay</title>
+  <button type="button" id="btnBatal" onclick="batalTukarKod()" style="display: none; width: 100%; background: transparent; color: #64748b; border: 1px solid #cbd5e1; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+      Batal &amp; Kembali ke Lobi
+    </button>
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f0f9ff; margin: 0; padding: 20px; text-align: center; }
     .grid-game { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; max-width: 600px; margin: 20px auto; }
@@ -98,10 +101,20 @@
     });
   }
 
-  function tukarKod() {
+function tukarKod() {
     document.getElementById("inputKod").value = "";
     document.getElementById("mesejRalat").style.display = "none";
     document.getElementById("skrinKunci").style.display = "flex";
+    
+    if (localStorage.getItem("celikplay_games")) {
+      document.getElementById("btnBatal").style.display = "block";
+    } else {
+      document.getElementById("btnBatal").style.display = "none";
+    }
+  }
+
+  function batalTukarKod() {
+    document.getElementById("skrinKunci").style.display = "none";
   }
 
   function semakKod(kodAuto = null) {
