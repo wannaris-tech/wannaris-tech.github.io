@@ -62,7 +62,7 @@
   </p>
 
 <script>
-  const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx93hmttJCzlsVMqk2K1Ly34eFvPtUeaDcishAYvoL3KNu9qdB-as1-V_H4lw2mBLCUDw/exec";
+  const URL_APPS_SCRIPT = "https://google.com";
 
   let deviceId = localStorage.getItem("celikplay_device_id");
   if (!deviceId) {
@@ -80,11 +80,24 @@
       if (senarai.includes(nama)) {
         kad.classList.remove("terkunci");
         btn.innerText = "▶️ Mula Bermain";
+        btn.onclick = null; // Guna pautan asal (href) permainan
       } else {
         kad.classList.add("terkunci");
-        btn.innerText = "🔒 Terkunci";
+        btn.innerText = "🔒 Terkunci (Dapatkan)";
+        btn.style.pointerEvents = "auto";
+        btn.style.cursor = "pointer";
+        btn.onclick = function(e) {
+          e.preventDefault();
+          window.location.href = "sales.html";
+        };
       }
     });
+  }
+
+  function tukarKod() {
+    document.getElementById("inputKod").value = "";
+    document.getElementById("mesejRalat").style.display = "none";
+    document.getElementById("skrinKunci").style.display = "flex";
   }
 
   function semakKod(kodAuto = null) {
@@ -139,11 +152,9 @@
   const simpananGame = localStorage.getItem("celikplay_games");
 
   if (kodDariLink) {
-    // 1. Jika klik pautan ?kod= baharu, terus guna kod baharu tersebut
     document.getElementById("inputKod").value = kodDariLink;
     semakKod(kodDariLink);
   } else if (simpananGame) {
-    // 2. Papar simpanan sedia ada dahulu supaya laju, kemudian kemas kini dari server jika ada game tambahan
     document.getElementById("skrinKunci").style.display = "none";
     bukaKunciGame(simpananGame);
     if (simpananKod) {
