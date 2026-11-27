@@ -70,26 +70,25 @@
     localStorage.setItem("celikplay_device_id", deviceId);
   }
 
-  const simpananGame = localStorage.getItem("celikplay_games");
-  if (simpananGame) {
-    document.getElementById("skrinKunci").style.display = "none";
-    bukaKunciGame(simpananGame);
-  }
-
   function bukaKunciGame(senaraiString) {
     const senarai = senaraiString.toLowerCase();
     const semuaGame = ["tappy", "english", "pasar", "angkasa"];
 
     semuaGame.forEach(nama => {
+      const kad = document.getElementById("kad-" + nama);
+      const btn = document.getElementById("btn-" + nama);
       if (senarai.includes(nama)) {
-        document.getElementById("kad-" + nama).classList.remove("terkunci");
-        document.getElementById("btn-" + nama).innerText = "▶ Mula Bermain";
+        kad.classList.remove("terkunci");
+        btn.innerText = "▶️ Mula Bermain";
+      } else {
+        kad.classList.add("terkunci");
+        btn.innerText = "🔒 Terkunci";
       }
     });
   }
 
-  function semakKod() {
-    const kod = document.getElementById("inputKod").value;
+  function semakKod(kodAuto = null) {
+    const kod = (kodAuto || document.getElementById("inputKod").value).trim();
     const btn = document.getElementById("btnSemak");
     const mesej = document.getElementById("mesejRalat");
 
@@ -110,13 +109,16 @@
     .then(res => res.json())
     .then(data => {
       if (data.status === "berjaya") {
+        localStorage.setItem("celikplay_kod", kod);
         localStorage.setItem("celikplay_games", data.games);
         document.getElementById("skrinKunci").style.display = "none";
         bukaKunciGame(data.games);
       } else if (data.status === "penuh") {
+        document.getElementById("skrinKunci").style.display = "flex";
         mesej.innerText = "Maaf, kod ini telah mencapai had maksimum 3 peranti.";
         mesej.style.display = "block";
       } else {
+        document.getElementById("skrinKunci").style.display = "flex";
         mesej.innerText = "Kod akses tidak sah. Sila semak semula.";
         mesej.style.display = "block";
       }
@@ -133,10 +135,20 @@
 
   const urlParams = new URLSearchParams(window.location.search);
   const kodDariLink = urlParams.get('kod');
+  const simpananKod = localStorage.getItem("celikplay_kod");
+  const simpananGame = localStorage.getItem("celikplay_games");
 
   if (kodDariLink) {
+    // 1. Jika klik pautan ?kod= baharu, terus guna kod baharu tersebut
     document.getElementById("inputKod").value = kodDariLink;
-    semakKod();
+    semakKod(kodDariLink);
+  } else if (simpananGame) {
+    // 2. Papar simpanan sedia ada dahulu supaya laju, kemudian kemas kini dari server jika ada game tambahan
+    document.getElementById("skrinKunci").style.display = "none";
+    bukaKunciGame(simpananGame);
+    if (simpananKod) {
+      semakKod(simpananKod);
+    }
   }
 </script>
 </body>
