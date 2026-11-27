@@ -76,7 +76,7 @@
     <div style="padding-right: 10px;">
       <span class="badge">BONUS COMBO</span><br>
       <strong>🚀 Misi Angkasa</strong><br>
-      <span id="statusBonus" style="font-size:12px; color:#64748b;">Percuma dengan Combo, atau apabila cukup 3 game melalui gabungan kod.</span>
+      <span id="statusBonus" style="font-size:12px; color:#64748b;">Percuma dengan Combo, atau apabila cukup 3 game menggunakan e-mel yang sama.</span>
     </div>
     <div style="font-weight:bold; color:#8b5cf6; flex-shrink:0;">PERCUMA</div>
   </div>
@@ -90,10 +90,9 @@
     <input type="text" id="namaPembeli" placeholder="Nama Penuh Anda" required>
     <input type="email" id="emailPembeli" placeholder="Alamat E-mel (Untuk terima kod akses)" required>
     
-    <label class="kotak-gabung">
-      <input type="checkbox" id="gabungKod">
-      <span><strong>Gabungkan dengan kod akses sedia ada saya</strong><br><span style="font-size:11.5px; color:#15803d;">Gunakan e-mel sama. Lepas bayar, hanya <strong>Refresh</strong> lobi sedia ada (tidak makan slot peranti baharu). Biarkan kosong jika beli untuk orang lain.</span></span>
-    </label>
+    <div class="nota-emel">
+      💡 <strong>Info Pantas:</strong> Gunakan <strong>e-mel yang sama</strong> seperti pembelian sebelum ini untuk terus membuka game baharu dalam lobi sedia ada. Jika beli sebagai hadiah, masukkan terus e-mel penerima.
+    </div>
 
     <button type="button" id="btnBayar" class="btn-bayar" onclick="prosesBayaran()">Teruskan ke Pembayaran FPX</button>
     
@@ -103,10 +102,9 @@
   </div>
 
   <div class="jenama-footer">
-    © 2026 CelikPlay • Dimiliki oleh Nurwan Trading
+    ©️ 2026 CelikPlay • Dimiliki oleh Nurwan Trading
   </div>
 </div>
-
 <script>
   const URL_APPS_SCRIPT = ["https:", "", "script." + "google.com", "macros", "s", "AKfycbx93hmttJCzlsVMqk2K1Ly34eFvPtUeaDcishAYvoL3KNu9qdB-as1-V_H4lw2mBLCUDw", "exec"].join("/");
 
