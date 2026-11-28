@@ -1008,6 +1008,12 @@
       stopEndlessTimer();
       stopSpeech();
 
+      const feedbackArea = document.getElementById('feedbackArea');
+      if (feedbackArea) {
+        feedbackArea.classList.add('hidden');
+        feedbackArea.innerHTML = '';
+      }
+
       let isNewRecord = false;
       let earnedStars = 0;
       let summaryLines = [];
@@ -1458,7 +1464,8 @@
 
     function finishGameSession() {
       const feedbackArea = document.getElementById('feedbackArea');
-      feedbackArea.classList.remove('hidden');
+      feedbackArea.classList.add('hidden');
+      feedbackArea.innerHTML = '';
 
       const displayName = (userProfile.name && userProfile.name !== 'Nama...') ? userProfile.name : 'Chef Cilik';
       const isLowScore = currentScore < 5;
